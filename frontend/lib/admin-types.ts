@@ -220,6 +220,8 @@ export interface LoginResponse {
     user: {
         username: string;
         email: string;
+        role?: string;
+        is_super_admin?: boolean;
     };
 }
 
@@ -238,5 +240,7 @@ export interface TokenResponse {
     user?: {
         username: string;
         email: string;
+        role?: string;
+        is_super_admin?: boolean;
     };
-}
+}

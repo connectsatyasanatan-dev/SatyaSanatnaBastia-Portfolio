@@ -5,8 +5,6 @@ wsgi.py — WSGI entry point for production servers (gunicorn, uWSGI).
 Usage:
   Development:  python wsgi.py
   Production:   gunicorn wsgi:app --bind 0.0.0.0:$PORT --workers 4
-
-Render / Railway will auto-detect this file and use it.
 """
 
 from app import create_app

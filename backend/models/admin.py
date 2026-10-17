@@ -40,7 +40,18 @@ def _build_credentials():
         "username": username,
         "password_hash": generate_password_hash(password),
         "email": email,
+        "role": "super_admin",
+        "is_super_admin": True,
     }
+
+
+def get_admin_credentials():
+    global ADMIN_CREDENTIALS
+    load_dotenv(override=True)
+    username = os.getenv("ADMIN_USERNAME")
+    if not ADMIN_CREDENTIALS or ADMIN_CREDENTIALS.get("username") != username:
+        ADMIN_CREDENTIALS = _build_credentials()
+    return ADMIN_CREDENTIALS
 
 
 ADMIN_CREDENTIALS = _build_credentials()
@@ -50,14 +61,16 @@ def verify_username(plain_username: str) -> bool:
     """Constant-time comparison for username to prevent timing attacks."""
     if not plain_username:
         return False
-    return hmac.compare_digest(plain_username.strip(), ADMIN_CREDENTIALS["username"])
+    creds = get_admin_credentials()
+    return hmac.compare_digest(plain_username.strip(), creds["username"])
 
 
 def verify_password(plain_password: str) -> bool:
     """Verify plain password against bcrypt hash using constant-time comparison."""
     if not plain_password:
         return False
-    return check_password_hash(ADMIN_CREDENTIALS["password_hash"], plain_password)
+    creds = get_admin_credentials()
+    return check_password_hash(creds["password_hash"], plain_password)
 
 
 def _get_jwt_secret() -> str:
@@ -79,6 +92,8 @@ def generate_access_token(username: str) -> str:
     payload = {
         "sub": username,
         "username": username,
+        "role": "super_admin",
+        "is_super_admin": True,
         "type": "access",
         "jti": secrets.token_hex(16),
         "iss": JWT_ISSUER,
@@ -97,6 +112,8 @@ def generate_refresh_token(username: str) -> str:
     payload = {
         "sub": username,
         "username": username,
+        "role": "super_admin",
+        "is_super_admin": True,
         "type": "refresh",
         "jti": secrets.token_hex(16),
         "iss": JWT_ISSUER,

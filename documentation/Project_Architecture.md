@@ -96,7 +96,7 @@ The project features a **3-tier disaster recovery architecture**:
    - `GET /api/admin/backup`: Download complete snapshot directly from browser.
    - `POST /api/admin/restore`: Upload snapshot to restore live data in 1 click.
 3. **Cloud Native Snapshots**:
-   - Compatible with Railway snapshots, Supabase PITR, and Render daily PostgreSQL backups.
+   - Compatible with automated volume snapshots and daily PostgreSQL backup archives.
 
 ---
 

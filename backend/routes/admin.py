@@ -101,7 +101,12 @@ def admin_login():
                 {
                     "success": True,
                     **token_pair,
-                    "user": {"username": username, "email": ADMIN_CREDENTIALS["email"]},
+                    "user": {
+                        "username": username,
+                        "email": ADMIN_CREDENTIALS["email"],
+                        "role": "super_admin",
+                        "is_super_admin": True,
+                    },
                 }
             )
             # Set bank-grade HttpOnly cookie for refresh token
@@ -241,7 +246,9 @@ def verify_admin():
         "message": "Token valid",
         "user": {
             "username": admin_user,
-            "email": ADMIN_CREDENTIALS["email"]
+            "email": ADMIN_CREDENTIALS["email"],
+            "role": "super_admin",
+            "is_super_admin": True,
         }
     })
 

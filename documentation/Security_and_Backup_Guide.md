@@ -105,15 +105,14 @@ python backup.py --restore backups/portfolio_backup_20261017_223708.json
 ### Cloud Hosting Automated Backups
 
 When hosting PostgreSQL in production:
-- **Railway**: Go to your PostgreSQL database -> **Snapshots** tab -> Click *Create Snapshot* or let Railway take daily automatic snapshots.
-- **Supabase / Neon**: Built-in Point-in-Time Recovery (PITR) allows rolling back the database to any chosen minute.
-- **Render**: Go to PostgreSQL instance -> **Backups** tab to download daily snapshots.
+- Standard Cloud Snapshots: Enable daily automated snapshots or volume backups on your host provider.
+- Point-in-Time Recovery: Modern managed PostgreSQL databases allow rolling back the database to any chosen minute.
 
 ---
 
 ## 4. 🚀 Pre-Deployment Security Checklist
 
-Before deploying to production (Vercel, Render, Railway, AWS):
+Before deploying to production:
 
 1. [ ] **Set Random Production Secrets**:
    ```bash

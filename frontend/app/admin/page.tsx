@@ -28,6 +28,7 @@ import AnalyticsTab from '@/components/admin/AnalyticsTab'
 
 const AdminPanel = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false)
+    const [currentUser, setCurrentUser] = useState<{ username: string; email?: string; role?: string; is_super_admin?: boolean } | null>(null)
     const [activeTab, setActiveTab] = useState('dashboard')
     const [adminData, setAdminData] = useState<AdminData | null>(null)
     const [loading, setLoading] = useState(false)
@@ -47,6 +48,7 @@ const AdminPanel = () => {
 
         const handleAuthExpired = () => {
             setIsAuthenticated(false)
+            setCurrentUser(null)
             setAdminData(null)
             toast.error('Session expired. Please log in again.')
         }
@@ -59,17 +61,24 @@ const AdminPanel = () => {
 
     const verifyToken = async () => {
         try {
-            await adminApiClient.verifyToken()
+            const res = await adminApiClient.verifyToken()
+            if (res.user) {
+                setCurrentUser(res.user)
+            }
             setIsAuthenticated(true)
             loadAdminData()
         } catch (error) {
             try {
                 await adminApiClient.refreshAccessToken()
-                await adminApiClient.verifyToken()
+                const res = await adminApiClient.verifyToken()
+                if (res.user) {
+                    setCurrentUser(res.user)
+                }
                 setIsAuthenticated(true)
                 loadAdminData()
             } catch (refreshErr) {
                 adminApiClient.clearTokens()
+                setCurrentUser(null)
                 setIsAuthenticated(false)
             }
         }
@@ -83,6 +92,9 @@ const AdminPanel = () => {
         try {
             const response = await adminApiClient.login(loginForm.username, loginForm.password)
             if (response.success) {
+                if (response.user) {
+                    setCurrentUser(response.user)
+                }
                 setIsAuthenticated(true)
                 toast.success('Login successful!')
                 loadAdminData()
@@ -138,6 +150,7 @@ const AdminPanel = () => {
     const handleLogout = () => {
         adminApiClient.logout()
         setIsAuthenticated(false)
+        setCurrentUser(null)
         setAdminData(null)
         setActiveTab('dashboard')
         toast.info('Logged out successfully')
@@ -574,7 +587,33 @@ const AdminPanel = () => {
                         <div className="admin-logo">
                             <BarChart3 />
                         </div>
-                        <h1 className="admin-header-title">Portfolio Admin Panel</h1>
+                        <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                                <h1 className="admin-header-title">Portfolio Admin Panel</h1>
+                                <span style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '0.35rem',
+                                    padding: '0.2rem 0.65rem',
+                                    borderRadius: '9999px',
+                                    fontSize: '0.72rem',
+                                    fontWeight: 700,
+                                    letterSpacing: '0.04em',
+                                    textTransform: 'uppercase',
+                                    background: 'linear-gradient(135deg, rgba(234, 179, 8, 0.18), rgba(245, 158, 11, 0.28))',
+                                    border: '1px solid rgba(245, 158, 11, 0.55)',
+                                    color: '#fbbf24',
+                                    boxShadow: '0 0 10px rgba(245, 158, 11, 0.2)'
+                                }}>
+                                    👑 Super Admin
+                                </span>
+                            </div>
+                            {currentUser?.username && (
+                                <p style={{ margin: '0.15rem 0 0 0', fontSize: '0.8rem', color: '#9ca3af' }}>
+                                    Logged in as <strong style={{ color: '#e5e7eb' }}>{currentUser.username}</strong>
+                                </p>
+                            )}
+                        </div>
                     </div>
                     <div className="admin-header-right">
                         <a

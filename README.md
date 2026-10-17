@@ -138,7 +138,6 @@ portfolio-root/
 │
 ├── .gitignore
 ├── README.md
-├── render.yaml                 # Render.com deployment config
 ├── SETUP_GUIDE.md              # Detailed setup instructions
 ├── GITHUB_GUIDE.md             # GitHub workflow guide
 └── run-project.md              # Quick run guide

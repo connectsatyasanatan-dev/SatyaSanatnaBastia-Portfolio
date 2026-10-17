@@ -21,6 +21,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Suppress external third-party HTTP client logs to protect architecture secrecy
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("httpcore").setLevel(logging.WARNING)
+
 # Rate limiter — shared instance, attached to app in factory
 # (defined in limiter.py to avoid circular imports)
 
@@ -124,6 +128,9 @@ def create_app(config_class: type = Config) -> Flask:
         response.headers["Strict-Transport-Security"] = (
             "max-age=31536000; includeSubDomains"
         )
+        # Strip server footprint headers
+        response.headers.pop("Server", None)
+        response.headers.pop("X-Powered-By", None)
         return response
 
     logger.info("Flask app created successfully")
