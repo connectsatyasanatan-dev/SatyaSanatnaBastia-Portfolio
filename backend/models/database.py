@@ -245,6 +245,38 @@ def init_database():
         """CREATE INDEX IF NOT EXISTS idx_revoked_tokens_expires_at ON revoked_tokens(expires_at)"""
     )
 
+    cur.execute(
+        """CREATE TABLE IF NOT EXISTS ai_chat_logs (
+        id SERIAL PRIMARY KEY,
+        session_id TEXT,
+        user_message TEXT NOT NULL,
+        bot_response TEXT NOT NULL,
+        sentiment TEXT,
+        lead_email TEXT,
+        ip_address TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )"""
+    )
+    cur.execute(
+        """CREATE INDEX IF NOT EXISTS idx_ai_chat_logs_created_at ON ai_chat_logs(created_at DESC)"""
+    )
+
+    cur.execute(
+        """CREATE TABLE IF NOT EXISTS ai_leads (
+        id SERIAL PRIMARY KEY,
+        name TEXT,
+        email TEXT,
+        phone TEXT,
+        company TEXT,
+        message TEXT NOT NULL,
+        session_id TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )"""
+    )
+    cur.execute(
+        """CREATE INDEX IF NOT EXISTS idx_ai_leads_created_at ON ai_leads(created_at DESC)"""
+    )
+
     # Safe schema auto-alignments (adds new columns if table existed without them)
     try:
         cur.execute("ALTER TABLE personal_info ADD COLUMN IF NOT EXISTS languages TEXT;")
@@ -1149,6 +1181,115 @@ class Database:
             cur.close()
             conn.close()
 
+    # ── AI Chat Conversation & Lead Logging ───────────────────────────
+    def log_ai_chat(self, user_message: str, bot_response: str, session_id: str = None, sentiment: str = None, lead_email: str = None, ip_address: str = None):
+        """Log conversation and potential lead to database."""
+        conn = get_connection()
+        cur = _cursor(conn)
+        try:
+            cur.execute(
+                """INSERT INTO ai_chat_logs (session_id, user_message, bot_response, sentiment, lead_email, ip_address)
+                   VALUES (%s, %s, %s, %s, %s, %s)""",
+                (session_id, user_message, bot_response, sentiment, lead_email, ip_address),
+            )
+            conn.commit()
+        except Exception as e:
+            logger.error(f"Error logging AI chat: {e}")
+            conn.rollback()
+        finally:
+            cur.close()
+            conn.close()
+
+    def get_ai_chat_logs(self, limit: int = 50):
+        """Fetch latest AI conversations and recruiter leads."""
+        conn = get_connection()
+        cur = _cursor(conn)
+        try:
+            cur.execute(
+                """SELECT id, session_id, user_message, bot_response, sentiment, lead_email, ip_address, created_at
+                   FROM ai_chat_logs
+                   ORDER BY created_at DESC
+                   LIMIT %s""",
+                (limit,),
+            )
+            rows = cur.fetchall()
+            return [dict(r) for r in rows]
+        except Exception as e:
+            logger.error(f"Error retrieving AI chat logs: {e}")
+            return []
+        finally:
+            cur.close()
+            conn.close()
+
+    # ── AI User Leads (Only users who provide their own details) ─────
+    def add_ai_lead(self, data: dict) -> int:
+        """Store verified visitor lead who shared their personal details."""
+        conn = get_connection()
+        cur = _cursor(conn)
+        try:
+            cur.execute(
+                """INSERT INTO ai_leads (name, email, phone, company, message, session_id)
+                   VALUES (%s, %s, %s, %s, %s, %s)
+                   RETURNING id""",
+                (
+                    data.get("name") or "Visitor",
+                    data.get("email") or "",
+                    data.get("phone") or "",
+                    data.get("company") or "",
+                    data.get("message", ""),
+                    data.get("session_id"),
+                ),
+            )
+            lead_id = cur.fetchone()["id"]
+            conn.commit()
+            return lead_id
+        except Exception as e:
+            logger.error(f"Error adding AI lead: {e}")
+            conn.rollback()
+            return -1
+        finally:
+            cur.close()
+            conn.close()
+
+    def get_ai_leads(self, limit: int = 100):
+        """Fetch all visitor leads who gave their personal details."""
+        conn = get_connection()
+        cur = _cursor(conn)
+        try:
+            cur.execute(
+                """SELECT id, name, email, phone, company, message, session_id,
+                          TO_CHAR(created_at, 'YYYY-MM-DD"T"HH24:MI:SS') as created_at
+                   FROM ai_leads
+                   ORDER BY created_at DESC
+                   LIMIT %s""",
+                (limit,),
+            )
+            rows = cur.fetchall()
+            return [dict(r) for r in rows]
+        except Exception as e:
+            logger.error(f"Error retrieving AI leads: {e}")
+            return []
+        finally:
+            cur.close()
+            conn.close()
+
+    def delete_ai_lead(self, lead_id: int) -> bool:
+        """Delete an AI lead by ID."""
+        conn = get_connection()
+        cur = _cursor(conn)
+        try:
+            cur.execute("DELETE FROM ai_leads WHERE id = %s", (lead_id,))
+            conn.commit()
+            return cur.rowcount > 0
+        except Exception as e:
+            logger.error(f"Error deleting AI lead: {e}")
+            conn.rollback()
+            return False
+        finally:
+            cur.close()
+            conn.close()
+
 
 # Global instance
 db = Database()
+

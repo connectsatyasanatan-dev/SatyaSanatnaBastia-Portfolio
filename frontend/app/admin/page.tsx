@@ -99,7 +99,7 @@ const AdminPanel = () => {
     const loadAdminData = async () => {
         setLoading(true)
         try {
-            const [dashboard, personalInfo, skills, projects, experience, testimonials, blog, contactMessages, achievements, education, certifications] = await Promise.all([
+            const [dashboard, personalInfo, skills, projects, experience, testimonials, blog, contactMessages, aiLeads, achievements, education, certifications] = await Promise.all([
                 adminApiClient.getDashboard(),
                 adminApiClient.getPersonalInfo(),
                 adminApiClient.getSkills(),
@@ -108,6 +108,7 @@ const AdminPanel = () => {
                 adminApiClient.getTestimonials(),
                 adminApiClient.getBlogPosts(),
                 adminApiClient.getContactMessages(),
+                adminApiClient.getAiLeads().catch(() => []),
                 adminApiClient.getAchievements(),
                 adminApiClient.getEducation(),
                 adminApiClient.getCertifications()
@@ -121,6 +122,7 @@ const AdminPanel = () => {
                 testimonials,
                 blogPosts: blog,
                 contactMessages,
+                aiLeads: Array.isArray(aiLeads) ? aiLeads : [],
                 achievements,
                 stats: dashboard.stats,
                 education,
@@ -425,6 +427,19 @@ const AdminPanel = () => {
         }
     }
 
+    const handleDeleteAiLead = async (id: number) => {
+        try {
+            const response = await adminApiClient.deleteAiLead(id)
+            if (response.success) {
+                toast.success('AI Lead deleted successfully!')
+                loadAdminData()
+            }
+        } catch (error: any) {
+            toast.error(error.message || 'Failed to delete AI lead')
+            throw error
+        }
+    }
+
     const handleUpdateAchievements = async (category: string, data: any) => {
         try {
             const response = await adminApiClient.updateAchievements(category, data)
@@ -544,7 +559,7 @@ const AdminPanel = () => {
         { id: 'education', label: 'Education', icon: GraduationCap },
         { id: 'certifications', label: 'Certifications', icon: Award },
         { id: 'testimonials', label: 'Testimonials', icon: MessageSquare },
-        { id: 'messages', label: 'Messages', icon: Mail },
+        { id: 'messages', label: 'Messages & AI Leads', icon: Mail },
         { id: 'blog', label: 'Blog Posts', icon: Star },
         { id: 'achievements', label: 'Achievements & Stats', icon: Award }
     ]
@@ -598,6 +613,19 @@ const AdminPanel = () => {
                                         >
                                             <IconComponent />
                                             <span>{tab.label}</span>
+                                            {tab.id === 'messages' && (adminData?.aiLeads?.length || 0) > 0 && (
+                                                <span style={{
+                                                    marginLeft: 'auto',
+                                                    background: 'linear-gradient(135deg, #a855f7, #ec4899)',
+                                                    color: '#fff',
+                                                    fontSize: '11px',
+                                                    fontWeight: 700,
+                                                    padding: '2px 7px',
+                                                    borderRadius: '10px'
+                                                }}>
+                                                    {adminData?.aiLeads?.length}
+                                                </span>
+                                            )}
                                         </button>
                                     </li>
                                 )
@@ -682,7 +710,9 @@ const AdminPanel = () => {
                             {activeTab === 'messages' && (
                                 <MessagesTab
                                     messages={adminData.contactMessages}
+                                    aiLeads={adminData.aiLeads || []}
                                     onDeleteMessage={handleDeleteContactMessage}
+                                    onDeleteAiLead={handleDeleteAiLead}
                                     onRefresh={loadAdminData}
                                 />
                             )}

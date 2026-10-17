@@ -333,3 +333,67 @@ def serve_uploaded_file(filename):
         "UPLOAD_FOLDER", os.path.join(current_app.root_path, "static/uploads")
     )
     return send_from_directory(upload_dir, filename)
+
+
+# ── AI Assistant (Zentara) ───────────────────────────────────────────
+@api.route("/chat", methods=["POST"])
+@limiter.limit("15 per minute; 60 per hour")
+def chat_ai():
+    """
+    AI Portfolio Assistant (Zentara) endpoint.
+    Powered by Groq Llama 3.3 with real-time PostgreSQL context, data-rich fallback,
+    and automated conversation/recruiter-lead logging.
+    """
+    try:
+        data = request.get_json(silent=True) or {}
+        message = (data.get("message") or "").strip()
+        history = data.get("history") or []
+        client_hour = data.get("hour", -1)
+        session_id = data.get("sessionId")
+
+        if not message:
+            return jsonify({"error": "Message is required", "response": "Please enter a message."}), 400
+
+        from services.ai_service import get_ai_response
+        result = get_ai_response(
+            user_message=message,
+            history=history,
+            client_hour=client_hour,
+            db=db,
+        )
+
+        # If visitor provided their personal/contact details, store specifically in ai_leads
+        try:
+            lead = result.get("lead")
+            if lead and lead.get("has_lead"):
+                db.add_ai_lead({
+                    "name": lead.get("name"),
+                    "email": lead.get("email"),
+                    "phone": lead.get("phone"),
+                    "company": lead.get("company"),
+                    "message": message,
+                    "session_id": session_id,
+                })
+        except Exception as lead_err:
+            logger.warning(f"Could not save AI lead: {lead_err}")
+
+        return jsonify(result)
+    except Exception as e:
+        logger.error(f"Chat error: {e}")
+        from services.ai_service import generate_smart_fallback
+        fallback = generate_smart_fallback(request.get_json(silent=True).get("message", ""), db)
+        try:
+            lead = fallback.get("lead")
+            if lead and lead.get("has_lead"):
+                db.add_ai_lead({
+                    "name": lead.get("name"),
+                    "email": lead.get("email"),
+                    "phone": lead.get("phone"),
+                    "company": lead.get("company"),
+                    "message": request.get_json(silent=True).get("message", ""),
+                    "session_id": request.get_json(silent=True).get("sessionId"),
+                })
+        except Exception:
+            pass
+        return jsonify(fallback)
+

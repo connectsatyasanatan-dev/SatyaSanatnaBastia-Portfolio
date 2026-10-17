@@ -114,6 +114,18 @@ export interface ContactMessage {
     created_at: string;
 }
 
+/** Verified visitor lead who provided their personal/contact details in chat */
+export interface AiLead {
+    id: number;
+    name: string;
+    email: string;
+    phone: string;
+    company: string;
+    message: string;
+    session_id?: string;
+    created_at: string;
+}
+
 export interface PersonalInfo {
     name: string;
     title: string;
@@ -144,6 +156,7 @@ export interface DashboardStats {
     skills_categories: number;
     total_skills: number;
     contact_messages: number;
+    ai_leads?: number;
 }
 
 export interface RecentActivity {
@@ -164,6 +177,7 @@ export interface AdminData {
     testimonials: Testimonial[];
     blogPosts: BlogPost[];
     contactMessages: ContactMessage[];
+    aiLeads?: AiLead[];
     stats: DashboardStats;
     education?: Education[];
     certifications?: Certification[];

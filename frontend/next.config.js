@@ -12,7 +12,7 @@ const nextConfig = {
     const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000'
     return [
       {
-        source: '/api/((?!chat).*)',
+        source: '/api/:path((?!chat).*)',
         destination: `${backendUrl}/api/:path*`,
       },
     ]

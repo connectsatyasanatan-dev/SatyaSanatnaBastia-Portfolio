@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { BarChart3, Users, FileText, Star, MessageSquare, Briefcase, Mail } from 'lucide-react'
+import { BarChart3, Users, FileText, Star, MessageSquare, Briefcase, Mail, Sparkles } from 'lucide-react'
 
 interface DashboardTabProps {
     stats: {
@@ -13,6 +13,7 @@ interface DashboardTabProps {
         skills_categories: number
         total_skills: number
         contact_messages?: number
+        ai_leads?: number
     }
 }
 
@@ -59,6 +60,13 @@ const DashboardTab = ({ stats }: DashboardTabProps) => {
             icon: Mail,
             colorClass: 'teal',
             description: 'From portfolio form'
+        }] : []),
+        ...(typeof stats.ai_leads === 'number' ? [{
+            title: 'AI Leads Captured',
+            value: stats.ai_leads,
+            icon: Sparkles,
+            colorClass: 'purple',
+            description: 'Recruiters & Clients from chat'
         }] : [])
     ]
 

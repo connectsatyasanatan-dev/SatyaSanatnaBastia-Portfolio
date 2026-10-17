@@ -779,6 +779,45 @@ def delete_contact_message(message_id):
         return jsonify({"error": str(e)}), 500
 
 
+# AI Assistant Chat Logs & Leads
+@admin.route("/chat-logs", methods=["GET"])
+@admin_required
+def get_chat_logs():
+    """Get recent AI assistant conversations"""
+    try:
+        limit = min(int(request.args.get("limit", 50)), 200)
+        logs = db.get_ai_chat_logs(limit=limit)
+        return jsonify({"success": True, "data": logs, "total": len(logs)})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# AI Verified Leads (Visitors who provided personal details)
+@admin.route("/ai-leads", methods=["GET"])
+@admin_required
+def get_ai_leads():
+    """Get visitor leads who provided their personal/contact details in chat"""
+    try:
+        limit = min(int(request.args.get("limit", 100)), 200)
+        leads = db.get_ai_leads(limit=limit)
+        return jsonify(leads)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@admin.route("/ai-leads/<int:lead_id>", methods=["DELETE"])
+@admin_required
+def delete_ai_lead(lead_id):
+    """Delete an AI lead"""
+    try:
+        deleted = db.delete_ai_lead(lead_id)
+        if deleted:
+            return jsonify({"success": True, "message": "Lead deleted successfully"})
+        return jsonify({"error": "Lead not found"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 # Dashboard Stats
 @admin.route("/dashboard", methods=["GET"])
 @admin_required
@@ -790,6 +829,7 @@ def admin_dashboard():
     blog_posts = db.get_blog_posts()
     skills = db.get_skills()
     contact_messages = db.get_contact_messages()
+    ai_leads = db.get_ai_leads()
 
     return jsonify(
         {
@@ -806,6 +846,7 @@ def admin_dashboard():
                     len(category["skills"]) for category in skills.values()
                 ),
                 "contact_messages": len(contact_messages),
+                "ai_leads": len(ai_leads),
             },
             "recent_activity": [
                 {

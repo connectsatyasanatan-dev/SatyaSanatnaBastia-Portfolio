@@ -14,6 +14,7 @@ import type {
     Testimonial,
     BlogPost,
     ContactMessage,
+    AiLead,
     AnalyticsSummary
 } from './admin-types'
 
@@ -416,6 +417,17 @@ class AdminApiClient {
 
     async deleteContactMessage(id: number): Promise<ApiResponse> {
         return this.request<ApiResponse>(`/contacts/${id}`, {
+            method: 'DELETE',
+        })
+    }
+
+    // AI Chat Verified Leads (Visitors who provided personal details)
+    async getAiLeads(): Promise<AiLead[]> {
+        return this.request<AiLead[]>('/ai-leads')
+    }
+
+    async deleteAiLead(id: number): Promise<ApiResponse> {
+        return this.request<ApiResponse>(`/ai-leads/${id}`, {
             method: 'DELETE',
         })
     }

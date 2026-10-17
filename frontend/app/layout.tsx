@@ -11,6 +11,7 @@ import '../styles/responsive.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://satya-sanatan.com'),
     title: {
         default: "Satya Sanatan | Full Stack Developer",
         template: "%s | Satya Sanatan"

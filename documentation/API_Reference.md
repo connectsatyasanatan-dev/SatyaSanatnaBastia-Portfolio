@@ -155,3 +155,52 @@ All the following endpoints require `Authorization: Bearer <access_token>`:
 - **Headers**: `Authorization: Bearer <access_token>`
 - **Payload**: JSON backup body or multipart file upload containing backup JSON.
 - **Response**: `{"success": true, "message": "Database restored successfully from backup"}`
+
+---
+
+### 🤖 AI Assistant (Zentara) & Lead Intelligence
+
+#### 1. Public Chat Endpoint
+- **Endpoint**: `POST /api/chat`
+- **Rate Limit**: `15 per minute; 60 per hour` per IP (DDoS and cost spike protection)
+- **Payload**:
+  ```json
+  {
+    "message": "What is Satya's experience with React?",
+    "history": [{"role": "user", "content": "Hi"}, {"role": "assistant", "content": "Hello!"}],
+    "hour": 15,
+    "sessionId": "cs_abc123"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "response": "Satya has over 3+ years of hands-on experience building reactive UIs with React and Next.js...",
+    "suggestions": ["Show me your best project", "What is your strongest skill?"],
+    "sentiment": "curious",
+    "fallback": false
+  }
+  ```
+
+#### 2. Recruiter Leads & Conversation Logs (Admin)
+- **Endpoint**: `GET /api/admin/chat-logs?limit=50`
+- **Headers**: `Authorization: Bearer <access_token>`
+- **Response**:
+  ```json
+  {
+    "success": true,
+    "total": 12,
+    "data": [
+      {
+        "id": 1,
+        "session_id": "cs_abc123",
+        "user_message": "We have an opening for Senior Full-Stack. Reach me at recruiter@company.com",
+        "bot_response": "...",
+        "sentiment": "recruiter",
+        "lead_email": "recruiter@company.com",
+        "ip_address": "192.168.1.1",
+        "created_at": "2026-10-17T23:05:00"
+      }
+    ]
+  }
+  ```

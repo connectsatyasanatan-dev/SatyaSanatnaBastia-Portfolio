@@ -52,6 +52,11 @@ const CHIPS: Chip[] = [
 // ── Client-side fallback (when API is unreachable) ────────
 function buildClientFallback(msg: string): string {
     const m = msg.toLowerCase();
+    const hasEmail = /[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+/.test(msg);
+    const hasPhone = /(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}|\+?\d{10,14}/.test(msg);
+    if (hasEmail || hasPhone || m.includes('my name is') || m.includes("i am ") || m.includes("i'm ")) {
+        return "Thank you so much for sharing your information! 🤝\n\nI have noted down your details securely for Satya. He reviews all recruiter & client messages regularly and will connect with you directly.\n\nIn the meantime, feel free to explore his featured projects or check out his resume!";
+    }
     if (m.includes('project') || m.includes('work') || m.includes('built'))
         return "Satya has worked on some really exciting projects! Head over to the **Projects** section on this page to explore them all — each one includes the tech stack, live demo, and GitHub link.\n\nAnything specific you're looking for?";
     if (m.includes('skill') || m.includes('tech') || m.includes('stack'))
@@ -59,14 +64,14 @@ function buildClientFallback(msg: string): string {
     if (m.includes('experience') || m.includes('career') || m.includes('job'))
         return "Satya has a solid professional background! The **Experience** section covers the full career timeline with roles, companies, and key achievements.";
     if (m.includes('contact') || m.includes('reach') || m.includes('email') || m.includes('hire'))
-        return "Getting in touch is easy — just scroll down to the **Contact** section at the bottom of this page. Satya usually responds within 24 hours!";
+        return "Getting in touch is easy — just scroll down to the **Contact** section at the bottom of this page, or drop your email right here and Satya will reach out to you within 24 hours!";
     if (m.includes('education') || m.includes('degree') || m.includes('university'))
         return "You can find Satya's academic background in the **Education** section on this page.";
     if (m.includes('certif'))
         return "Satya's professional certifications are listed in the **Certifications** section — go check them out!";
     if (m.includes('hello') || m.includes('hi') || m.includes('hey'))
-        return "Hey there! 👋 I'm Zentara, Satya's personal AI assistant.\n\nYou can ask me about his **projects**, **skills**, **experience**, or how to **get in touch**. What would you like to explore?";
-    return "Great question! Feel free to explore the portfolio sections — **Projects**, **Skills**, **Experience**, and **Contact** are all just a scroll away.\n\nWhat would you like to know about Satya?";
+        return "Hello and welcome! 👋 I'm Zentara, Satya's personal AI assistant.\n\nI can walk you through his **projects**, **skills**, **experience**, or help you **get in touch**. What would you like to explore?";
+    return "Thank you for reaching out! Feel free to explore Satya's work — **Projects**, **Skills**, **Experience**, and **Contact** are all just a scroll away.\n\nWhat would you like to know about Satya?";
 }
 
 // ── Smart follow-up suggestions ───────────────────────────
@@ -130,6 +135,18 @@ export default function ChatBot() {
     // Tooltip state
     const [showTooltip, setShowTooltip] = useState(false);
     const [tooltipIdx, setTooltipIdx] = useState(0);
+
+    const [sessionId] = useState(() => {
+        if (typeof window !== 'undefined') {
+            let sid = sessionStorage.getItem('portfolio_chat_sid');
+            if (!sid) {
+                sid = 'cs_' + Math.random().toString(36).substring(2, 9) + Date.now().toString(36);
+                sessionStorage.setItem('portfolio_chat_sid', sid);
+            }
+            return sid;
+        }
+        return '';
+    });
 
     const messagesRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -217,27 +234,51 @@ export default function ChatBot() {
         streamRef.current = setTimeout(tick, 10);
     };
 
-    // ── API call ──────────────────────────────────────────
+    // ── API call (Connected directly to Flask Backend AI Engine) ─────
     const getBotResponse = async (userMsg: string): Promise<{ response: string; suggestions: string[]; isFallback: boolean; sentiment: string }> => {
         try {
             const controller = new AbortController();
             const timeout = setTimeout(() => controller.abort(), 15000);
-            const res = await fetch('/api/chat', {
+            const baseUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api').replace(/\/$/, '');
+            const res = await fetch(`${baseUrl}/chat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: userMsg, history, hour: new Date().getHours() }),
+                body: JSON.stringify({ message: userMsg, history, hour: new Date().getHours(), sessionId }),
                 signal: controller.signal,
             });
             clearTimeout(timeout);
             if (res.ok) {
                 const data = await res.json();
-                return { response: data.response, suggestions: extractSuggestions(data.response), isFallback: false, sentiment: data.sentiment || 'neutral' };
+                const aiSuggestions = (data.suggestions && data.suggestions.length > 0)
+                    ? data.suggestions
+                    : extractSuggestions(data.response);
+                return { response: data.response, suggestions: aiSuggestions, isFallback: Boolean(data.fallback), sentiment: data.sentiment || 'neutral' };
             }
         } catch {
             // silently fall through to smart fallback
         }
         // Always return a helpful response — never expose errors to user
-        return { response: '', suggestions: [], isFallback: true, sentiment: 'neutral' };
+        return { response: buildClientFallback(userMsg), suggestions: [], isFallback: true, sentiment: 'neutral' };
+    };
+
+    // ── Smart Action or Send ──────────────────────────────
+    const handleActionOrSend = (actionText: string) => {
+        const lower = actionText.toLowerCase();
+        if (lower.includes('download resume') || lower === 'resume') {
+            window.open('/api/resume', '_blank');
+            return;
+        }
+        if (lower.includes('view projects') || lower === 'projects') {
+            const el = document.getElementById('projects');
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+            return;
+        }
+        if (lower.includes('contact satya') || lower === 'contact') {
+            const el = document.getElementById('contact');
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+            return;
+        }
+        sendMessage(actionText);
     };
 
     // ── Send message ──────────────────────────────────────
@@ -439,7 +480,7 @@ export default function ChatBot() {
                                 {msg.isBot && !msg.isStreaming && msg.suggestions && msg.suggestions.length > 0 && (
                                     <div className="cb-suggestions">
                                         {msg.suggestions.map((s, i) => (
-                                            <button key={i} className="cb-suggestion" onClick={() => sendMessage(s)}>{s}</button>
+                                            <button key={i} className="cb-suggestion" onClick={() => handleActionOrSend(s)}>{s}</button>
                                         ))}
                                     </div>
                                 )}
