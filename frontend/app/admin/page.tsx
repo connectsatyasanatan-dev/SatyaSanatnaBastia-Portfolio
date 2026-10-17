@@ -37,9 +37,23 @@ const AdminPanel = () => {
 
     useEffect(() => {
         const savedToken = localStorage.getItem('admin_token')
-        if (savedToken) {
-            adminApiClient.setToken(savedToken)
+        const savedRefreshToken = localStorage.getItem('admin_refresh_token')
+        if (savedToken || savedRefreshToken) {
+            if (savedToken) {
+                adminApiClient.setTokens(savedToken, savedRefreshToken || undefined)
+            }
             verifyToken()
+        }
+
+        const handleAuthExpired = () => {
+            setIsAuthenticated(false)
+            setAdminData(null)
+            toast.error('Session expired. Please log in again.')
+        }
+
+        window.addEventListener('admin-auth-expired', handleAuthExpired)
+        return () => {
+            window.removeEventListener('admin-auth-expired', handleAuthExpired)
         }
     }, [])
 
@@ -49,7 +63,15 @@ const AdminPanel = () => {
             setIsAuthenticated(true)
             loadAdminData()
         } catch (error) {
-            adminApiClient.clearToken()
+            try {
+                await adminApiClient.refreshAccessToken()
+                await adminApiClient.verifyToken()
+                setIsAuthenticated(true)
+                loadAdminData()
+            } catch (refreshErr) {
+                adminApiClient.clearTokens()
+                setIsAuthenticated(false)
+            }
         }
     }
 

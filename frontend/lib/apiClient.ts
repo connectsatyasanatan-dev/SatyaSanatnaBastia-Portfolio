@@ -20,31 +20,86 @@ apiClient.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-// ── Response interceptor — handle 401 globally ───────────────
+// ── Response interceptor — handle 401 with transparent auto-refresh ───────────
+let isRefreshingAxios = false;
+let refreshSubscribers: ((token: string) => void)[] = [];
+
+function onTokenRefreshed(token: string) {
+    refreshSubscribers.forEach((cb) => cb(token));
+    refreshSubscribers = [];
+}
+
 apiClient.interceptors.response.use(
     (response) => response,
     async (error: AxiosError) => {
-        const config = error.config as AxiosRequestConfig & { _retryCount?: number };
+        const originalRequest = error.config as AxiosRequestConfig & { _isRetry?: boolean; _retryCount?: number };
 
-        // Auto-logout on 401 for admin routes
-        if (error.response?.status === 401 && typeof window !== 'undefined') {
-            if (config.url?.includes('/admin')) {
+        // Auto-refresh on 401 for admin routes
+        if (
+            error.response?.status === 401 &&
+            typeof window !== 'undefined' &&
+            originalRequest?.url?.includes('/admin') &&
+            !originalRequest?.url?.includes('/login') &&
+            !originalRequest?.url?.includes('/refresh') &&
+            !originalRequest?._isRetry
+        ) {
+            const refreshToken = localStorage.getItem('admin_refresh_token');
+            if (refreshToken) {
+                if (isRefreshingAxios) {
+                    return new Promise((resolve) => {
+                        refreshSubscribers.push((newToken: string) => {
+                            if (originalRequest.headers) {
+                                originalRequest.headers.Authorization = `Bearer ${newToken}`;
+                            }
+                            resolve(apiClient(originalRequest));
+                        });
+                    });
+                }
+
+                originalRequest._isRetry = true;
+                isRefreshingAxios = true;
+
+                try {
+                    const refreshRes = await axios.post(`${BASE_URL}/admin/refresh`, { refreshToken });
+                    const newToken = refreshRes.data?.accessToken || refreshRes.data?.token;
+                    const newRefreshToken = refreshRes.data?.refreshToken;
+
+                    if (newToken) {
+                        localStorage.setItem('admin_token', newToken);
+                        if (newRefreshToken) {
+                            localStorage.setItem('admin_refresh_token', newRefreshToken);
+                        }
+                        if (originalRequest.headers) {
+                            originalRequest.headers.Authorization = `Bearer ${newToken}`;
+                        }
+                        onTokenRefreshed(newToken);
+                        return apiClient(originalRequest);
+                    }
+                } catch (refreshErr) {
+                    localStorage.removeItem('admin_token');
+                    localStorage.removeItem('admin_refresh_token');
+                    window.dispatchEvent(new CustomEvent('admin-auth-expired'));
+                    return Promise.reject(refreshErr);
+                } finally {
+                    isRefreshingAxios = false;
+                }
+            } else {
                 localStorage.removeItem('admin_token');
             }
         }
 
         // Retry on network errors or 5xx (max 2 retries, non-admin only)
-        const isAdminRoute = config.url?.includes('/admin');
+        const isAdminRoute = originalRequest?.url?.includes('/admin');
         const shouldRetry =
             !isAdminRoute &&
-            (config._retryCount ?? 0) < 2 &&
+            (originalRequest?._retryCount ?? 0) < 2 &&
             (!error.response || error.response.status >= 500);
 
         if (shouldRetry) {
-            config._retryCount = (config._retryCount ?? 0) + 1;
-            const delay = config._retryCount * 800; // 800ms, 1600ms
+            originalRequest._retryCount = (originalRequest._retryCount ?? 0) + 1;
+            const delay = originalRequest._retryCount * 800; // 800ms, 1600ms
             await new Promise((r) => setTimeout(r, delay));
-            return apiClient(config);
+            return apiClient(originalRequest);
         }
 
         return Promise.reject(error);

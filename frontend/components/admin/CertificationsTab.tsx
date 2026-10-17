@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Edit, Save, X, Plus, Trash2, Calendar, Award, Upload, Loader2, Image as ImageIcon } from 'lucide-react'
 import type { Certification } from '@/lib/admin-types'
+import { adminApiClient } from '@/lib/admin-api'
 import ErrorAlert from './ErrorAlert'
 import ConfirmDialog from './ConfirmDialog'
 
@@ -57,17 +58,7 @@ const CertificationsTab = ({ certifications, onAddCertification, onUpdateCertifi
         setError(null)
 
         try {
-            const token = localStorage.getItem('admin_token')
-            const backendUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api').replace(/\/$/, '')
-            const response = await fetch(`${backendUrl}/admin/upload`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                body: formData
-            })
-
-            const data = await response.json()
+            const data = await adminApiClient.uploadFile(file)
             if (data.success) {
                 if (isEdit) {
                     setEditData(prev => ({ ...prev, badge: data.url }))
@@ -75,7 +66,7 @@ const CertificationsTab = ({ certifications, onAddCertification, onUpdateCertifi
                     setNewCertification(prev => ({ ...prev, badge: data.url }))
                 }
             } else {
-                throw new Error(data.error || 'Upload failed')
+                throw new Error('Upload failed')
             }
         } catch (err: unknown) {
             setError((err as Error).message || 'Failed to upload image')

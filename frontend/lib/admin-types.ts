@@ -199,13 +199,30 @@ export interface ApiResponse<T = any> {
 export interface LoginResponse {
     success: boolean;
     token: string;
+    accessToken?: string;
+    refreshToken?: string;
+    tokenType?: string;
+    expiresIn?: number;
     user: {
         username: string;
         email: string;
     };
 }
 
+export interface RefreshResponse {
+    success: boolean;
+    token: string;
+    accessToken: string;
+    refreshToken: string;
+    tokenType: string;
+    expiresIn: number;
+}
+
 export interface TokenResponse {
     success: boolean;
     message: string;
+    user?: {
+        username: string;
+        email: string;
+    };
 }

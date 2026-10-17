@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 interface ErrorAlertProps {
     message: string
-    type?: 'error' | 'warning' | 'success'
+    type?: 'error' | 'warning' | 'success' | 'info'
     onDismiss?: () => void
     autoDismiss?: boolean
     dismissTimeout?: number
@@ -24,13 +24,15 @@ const ErrorAlert = ({
     const typeClasses = {
         error: 'admin-message-error',
         warning: 'admin-message-warning',
-        success: 'admin-message-success'
+        success: 'admin-message-success',
+        info: 'admin-message-info'
     }
 
     const iconColors = {
         error: 'admin-icon-error',
         warning: 'admin-icon-warning',
-        success: 'admin-icon-success'
+        success: 'admin-icon-success',
+        info: 'admin-icon-info'
     }
 
     const handleDismiss = () => {

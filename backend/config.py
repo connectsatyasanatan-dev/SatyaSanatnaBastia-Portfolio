@@ -35,9 +35,9 @@ class Config:
                     "Set a strong random SECRET_KEY environment variable before deploying."
                 )
             jwt_key = os.environ.get("JWT_SECRET_KEY", "")
-            if not jwt_key or jwt_key == "dev-jwt-secret-change-in-production":
+            if not jwt_key or jwt_key == "dev-jwt-secret-change-in-production" or len(jwt_key) < 32:
                 raise RuntimeError(
-                    "FATAL: JWT_SECRET_KEY is not set or is using the default dev value. "
+                    "FATAL: JWT_SECRET_KEY is not set, is using the default dev value, or is too short (< 32 characters). "
                     "Set a strong random JWT_SECRET_KEY environment variable before deploying."
                 )
         elif not cls.SECRET_KEY:
@@ -83,7 +83,8 @@ class Config:
     # JWT
     # ------------------------------------------------------------------ #
     JWT_SECRET_KEY: str = os.environ.get("JWT_SECRET_KEY", "") or SECRET_KEY
-    JWT_EXPIRY_HOURS: int = int(os.environ.get("JWT_EXPIRY_HOURS", 24))
+    JWT_ACCESS_TOKEN_MINUTES: int = int(os.environ.get("JWT_ACCESS_TOKEN_MINUTES", 15))
+    JWT_REFRESH_TOKEN_DAYS: int = int(os.environ.get("JWT_REFRESH_TOKEN_DAYS", 1))
 
     # ------------------------------------------------------------------ #
     # Uploads

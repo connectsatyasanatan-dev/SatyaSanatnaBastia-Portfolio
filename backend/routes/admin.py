@@ -1,12 +1,18 @@
 from flask import Blueprint, request, jsonify, current_app
 from models.admin import (
     ADMIN_CREDENTIALS,
+    verify_username,
     verify_password,
     generate_token,
+    create_token_pair,
+    decode_and_verify_token,
+    revoke_jti,
+    revoke_raw_token,
     admin_required,
 )
 from models.database import db
 from cache import invalidate_cache as _invalidate_cache
+from limiter import limiter
 import json
 import os
 import time
@@ -17,10 +23,20 @@ from werkzeug.utils import secure_filename
 admin = Blueprint("admin", __name__)
 logger = logging.getLogger(__name__)
 
-# Simple in-memory brute-force protection
+# In-memory brute-force protection
 _login_attempts: dict = {}
 _MAX_ATTEMPTS = 5
 _LOCKOUT_SECONDS = 300  # 5 minutes
+
+
+def _get_client_ip() -> str:
+    """Extract and sanitize client IP address."""
+    xff = request.headers.get("X-Forwarded-For")
+    if xff:
+        client_ip = xff.split(",")[0].strip()
+        if client_ip:
+            return client_ip
+    return request.remote_addr or "127.0.0.1"
 
 
 def _check_rate_limit(ip: str) -> tuple[bool, int]:
@@ -54,34 +70,35 @@ def _clear_attempts(ip: str):
 
 
 @admin.route("/login", methods=["POST"])
+@limiter.limit("10 per minute")
 def admin_login():
-    """Admin login with brute-force protection"""
-    ip = (
-        request.headers.get("X-Forwarded-For", request.remote_addr or "unknown")
-        .split(",")[0]
-        .strip()
-    )
+    """Admin login with brute-force protection, timing attack mitigation, and dual tokens"""
+    ip = _get_client_ip()
 
     allowed, wait = _check_rate_limit(ip)
     if not allowed:
-        return jsonify({"error": f"Too many attempts. Try again in {wait}s"}), 429
+        return jsonify({"error": f"Too many failed attempts. Try again in {wait}s"}), 429
 
     try:
-        data = request.get_json() or {}
+        data = request.get_json(silent=True) or {}
         username = (data.get("username") or "").strip()
         password = data.get("password") or ""
 
         if not username or not password:
             return jsonify({"error": "Username and password required"}), 400
 
-        if username == ADMIN_CREDENTIALS["username"] and verify_password(password):
+        # Timing attack mitigation: verify username and password with constant-time checks
+        valid_user = verify_username(username)
+        valid_pass = verify_password(password)
+
+        if valid_user and valid_pass:
             _clear_attempts(ip)
-            token = generate_token(username)
-            logger.info(f"Admin login success for {username}")
+            token_pair = create_token_pair(username)
+            logger.info(f"Admin login success for {username} from {ip}")
             return jsonify(
                 {
                     "success": True,
-                    "token": token,
+                    **token_pair,
                     "user": {"username": username, "email": ADMIN_CREDENTIALS["email"]},
                 }
             )
@@ -97,11 +114,100 @@ def admin_login():
         return jsonify({"error": "Login failed"}), 500
 
 
+@admin.route("/refresh", methods=["POST"])
+@limiter.limit("30 per minute")
+def admin_refresh():
+    """
+    Refresh 15-minute access token using a valid 1-day refresh token.
+    Implements Refresh Token Rotation (RTR) and Token Reuse Attack Detection.
+    """
+    try:
+        data = request.get_json(silent=True) or {}
+        auth_header = request.headers.get("Authorization", "")
+
+        refresh_token = (
+            data.get("refreshToken")
+            or (auth_header[7:].strip() if auth_header.startswith("Bearer ") else auth_header.strip())
+        )
+
+        if not refresh_token:
+            return jsonify({"error": "Refresh token required", "code": "REFRESH_TOKEN_MISSING"}), 400
+
+        payload, error_msg = decode_and_verify_token(refresh_token, expected_type="refresh")
+
+        if not payload:
+            if error_msg == "Token has been revoked":
+                # Reuse detection: Stolen token replay alert!
+                ip = _get_client_ip()
+                logger.critical(f"SECURITY ALERT: Reused or revoked refresh token presented from IP {ip}!")
+                return jsonify({
+                    "error": "Refresh token has already been used or revoked. Please login again.",
+                    "code": "TOKEN_REVOKED_OR_REUSED"
+                }), 401
+
+            return jsonify({
+                "error": error_msg or "Invalid refresh token",
+                "code": "REFRESH_TOKEN_INVALID"
+            }), 401
+
+        username = payload.get("username") or payload.get("sub")
+        old_jti = payload.get("jti")
+
+        # Refresh Token Rotation: Invalidate the consumed refresh token immediately
+        revoke_jti(old_jti, token_type="refresh", username=username)
+
+        # Issue brand new token pair (new 15m access token + new 1d refresh token)
+        token_pair = create_token_pair(username)
+        logger.info(f"Refreshed access token successfully for {username}")
+
+        return jsonify({
+            "success": True,
+            **token_pair,
+        })
+
+    except Exception as e:
+        logger.error(f"Token refresh error: {e}")
+        return jsonify({"error": "Failed to refresh token", "code": "REFRESH_FAILED"}), 500
+
+
+@admin.route("/logout", methods=["POST"])
+def admin_logout():
+    """
+    Revoke current tokens on the server to prevent token reuse after logout.
+    """
+    try:
+        # Revoke access token from Authorization header if present
+        auth_header = request.headers.get("Authorization", "")
+        if auth_header:
+            token = auth_header[7:].strip() if auth_header.startswith("Bearer ") else auth_header.strip()
+            if token:
+                revoke_raw_token(token)
+
+        # Revoke refresh token from JSON body if present
+        data = request.get_json(silent=True) or {}
+        refresh_token = data.get("refreshToken")
+        if refresh_token:
+            revoke_raw_token(refresh_token)
+
+        return jsonify({"success": True, "message": "Successfully logged out and tokens invalidated"})
+    except Exception as e:
+        logger.error(f"Admin logout error: {e}")
+        return jsonify({"success": True, "message": "Logged out locally"}), 200
+
+
 @admin.route("/verify", methods=["GET"])
 @admin_required
 def verify_admin():
-    """Verify admin token"""
-    return jsonify({"success": True, "message": "Token valid"})
+    """Verify admin access token"""
+    admin_user = getattr(request, "admin_user", ADMIN_CREDENTIALS["username"])
+    return jsonify({
+        "success": True,
+        "message": "Token valid",
+        "user": {
+            "username": admin_user,
+            "email": ADMIN_CREDENTIALS["email"]
+        }
+    })
 
 
 # Personal Info Management
@@ -689,6 +795,7 @@ def get_analytics():
 # File Upload Management
 @admin.route("/upload", methods=["POST"])
 @admin_required
+@limiter.limit("20 per minute")
 def upload_file():
     """
     Upload handler — best practice:
@@ -702,6 +809,14 @@ def upload_file():
         file = request.files["file"]
         if not file or file.filename == "":
             return jsonify({"error": "No file selected"}), 400
+
+        # Enforce strict file extension whitelist to prevent malicious uploads
+        allowed_extensions = {"png", "jpg", "jpeg", "webp", "gif", "pdf"}
+        file_ext = file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else ""
+        if file_ext not in allowed_extensions:
+            return jsonify({
+                "error": f"Invalid file type .{file_ext}. Allowed: {', '.join(sorted(allowed_extensions))}"
+            }), 400
 
         cloudinary_url = os.environ.get(
             "CLOUDINARY_URL"

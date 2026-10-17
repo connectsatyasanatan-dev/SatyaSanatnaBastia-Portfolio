@@ -22,33 +22,113 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/a
 class AdminApiClient {
     private baseUrl: string
     private token: string | null = null
+    private refreshToken: string | null = null
+    private refreshPromise: Promise<string> | null = null
 
     constructor(baseUrl: string = API_BASE_URL) {
         this.baseUrl = baseUrl
-        this.token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null
+        if (typeof window !== 'undefined') {
+            this.token = localStorage.getItem('admin_token')
+            this.refreshToken = localStorage.getItem('admin_refresh_token')
+        }
+    }
+
+    setTokens(accessToken: string, refreshToken?: string) {
+        this.token = accessToken
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('admin_token', accessToken)
+            if (refreshToken) {
+                this.refreshToken = refreshToken
+                localStorage.setItem('admin_refresh_token', refreshToken)
+            }
+        }
     }
 
     setToken(token: string) {
-        this.token = token
+        this.setTokens(token)
+    }
+
+    getToken(): string | null {
+        return this.token || (typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null)
+    }
+
+    getRefreshToken(): string | null {
+        return this.refreshToken || (typeof window !== 'undefined' ? localStorage.getItem('admin_refresh_token') : null)
+    }
+
+    clearTokens() {
+        this.token = null
+        this.refreshToken = null
         if (typeof window !== 'undefined') {
-            localStorage.setItem('admin_token', token)
+            localStorage.removeItem('admin_token')
+            localStorage.removeItem('admin_refresh_token')
         }
     }
 
     clearToken() {
-        this.token = null
-        if (typeof window !== 'undefined') {
-            localStorage.removeItem('admin_token')
-        }
+        this.clearTokens()
     }
 
-    private async request<T = any>(endpoint: string, options?: RequestInit): Promise<T> {
+    /**
+     * Refresh access token seamlessly using the 1-day refresh token.
+     * Prevents race conditions by caching in-flight refresh promise.
+     */
+    async refreshAccessToken(): Promise<string> {
+        if (this.refreshPromise) {
+            return this.refreshPromise
+        }
+
+        const currentRefreshToken = this.getRefreshToken()
+        if (!currentRefreshToken) {
+            this.clearTokens()
+            throw new Error('No refresh token available')
+        }
+
+        this.refreshPromise = (async () => {
+            try {
+                const response = await fetch(`${this.baseUrl}/admin/refresh`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refreshToken: currentRefreshToken }),
+                })
+
+                if (!response.ok) {
+                    const err = await response.json().catch(() => ({ error: 'Refresh failed' }))
+                    throw new Error(err.error || 'Failed to refresh access token')
+                }
+
+                const data = await response.json()
+                const newAccessToken = data.accessToken || data.token
+                const newRefreshToken = data.refreshToken || currentRefreshToken
+
+                if (!newAccessToken) {
+                    throw new Error('Invalid token response from refresh endpoint')
+                }
+
+                this.setTokens(newAccessToken, newRefreshToken)
+                return newAccessToken
+            } catch (err) {
+                this.clearTokens()
+                if (typeof window !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent('admin-auth-expired'))
+                }
+                throw err
+            } finally {
+                this.refreshPromise = null
+            }
+        })()
+
+        return this.refreshPromise
+    }
+
+    private async request<T = any>(endpoint: string, options?: RequestInit, isRetry: boolean = false): Promise<T> {
         const url = `${this.baseUrl}/admin${endpoint}`
+        const currentToken = this.getToken()
 
         const config: RequestInit = {
             headers: {
                 'Content-Type': 'application/json',
-                ...(this.token && { 'Authorization': `Bearer ${this.token}` }),
+                ...(currentToken && { 'Authorization': `Bearer ${currentToken}` }),
                 ...options?.headers,
             },
             ...options,
@@ -56,6 +136,27 @@ class AdminApiClient {
 
         try {
             const response = await fetch(url, config)
+
+            // Transparently refresh token on 401 Unauthorized (15 min access expiry)
+            if (
+                response.status === 401 &&
+                !isRetry &&
+                !endpoint.includes('/login') &&
+                !endpoint.includes('/refresh') &&
+                this.getRefreshToken()
+            ) {
+                try {
+                    const newToken = await this.refreshAccessToken()
+                    const retriedHeaders = {
+                        ...(options?.headers || {}),
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${newToken}`,
+                    }
+                    return await this.request<T>(endpoint, { ...options, headers: retriedHeaders }, true)
+                } catch (refreshError) {
+                    throw new Error('Session expired. Please log in again.')
+                }
+            }
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({ error: 'Request failed' }))
@@ -76,8 +177,9 @@ class AdminApiClient {
             body: JSON.stringify({ username, password }),
         })
 
-        if (response.success && response.token) {
-            this.setToken(response.token)
+        if (response.success && (response.accessToken || response.token)) {
+            const accessTok = response.accessToken || response.token
+            this.setTokens(accessTok, response.refreshToken)
         }
 
         return response
@@ -88,7 +190,22 @@ class AdminApiClient {
     }
 
     async logout() {
-        this.clearToken()
+        try {
+            const token = this.getToken()
+            const refreshToken = this.getRefreshToken()
+            if (token || refreshToken) {
+                await fetch(`${this.baseUrl}/admin/logout`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(token && { 'Authorization': `Bearer ${token}` }),
+                    },
+                    body: JSON.stringify({ refreshToken }),
+                }).catch(() => {})
+            }
+        } finally {
+            this.clearTokens()
+        }
     }
 
     // Dashboard
@@ -306,21 +423,31 @@ class AdminApiClient {
     }
 
     // Generic File Upload
-    async uploadFile(file: File): Promise<{ success: boolean; url: string; filename: string }> {
+    async uploadFile(file: File, isRetry: boolean = false): Promise<{ success: boolean; url: string; filename: string }> {
         const formData = new FormData()
         formData.append('file', file)
 
         const url = `${this.baseUrl}/admin/upload`
+        const currentToken = this.getToken()
         const config: RequestInit = {
             method: 'POST',
             headers: {
-                ...(this.token && { 'Authorization': `Bearer ${this.token}` }),
+                ...(currentToken && { 'Authorization': `Bearer ${currentToken}` }),
             },
             body: formData,
         }
 
         try {
             const response = await fetch(url, config)
+
+            if (response.status === 401 && !isRetry && this.getRefreshToken()) {
+                try {
+                    await this.refreshAccessToken()
+                    return await this.uploadFile(file, true)
+                } catch (refreshErr) {
+                    throw new Error('Session expired. Please log in again.')
+                }
+            }
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({ error: 'Upload failed' }))

@@ -8,18 +8,18 @@ import os
 import psycopg2
 import psycopg2.extras
 from typing import Dict, List, Any
+from dotenv import load_dotenv
 
-DATABASE_URL = os.environ.get("DATABASE_URL", "")
-
-# Render gives postgres:// but psycopg2 needs postgresql://
-if DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+load_dotenv()
 
 
 def get_connection():
-    if not DATABASE_URL:
+    db_url = os.environ.get("DATABASE_URL", "")
+    if db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql://", 1)
+    if not db_url:
         raise RuntimeError("DATABASE_URL environment variable is not set.")
-    conn = psycopg2.connect(DATABASE_URL)
+    conn = psycopg2.connect(db_url)
     return conn
 
 
@@ -151,6 +151,19 @@ def init_database():
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         last_active TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )"""
+    )
+
+    cur.execute(
+        """CREATE TABLE IF NOT EXISTS revoked_tokens (
+        jti VARCHAR(64) PRIMARY KEY,
+        token_type VARCHAR(16) NOT NULL,
+        username TEXT NOT NULL,
+        revoked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        expires_at TIMESTAMP NOT NULL
+    )"""
+    )
+    cur.execute(
+        """CREATE INDEX IF NOT EXISTS idx_revoked_tokens_expires_at ON revoked_tokens(expires_at)"""
     )
 
     conn.commit()
@@ -992,6 +1005,56 @@ class Database:
             "newVsReturning": {"new": total_u - returning, "returning": returning},
             "bounceRate": bounce_rate,
         }
+
+    # ── JWT Revocation / Blacklist ──────────────────────────────────────
+    def revoke_token(self, jti: str, token_type: str, username: str, expires_at) -> bool:
+        """Store revoked JWT jti in database."""
+        conn = get_connection()
+        cur = _cursor(conn)
+        try:
+            cur.execute(
+                """INSERT INTO revoked_tokens (jti, token_type, username, expires_at)
+                   VALUES (%s, %s, %s, %s)
+                   ON CONFLICT (jti) DO NOTHING""",
+                (jti, token_type, username, expires_at),
+            )
+            conn.commit()
+            return True
+        except Exception:
+            conn.rollback()
+            return False
+        finally:
+            cur.close()
+            conn.close()
+
+    def is_token_revoked(self, jti: str) -> bool:
+        """Check whether a JWT jti is blacklisted."""
+        conn = get_connection()
+        cur = _cursor(conn)
+        try:
+            cur.execute("SELECT 1 FROM revoked_tokens WHERE jti = %s", (jti,))
+            return cur.fetchone() is not None
+        except Exception:
+            return False
+        finally:
+            cur.close()
+            conn.close()
+
+    def cleanup_expired_revoked_tokens(self) -> int:
+        """Prune expired revoked tokens from the database."""
+        conn = get_connection()
+        cur = _cursor(conn)
+        try:
+            cur.execute("DELETE FROM revoked_tokens WHERE expires_at < CURRENT_TIMESTAMP")
+            deleted = cur.rowcount
+            conn.commit()
+            return deleted
+        except Exception:
+            conn.rollback()
+            return 0
+        finally:
+            cur.close()
+            conn.close()
 
 
 # Global instance
