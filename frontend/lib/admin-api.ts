@@ -88,6 +88,7 @@ class AdminApiClient {
             try {
                 const response = await fetch(`${this.baseUrl}/admin/refresh`, {
                     method: 'POST',
+                    credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ refreshToken: currentRefreshToken }),
                 })
@@ -126,6 +127,7 @@ class AdminApiClient {
         const currentToken = this.getToken()
 
         const config: RequestInit = {
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
                 ...(currentToken && { 'Authorization': `Bearer ${currentToken}` }),
@@ -196,6 +198,7 @@ class AdminApiClient {
             if (token || refreshToken) {
                 await fetch(`${this.baseUrl}/admin/logout`, {
                     method: 'POST',
+                    credentials: 'include',
                     headers: {
                         'Content-Type': 'application/json',
                         ...(token && { 'Authorization': `Bearer ${token}` }),
@@ -431,6 +434,7 @@ class AdminApiClient {
         const currentToken = this.getToken()
         const config: RequestInit = {
             method: 'POST',
+            credentials: 'include',
             headers: {
                 ...(currentToken && { 'Authorization': `Bearer ${currentToken}` }),
             },

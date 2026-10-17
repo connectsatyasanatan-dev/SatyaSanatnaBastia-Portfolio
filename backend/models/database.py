@@ -5,22 +5,101 @@ Set DATABASE_URL env var: postgresql://user:password@host:5432/dbname
 
 import json
 import os
+import logging
 import psycopg2
 import psycopg2.extras
+from psycopg2.pool import ThreadedConnectionPool
 from typing import Dict, List, Any
 from dotenv import load_dotenv
 
 load_dotenv()
+logger = logging.getLogger(__name__)
+
+_pool: ThreadedConnectionPool | None = None
 
 
-def get_connection():
+def _get_db_url() -> str:
     db_url = os.environ.get("DATABASE_URL", "")
     if db_url.startswith("postgres://"):
         db_url = db_url.replace("postgres://", "postgresql://", 1)
     if not db_url:
         raise RuntimeError("DATABASE_URL environment variable is not set.")
-    conn = psycopg2.connect(db_url)
-    return conn
+    return db_url
+
+
+def _init_pool():
+    global _pool
+    if _pool is None:
+        try:
+            db_url = _get_db_url()
+            min_conn = int(os.environ.get("DB_POOL_MIN", 2))
+            max_conn = int(os.environ.get("DB_POOL_MAX", 20))
+            _pool = ThreadedConnectionPool(minconn=min_conn, maxconn=max_conn, dsn=db_url)
+            logger.info(f"Initialized ThreadedConnectionPool (min={min_conn}, max={max_conn})")
+        except Exception as e:
+            logger.error(f"Failed to initialize PostgreSQL connection pool: {e}")
+            _pool = None
+
+
+class PooledConnectionProxy:
+    """
+    Proxy wrapper around psycopg2 connection from ThreadedConnectionPool.
+    When conn.close() is called, it intercepts and returns the connection back
+    to the pool for instant reuse by subsequent requests instead of killing the TCP socket.
+    """
+    def __init__(self, conn, pool):
+        self._conn = conn
+        self._pool = pool
+        self._closed = False
+
+    def close(self):
+        if not self._closed:
+            self._closed = True
+            if self._pool and self._conn:
+                try:
+                    if not self._conn.closed:
+                        # Rollback any uncommitted transaction so connection is fresh
+                        if self._conn.get_transaction_status() != psycopg2.extensions.TRANSACTION_STATUS_IDLE:
+                            self._conn.rollback()
+                        self._pool.putconn(self._conn)
+                    else:
+                        self._pool.putconn(self._conn, close=True)
+                except Exception:
+                    try:
+                        self._pool.putconn(self._conn, close=True)
+                    except Exception:
+                        pass
+
+    def __getattr__(self, name):
+        return getattr(self._conn, name)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+
+
+def get_connection():
+    """
+    Thread-safe connection acquisition from pool, with direct fallback.
+    """
+    global _pool
+    if _pool is None:
+        _init_pool()
+
+    if _pool is not None:
+        try:
+            conn = _pool.getconn()
+            if conn.closed != 0:
+                _pool.putconn(conn, close=True)
+                conn = _pool.getconn()
+            return PooledConnectionProxy(conn, _pool)
+        except Exception as e:
+            logger.warning(f"Connection pool acquisition failed ({e}); falling back to direct connection.")
+
+    # Direct connection fallback
+    return psycopg2.connect(_get_db_url())
 
 
 def _cursor(conn):
@@ -165,6 +244,20 @@ def init_database():
     cur.execute(
         """CREATE INDEX IF NOT EXISTS idx_revoked_tokens_expires_at ON revoked_tokens(expires_at)"""
     )
+
+    # Safe schema auto-alignments (adds new columns if table existed without them)
+    try:
+        cur.execute("ALTER TABLE personal_info ADD COLUMN IF NOT EXISTS languages TEXT;")
+        cur.execute("ALTER TABLE personal_info ADD COLUMN IF NOT EXISTS availability TEXT;")
+        cur.execute("ALTER TABLE personal_info ADD COLUMN IF NOT EXISTS timezone TEXT;")
+        cur.execute("ALTER TABLE projects ADD COLUMN IF NOT EXISTS demo_url TEXT;")
+        cur.execute("ALTER TABLE projects ADD COLUMN IF NOT EXISTS github_url TEXT;")
+        cur.execute("ALTER TABLE projects ADD COLUMN IF NOT EXISTS featured BOOLEAN DEFAULT FALSE;")
+        cur.execute("ALTER TABLE projects ADD COLUMN IF NOT EXISTS stars INTEGER DEFAULT 0;")
+        cur.execute("ALTER TABLE projects ADD COLUMN IF NOT EXISTS forks INTEGER DEFAULT 0;")
+        cur.execute("ALTER TABLE certifications ADD COLUMN IF NOT EXISTS verify_url TEXT;")
+    except Exception as e:
+        logger.warning(f"Schema auto-alignment warning: {e}")
 
     conn.commit()
     cur.close()

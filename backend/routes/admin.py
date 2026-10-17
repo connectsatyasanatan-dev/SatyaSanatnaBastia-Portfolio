@@ -95,13 +95,26 @@ def admin_login():
             _clear_attempts(ip)
             token_pair = create_token_pair(username)
             logger.info(f"Admin login success for {username} from {ip}")
-            return jsonify(
+            
+            is_prod = current_app.config.get("FLASK_ENV") == "production"
+            response = jsonify(
                 {
                     "success": True,
                     **token_pair,
                     "user": {"username": username, "email": ADMIN_CREDENTIALS["email"]},
                 }
             )
+            # Set bank-grade HttpOnly cookie for refresh token
+            response.set_cookie(
+                "admin_refresh_token",
+                token_pair["refreshToken"],
+                httponly=True,
+                secure=is_prod,
+                samesite="Lax",
+                path="/api/admin",
+                max_age=86400,
+            )
+            return response
 
         _record_failed_attempt(ip)
         logger.warning(
@@ -119,14 +132,17 @@ def admin_login():
 def admin_refresh():
     """
     Refresh 15-minute access token using a valid 1-day refresh token.
+    Supports both HttpOnly cookie and JSON body/header.
     Implements Refresh Token Rotation (RTR) and Token Reuse Attack Detection.
     """
     try:
         data = request.get_json(silent=True) or {}
         auth_header = request.headers.get("Authorization", "")
+        cookie_token = request.cookies.get("admin_refresh_token")
 
         refresh_token = (
-            data.get("refreshToken")
+            cookie_token
+            or data.get("refreshToken")
             or (auth_header[7:].strip() if auth_header.startswith("Bearer ") else auth_header.strip())
         )
 
@@ -160,10 +176,21 @@ def admin_refresh():
         token_pair = create_token_pair(username)
         logger.info(f"Refreshed access token successfully for {username}")
 
-        return jsonify({
+        is_prod = current_app.config.get("FLASK_ENV") == "production"
+        response = jsonify({
             "success": True,
             **token_pair,
         })
+        response.set_cookie(
+            "admin_refresh_token",
+            token_pair["refreshToken"],
+            httponly=True,
+            secure=is_prod,
+            samesite="Lax",
+            path="/api/admin",
+            max_age=86400,
+        )
+        return response
 
     except Exception as e:
         logger.error(f"Token refresh error: {e}")
@@ -174,6 +201,7 @@ def admin_refresh():
 def admin_logout():
     """
     Revoke current tokens on the server to prevent token reuse after logout.
+    Clears HttpOnly cookie and invalidates JTI in PostgreSQL.
     """
     try:
         # Revoke access token from Authorization header if present
@@ -183,16 +211,24 @@ def admin_logout():
             if token:
                 revoke_raw_token(token)
 
-        # Revoke refresh token from JSON body if present
+        # Revoke refresh token from cookie or body
+        cookie_token = request.cookies.get("admin_refresh_token")
+        if cookie_token:
+            revoke_raw_token(cookie_token)
+
         data = request.get_json(silent=True) or {}
         refresh_token = data.get("refreshToken")
         if refresh_token:
             revoke_raw_token(refresh_token)
 
-        return jsonify({"success": True, "message": "Successfully logged out and tokens invalidated"})
+        response = jsonify({"success": True, "message": "Successfully logged out and tokens invalidated"})
+        response.delete_cookie("admin_refresh_token", path="/api/admin")
+        return response
     except Exception as e:
         logger.error(f"Admin logout error: {e}")
-        return jsonify({"success": True, "message": "Logged out locally"}), 200
+        response = jsonify({"success": True, "message": "Logged out locally"})
+        response.delete_cookie("admin_refresh_token", path="/api/admin")
+        return response
 
 
 @admin.route("/verify", methods=["GET"])

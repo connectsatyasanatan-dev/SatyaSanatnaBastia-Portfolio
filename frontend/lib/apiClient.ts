@@ -5,6 +5,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 const apiClient = axios.create({
     baseURL: BASE_URL,
     timeout: 12000,
+    withCredentials: true,
     headers: { 'Content-Type': 'application/json' },
 });
 
@@ -60,7 +61,7 @@ apiClient.interceptors.response.use(
                 isRefreshingAxios = true;
 
                 try {
-                    const refreshRes = await axios.post(`${BASE_URL}/admin/refresh`, { refreshToken });
+                    const refreshRes = await axios.post(`${BASE_URL}/admin/refresh`, { refreshToken }, { withCredentials: true });
                     const newToken = refreshRes.data?.accessToken || refreshRes.data?.token;
                     const newRefreshToken = refreshRes.data?.refreshToken;
 
