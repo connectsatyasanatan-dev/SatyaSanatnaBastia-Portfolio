@@ -241,8 +241,30 @@ python run.py
 | GET    | `/api/blog`                   | Blog posts                 |
 | GET    | `/api/stats`                  | Aggregate portfolio stats  |
 | POST   | `/api/contact`                | Submit contact form        |
-| POST   | `/api/admin/login`            | Admin login (returns JWT)  |
-| GET    | `/api/admin/dashboard`        | Admin dashboard data (JWT) |
+| POST   | `/api/admin/login`            | Admin login (dual JWT + HttpOnly cookie) |
+| POST   | `/api/admin/refresh`          | Rotate access token (RTR + HttpOnly)     |
+| POST   | `/api/admin/logout`           | Revoke tokens server-side & delete cookie|
+| GET    | `/api/admin/backup`           | Download full DB snapshot (JSON)         |
+| POST   | `/api/admin/restore`          | Restore DB from JSON snapshot            |
+| GET    | `/api/admin/dashboard`        | Admin dashboard data (JWT)               |
+
+---
+
+## 💾 Database Backup & Disaster Recovery
+
+The project includes an automated backup and disaster recovery utility:
+
+```bash
+# In backend/ directory:
+python backup.py --export                                # Create snapshot in backend/backups/
+python backup.py --list                                  # List existing backups
+python backup.py --restore backups/<filename>.json       # 1-second full DB restoration
+```
+
+Comprehensive documentation is available in:
+- [API Reference & Technical Specification](./documentation/API_Reference.md)
+- [Project Architecture & System Specification](./documentation/Project_Architecture.md)
+- [Security & Database Backup Operations Manual](./documentation/Security_and_Backup_Guide.md)
 
 ---
 

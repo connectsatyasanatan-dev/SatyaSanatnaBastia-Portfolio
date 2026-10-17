@@ -1,14 +1,31 @@
-# REST API Reference & Documentation
+# REST API Reference & Technical Specification
 
 ## Overview
-This API is designed as a **RESTful service**, providing JSON-formatted data to the Next.js frontend. It features a public-facing API for visitors and a secured Admin API for portfolio management.
+This API is designed as a **high-performance, production-grade RESTful service**, providing JSON-formatted data to the Next.js frontend. It features a public-facing API for visitors, an AI chatbot endpoint, and a hardened Admin API for portfolio management.
 
 ### Base URL
-`http://localhost:5000/api`
+- **Local Development**: `http://localhost:5000/api`
+- **Production**: `https://<your-domain>/api`
 
-### Authentication
-All Admin API endpoints (prefixed with `/admin`) require a **JWT (JSON Web Token)**.
-- **Header**: `Authorization: Bearer <your_token>`
+### Authentication Architecture (Dual-Token + HttpOnly Cookie)
+All Admin API endpoints (prefixed with `/admin`) require authentication:
+- **Access Token**: Short-lived (15 minutes). Sent in header: `Authorization: Bearer <access_token>`.
+- **Refresh Token**: Long-lived (1 day). Stored and transmitted via bank-grade `HttpOnly; SameSite=Lax; Secure` cookie and/or JSON body.
+- **Refresh Token Rotation (RTR)**: Each refresh token is single-use only. When refreshed, the old token JTI is permanently blacklisted in PostgreSQL, and a new token pair is issued.
+
+---
+
+## 🚦 Rate Limiting & Protection Specifications
+
+| Endpoint | Method | Rate Limit | Protection Mechanism |
+|---|---|---|---|
+| `/admin/login` | `POST` | **5 failed attempts / 5 min lockout** + `10/min` | Brute-force & credential stuffing defense + `hmac.compare_digest` timing attack mitigation |
+| `/admin/refresh` | `POST` | **30 per minute** | Token generation spam prevention + Replay attack detection |
+| `/admin/upload` | `POST` | **20 per minute** | Bandwidth exhaustion prevention + Strict file extension whitelist |
+| `/contact` | `POST` | **5 per minute; 20 per hour** | Anti-spam & inbox protection |
+| `/analytics/track` | `POST` | **30 per minute** | Bot analytics spoofing prevention |
+| `/analytics/heartbeat` | `POST` | **60 per minute** | Ping spam prevention |
+| **Global Default** | `ALL` | **200 per minute; 2000 per hour** | DoS/DDoS protection on all public read endpoints |
 
 ---
 
@@ -16,99 +33,125 @@ All Admin API endpoints (prefixed with `/admin`) require a **JWT (JSON Web Token
 
 ### 🏥 System Health
 - **Endpoint**: `GET /health`
-- **Purpose**: Verify if the backend API is online and healthy.
+- **Purpose**: Verify if the backend API and database connection pool are online.
 - **Response**: `{"status": "healthy", "message": "Flask backend is running!"}`
 
 ### 👤 Profile Information
 - **Endpoint**: `GET /personal-info`
-- **Purpose**: Retrieve the portfolio owner's bio, contact details, and social links.
-- **Response**: `PersonalInfo` object.
+- **Purpose**: Retrieve owner's bio, contact details, social links, availability, and timezone.
+- **Response**: `PersonalInfo` JSON object.
 
 ### 💼 Portfolio Sections
 - **Endpoints**:
-  - `GET /skills`: All categorized tech skills.
-  - `GET /projects`: List of all projects (filtered by `?featured=true`).
-  - `GET /experience`: Full work history and achievements.
-  - `GET /education`: Academic history and course details.
-  - `GET /certifications`: Dynamic list of licenses (includes badges and verification URLs).
-  - `GET /achievements`: Key stats and high-level highlights.
-  - `GET /testimonials`: Feedback from colleagues or clients.
-  - `GET /blog`: All published blog posts.
+  - `GET /skills`: Categorized technical skill sets.
+  - `GET /projects`: List of all projects (supports query filter `?featured=true`).
+  - `GET /experience`: Work history, roles, achievements, and tech stack tags.
+  - `GET /education`: Academic degrees, institutions, and dates.
+  - `GET /certifications`: Verified licenses, badges, and verification links.
+  - `GET /achievements`: Key career milestones and stats.
+  - `GET /testimonials`: Professional recommendations and ratings.
+  - `GET /blog`: Published articles (supports `?featured=true`).
 
 ### 📬 User Interaction
 - **Endpoint**: `POST /contact`
-- **Purpose**: Submit the contact form.
-- **Payload**: `{"name": "Name", "email": "email@example.com", "subject": "Topic", "message": "Body"}`
-- **Side Effect**: Saves to database and sends an email notification to the owner.
+- **Rate Limit**: 5 per minute, 20 per hour
+- **Payload**:
+  ```json
+  {
+    "name": "Jane Doe",
+    "email": "jane@example.com",
+    "subject": "Project Collaboration",
+    "message": "Hi, I would like to discuss a project..."
+  }
+  ```
+- **Response**: `{"success": true, "message": "Message sent successfully"}`
 
-### 📈 Visitor Tracking (Analytics)
-- **Endpoint**: `POST /track-visit`
-- **Purpose**: Log a new visit with IP-based geolocation, device, and browser data.
-- **Payload**: `{"visitorId": "UID", "sessionId": "SID", "deviceType": "Desktop", "browser": "Chrome", "pagePath": "/"}`
-
-- **Endpoint**: `POST /track-duration`
-- **Purpose**: Update how much time a user spent in a specific session.
+### 📈 Visitor Analytics Tracking
+- **Endpoint**: `POST /analytics/track`
+- **Payload**: `{"visitorId": "UUID", "sessionId": "UUID", "deviceType": "Desktop", "browser": "Chrome", "pagePath": "/"}`
+- **Endpoint**: `POST /analytics/heartbeat`
+- **Payload**: `{"sessionId": "UUID", "duration": 45}`
 
 ---
 
 ## 🔒 Admin API Endpoints (Secured)
 
-### 🔑 Authentication
+### 🔑 Authentication & Token Lifecycle
+
+#### 1. Admin Login
 - **Endpoint**: `POST /admin/login`
-- **Payload**: `{"username": "Admin", "password": "Password"}`
-- **Response**: `{"token": "JWT_TOKEN", "user": { ... }}`
+- **Payload**: `{"username": "Admin", "password": "YourPassword"}`
+- **Response Headers**: Sets `Set-Cookie: admin_refresh_token=<token>; HttpOnly; SameSite=Lax; Path=/api/admin; Max-Age=86400`
+- **Response Body**:
+  ```json
+  {
+    "success": true,
+    "accessToken": "eyJhbGciOiJIUzI1NiIs...",
+    "token": "eyJhbGciOiJIUzI1NiIs...",
+    "refreshToken": "eyJhbGciOiJIUzI1NiIs...",
+    "tokenType": "Bearer",
+    "expiresIn": 900,
+    "user": {
+      "username": "Admin",
+      "email": "admin@portfolio.dev"
+    }
+  }
+  ```
 
+#### 2. Access Token Refresh (RTR)
+- **Endpoint**: `POST /admin/refresh`
+- **Authentication**: Transmitted automatically via `admin_refresh_token` HttpOnly cookie OR JSON body `{"refreshToken": "..."}`.
+- **Behavior**: Rotates refresh token (destroys old JTI in PostgreSQL blocklist, issues fresh 15m access token + new 1d refresh token).
+- **Response**: Same structure as login token pair.
+
+#### 3. Admin Logout
+- **Endpoint**: `POST /admin/logout`
+- **Behavior**: Blacklists both active access token and refresh token in database `revoked_tokens` table; clears `admin_refresh_token` HttpOnly cookie.
+- **Response**: `{"success": true, "message": "Successfully logged out and tokens invalidated"}`
+
+#### 4. Verify Session
 - **Endpoint**: `GET /admin/verify`
-- **Purpose**: Validates the current session token.
-
-### 📂 Content Management (CRUD)
-The following endpoints support `GET` (list), `POST` (create), `PUT` (update), and `DELETE` (remove) operations:
-- `/admin/projects`
-- `/admin/experience`
-- `/admin/education`
-- `/admin/certifications`
-- `/admin/testimonials`
-- `/admin/blog`
-
-### 📊 Administrative Tools
-- **Endpoint**: `GET /admin/dashboard`
-- **Purpose**: Summary of content (counts of projects, skills, messages, etc.).
-- **Endpoint**: `GET /admin/analytics`
-- **Purpose**: Detailed traffic insights, including visitor trends and geographical maps.
-- **Endpoint**: `GET /admin/contacts`
-- **Purpose**: Review all messages received via the contact form.
-
-### 🖼️ Media & Uploads
-- **Endpoint**: `POST /admin/upload`
-- **Purpose**: Handles file uploads (badges, profile pictures, etc.).
-- **Payload**: `multipart/form-data` containing an image file.
-- **Response**: `{"success": true, "url": "/api/static/uploads/unique_filename.png"}`
-
-- **Static Serving**: `GET /api/static/uploads/<filename>`
-- **Purpose**: Serves the uploaded images back to the frontend.
+- **Headers**: `Authorization: Bearer <access_token>`
+- **Response**: `{"success": true, "message": "Token valid", "user": {"username": "Admin", "email": "..."}}`
 
 ---
 
-## ⚙️ Data Payload Example (Certification)
+### 📂 Content Management (Full CRUD)
 
-### POST /admin/certifications
-```json
-{
-  "name": "Oracle Cloud Infrastructure 2024 Foundations Associate",
-  "issuer": "Oracle",
-  "date": "March 2024",
-  "credential": "OCI-FOUND-2024",
-  "validity": "No Expiration",
-  "badge": "/api/static/uploads/7f2b_badge.png",
-  "verify_url": "https://oracle.com/verify/..."
-}
-```
+All the following endpoints require `Authorization: Bearer <access_token>`:
+- `GET`, `POST`, `PUT`, `DELETE`: `/admin/projects`
+- `GET`, `POST`, `PUT`, `DELETE`: `/admin/experience`
+- `GET`, `POST`, `PUT`, `DELETE`: `/admin/education`
+- `GET`, `POST`, `PUT`, `DELETE`: `/admin/certifications`
+- `GET`, `POST`, `PUT`, `DELETE`: `/admin/testimonials`
+- `GET`, `POST`, `PUT`, `DELETE`: `/admin/blog`
+- `GET`, `PUT`: `/admin/personal-info`
+- `GET`, `PUT`: `/admin/skills`
 
-## 🛠️ Error Handling
-The API returns standard HTTP status codes:
-- `200/201`: Success
-- `400`: Bad Request (Invalid payload)
-- `401`: Unauthorized (Missing/invalid token)
-- `403`: Forbidden
-- `404`: Not Found
-- `500`: Internal Server Error
+---
+
+### 🖼️ Media & File Upload
+- **Endpoint**: `POST /admin/upload`
+- **Headers**: `Authorization: Bearer <access_token>`
+- **Payload**: `multipart/form-data` with `file` key.
+- **Allowed Extensions**: `.png`, `.jpg`, `.jpeg`, `.webp`, `.gif`, `.pdf` (Enforced for defense-in-depth).
+- **Storage Target**:
+  - **Production**: Cloudinary CDN (permanent, global CDN).
+  - **Local Development**: `backend/static/uploads/`.
+- **Response**: `{"success": true, "url": "https://res.cloudinary.com/...", "filename": "unique_id"}`
+
+---
+
+### 💾 Database Backup & Disaster Recovery
+
+#### 1. Export Database Snapshot
+- **Endpoint**: `GET /admin/backup`
+- **Headers**: `Authorization: Bearer <access_token>`
+- **Response**: Downloadable JSON snapshot file with HTTP header:
+  `Content-Disposition: attachment; filename=portfolio_backup_YYYYMMDD_HHMMSS.json`
+
+#### 2. Restore Database from Backup
+- **Endpoint**: `POST /admin/restore`
+- **Headers**: `Authorization: Bearer <access_token>`
+- **Payload**: JSON backup body or multipart file upload containing backup JSON.
+- **Response**: `{"success": true, "message": "Database restored successfully from backup"}`

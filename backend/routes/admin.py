@@ -908,3 +908,91 @@ def serve_uploaded_file(filename):
         "UPLOAD_FOLDER", os.path.join(current_app.root_path, "static/uploads")
     )
     return send_from_directory(upload_dir, filename)
+
+
+# ── Database Backup & Restore ─────────────────────────────────────────
+@admin.route("/backup", methods=["GET"])
+@admin_required
+def download_backup():
+    """Export complete portfolio database as downloadable JSON snapshot."""
+    try:
+        from backup import TABLES
+        from datetime import datetime
+        from models.database import get_connection, _cursor
+
+        conn = get_connection()
+        cur = _cursor(conn)
+
+        backup_data = {
+            "version": "1.0",
+            "timestamp": datetime.now().isoformat(),
+            "tables": {},
+        }
+        for table in TABLES:
+            cur.execute(f"SELECT * FROM {table}")
+            rows = cur.fetchall()
+            serializable_rows = []
+            for row in rows:
+                r_dict = dict(row)
+                for k, v in r_dict.items():
+                    if isinstance(v, datetime):
+                        r_dict[k] = v.isoformat()
+                serializable_rows.append(r_dict)
+            backup_data["tables"][table] = serializable_rows
+        cur.close()
+        conn.close()
+
+        timestamp_str = datetime.now().strftime("%Y%m%d_%H%M%S")
+        response = jsonify(backup_data)
+        response.headers["Content-Disposition"] = f"attachment; filename=portfolio_backup_{timestamp_str}.json"
+        return response
+    except Exception as e:
+        logger.error(f"Backup export error: {e}")
+        return jsonify({"error": f"Backup export failed: {e}"}), 500
+
+
+@admin.route("/restore", methods=["POST"])
+@admin_required
+def upload_restore():
+    """Restore database tables from uploaded JSON snapshot."""
+    try:
+        data = request.get_json(silent=True)
+        if not data and "file" in request.files:
+            file = request.files["file"]
+            data = json.loads(file.read().decode("utf-8"))
+
+        if not data or "tables" not in data:
+            return jsonify({"error": "Invalid backup payload: missing 'tables'"}), 400
+
+        from backup import TABLES
+        from models.database import get_connection
+
+        conn = get_connection()
+        cur = conn.cursor()
+
+        try:
+            for table, rows in data["tables"].items():
+                if table not in TABLES:
+                    continue
+                cur.execute(f"DELETE FROM {table}")
+                for row in rows:
+                    cols = list(row.keys())
+                    vals = [row[c] for c in cols]
+                    cols_str = ", ".join(cols)
+                    placeholders = ", ".join(["%s"] * len(cols))
+                    query = f"INSERT INTO {table} ({cols_str}) VALUES ({placeholders})"
+                    cur.execute(query, tuple(vals))
+                cur.execute(f"SELECT setval(pg_get_serial_sequence('{table}', 'id'), COALESCE(MAX(id), 1)) FROM {table};")
+
+            conn.commit()
+            return jsonify({"success": True, "message": "Database restored successfully from backup"})
+        except Exception as err:
+            conn.rollback()
+            return jsonify({"error": f"Database restore failed: {err}"}), 500
+        finally:
+            cur.close()
+            conn.close()
+    except Exception as e:
+        logger.error(f"Restore error: {e}")
+        return jsonify({"error": f"Restore failed: {e}"}), 500
+
