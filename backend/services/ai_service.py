@@ -645,10 +645,11 @@ def generate_conversational_backup(message: str, history: List[Dict[str, str]], 
 
     # 11. Resume / CV
     if any(w in m for w in ["resume", "cv", "curriculum vitae", "biodata", "download resume"]):
+        resume_target = personal.get("resume") or personal.get("resume_url") or "/SATYA SANATAN BASTIA - Resume.pdf"
         return {
             "response": (
                 f"You can view or download **Satya Sanatan's official Resume** directly! 📄\n\n"
-                f"• **Direct Link**: [Click to view / download Resume.pdf](/resume.pdf)\n"
+                f"• **Direct Link**: [Click to view / download Satya's Resume]({resume_target})\n"
                 f"• **Highlights**: 2+ years full-stack experience, B.Tech CSE (8.6 GPA), Meta & AWS Certifications.\n\n"
                 f"You can also click the **Resume** button in the header navigation or hero section."
             ),

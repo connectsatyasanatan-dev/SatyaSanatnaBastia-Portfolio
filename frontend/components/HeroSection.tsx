@@ -399,8 +399,8 @@ const HeroSection = () => {
                     <ResumeModal
                         isOpen={isResumeModalOpen}
                         onClose={() => setIsResumeModalOpen(false)}
-                        resumeUrl={personalInfo?.resume || null}
-                        name={personalInfo?.name || 'Developer'}
+                        resumeUrl={personalInfo?.resume || '/SATYA SANATAN BASTIA - Resume.pdf'}
+                        name={personalInfo?.name || 'Satya Sanatan'}
                     />
                 </>
             )}

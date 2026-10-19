@@ -186,6 +186,7 @@ class PortfolioAPI {
                 bio: data.bio || FALLBACK_PERSONAL_INFO.bio,
                 availability: data.availability || FALLBACK_PERSONAL_INFO.availability,
                 timezone: data.timezone || FALLBACK_PERSONAL_INFO.timezone,
+                resume: data.resume || FALLBACK_PERSONAL_INFO.resume,
             }
         } catch {
             return FALLBACK_PERSONAL_INFO

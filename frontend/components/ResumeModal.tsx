@@ -11,45 +11,44 @@ interface ResumeModalProps {
     name: string
 }
 
+const LOCAL_RESUME_FALLBACK = '/SATYA SANATAN BASTIA - Resume.pdf'
+
 const ResumeModal = ({ isOpen, onClose, resumeUrl, name }: ResumeModalProps) => {
     const [loading, setLoading] = useState(true)
     const [zoom, setZoom] = useState(100)
+    const [currentUrl, setCurrentUrl] = useState(resumeUrl || LOCAL_RESUME_FALLBACK)
 
     useEffect(() => {
         if (isOpen) {
             setLoading(true)
-            // Reset zoom when opening
             setZoom(100)
+            setCurrentUrl(resumeUrl || LOCAL_RESUME_FALLBACK)
         }
-    }, [isOpen])
+    }, [isOpen, resumeUrl])
 
     const handleDownload = async () => {
-        if (!resumeUrl) return
-        
+        const target = currentUrl || LOCAL_RESUME_FALLBACK
         try {
-            // Use fetch to get the file as a blob to bypass cross-origin restrictions on the 'download' attribute
-            const response = await fetch(resumeUrl)
+            const response = await fetch(target)
+            if (!response.ok) throw new Error('Fetch failed')
             const blob = await response.blob()
             const blobUrl = window.URL.createObjectURL(blob)
             
             const link = document.createElement('a')
             link.href = blobUrl
-            // Exactly what's requested
-            link.download = "Satya Sanatan Bastia's Resume.pdf"
+            link.download = "Satya Sanatan Bastia - Resume.pdf"
             
             document.body.appendChild(link)
             link.click()
             
-            // Cleanup
             document.body.removeChild(link)
             window.URL.revokeObjectURL(blobUrl)
         } catch (error) {
-            console.error('Download failed:', error)
-            // Fallback to simple link if fetch fails
+            console.error('Download failed, using local fallback:', error)
             const link = document.createElement('a')
-            link.href = resumeUrl
+            link.href = LOCAL_RESUME_FALLBACK
             link.target = '_blank'
-            link.download = "Satya Sanatan Bastia's Resume.pdf"
+            link.download = "Satya Sanatan Bastia - Resume.pdf"
             link.click()
         }
     }
@@ -121,25 +120,30 @@ const ResumeModal = ({ isOpen, onClose, resumeUrl, name }: ResumeModalProps) => 
                             </div>
                         )}
                         
-                        {!resumeUrl ? (
+                        {!currentUrl ? (
                             <div className="resume-error">
                                 <FileText size={48} style={{ opacity: 0.2, marginBottom: '16px' }} />
-                                <p>Resume file not found. Please upload one in the admin panel.</p>
+                                <p>Resume file not found.</p>
                             </div>
                         ) : (
                             <iframe
                                 id="resume-iframe"
-                                src={`${resumeUrl}#toolbar=0&navpanes=0&scrollbar=0`}
+                                src={`${currentUrl}#toolbar=0&navpanes=0&scrollbar=0`}
                                 className="resume-iframe"
                                 style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }}
                                 onLoad={() => setLoading(false)}
+                                onError={() => {
+                                    if (currentUrl !== LOCAL_RESUME_FALLBACK) {
+                                        setCurrentUrl(LOCAL_RESUME_FALLBACK);
+                                    }
+                                }}
                             />
                         )}
                     </div>
                     
                     <div className="resume-modal-footer">
                         <p>Document Security: Verified & Signed</p>
-                        <a href={resumeUrl || '#'} target="_blank" rel="noopener noreferrer" className="external-link">
+                        <a href={currentUrl || LOCAL_RESUME_FALLBACK} target="_blank" rel="noopener noreferrer" className="external-link">
                             Open in New Tab <ExternalLink size={14} />
                         </a>
                     </div>

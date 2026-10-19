@@ -475,7 +475,7 @@ function getClientBlueprint(msg: string): ProjectBlueprint | undefined {
     const handleActionOrSend = (actionText: string) => {
         const lower = actionText.toLowerCase();
         if (lower.includes('download resume') || lower === 'resume') {
-            window.open('/resume.pdf', '_blank');
+            window.open('/SATYA SANATAN BASTIA - Resume.pdf', '_blank');
             return;
         }
         if (lower.includes('project') || lower === 'projects') {

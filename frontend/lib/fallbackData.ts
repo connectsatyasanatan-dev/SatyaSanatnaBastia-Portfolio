@@ -24,7 +24,7 @@ export const FALLBACK_PERSONAL_INFO: PersonalInfo = {
     linkedin: "https://linkedin.com/in/satya-sanatan",
     twitter: "https://twitter.com/satyasanatan",
     portfolio: "https://satya-sanatan.com",
-    resume: "/resume.pdf",
+    resume: "/SATYA SANATAN BASTIA - Resume.pdf",
     bio: "Passionate Full Stack Engineer specializing in Next.js, React, TypeScript, Python, and scalable cloud systems. Experienced in building AI-integrated web applications, real-time architectures, and developer tooling with high aesthetic precision.",
     availability: "Available for opportunities",
     timezone: "IST (UTC+5:30)",
