@@ -239,7 +239,7 @@ export default function ChatBot() {
     const getBotResponse = async (userMsg: string): Promise<{ response: string; suggestions: string[]; isFallback: boolean; sentiment: string }> => {
         try {
             const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 15000);
+            const timeout = setTimeout(() => controller.abort(), 65000);
             const baseUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api').replace(/\/$/, '');
             const res = await fetch(`${baseUrl}/chat`, {
                 method: 'POST',
