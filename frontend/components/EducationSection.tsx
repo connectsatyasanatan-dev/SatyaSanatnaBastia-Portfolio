@@ -485,8 +485,6 @@ const EducationSection = () => {
                                 .edu-detail-inner { padding: 16px 12px 14px; }
                                 .edu-detail-degree { font-size: 16px; }
                                 .edu-detail-school { font-size: 13px; }
-                                #edu-root { padding: 0 8px; margin-bottom: 48px; }
-                                .edu-header-title { font-size: 20px; }
                                 .edu-meta-pill { font-size: 11px; padding: 4px 8px; }
                                 .edu-chip { font-size: 11px; padding: 4px 8px; }
                                 .edu-nav-item {
@@ -499,28 +497,26 @@ const EducationSection = () => {
                             @media (min-width: 481px) and (max-width: 600px) {
                                 .edu-detail-inner { padding: 20px 16px 18px; }
                                 .edu-detail-degree { font-size: 17px; }
-                                #edu-root { padding: 0 10px; }
                             }
-                            @media (min-width: 640px)  { #edu-root { padding: 0 24px; } }
-                            @media (min-width: 768px)  { #edu-root { padding: 0 32px; margin-bottom: 80px; } }
-                            @media (min-width: 1024px) { #edu-root { padding: 0; } }
                         `}</style>
 
                         {/* Header */}
-                        <div className="edu-header">
-                            <div className="edu-header-icon-wrap">
-                                <div className="edu-header-icon-bg" />
-                                <GraduationCap size={22} className="edu-header-icon" />
+                        <div className="ide-section-header">
+                            <div className="ide-section-header-left">
+                                <div className="ide-section-icon-badge">
+                                    <GraduationCap size={20} />
+                                </div>
+                                <div className="ide-section-titles">
+                                    <h2 className="ide-section-title">Education &amp; Academics</h2>
+                                    <span className="ide-section-tag">// academic_journey.log</span>
+                                </div>
                             </div>
-                            <div className="edu-header-text">
-                                <h2 className="edu-header-title">Education</h2>
-                                <p className="edu-header-sub">// academic_journey.log</p>
-                            </div>
-                            <div className="edu-header-actions">
+                            <div className="ide-section-controls">
                                 <button
                                     className="edu-animation-toggle"
                                     onClick={toggleAnimation}
                                     title={isAnimating ? 'Pause Animation' : 'Play Animation'}
+                                    aria-label={isAnimating ? 'Pause Animation' : 'Play Animation'}
                                 >
                                     {isAnimating ? <Pause size={14} /> : <Play size={14} />}
                                 </button>

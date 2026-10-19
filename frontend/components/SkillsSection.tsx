@@ -165,24 +165,26 @@ const SkillsSection = () => {
                     transition={{ duration: 0.6, ease: "easeOut" }}
                 >
                     {/* Header with Animation Control */}
-                    <div className="section-header-modern">
-                        <div className="header-content">
-                            <div className="header-icon">
-                                <Brain className="icon-brain" />
-                                <div className="icon-glow"></div>
+                    <div className="ide-section-header">
+                        <div className="ide-section-header-left">
+                            <div className="ide-section-icon-badge">
+                                <Brain size={20} />
                             </div>
-                            <div className="header-text">
-                                <h3 className="section-title-modern">Technical Expertise</h3>
-                                <p className="section-subtitle">Interactive Skills Showcase</p>
+                            <div className="ide-section-titles">
+                                <h2 className="ide-section-title">Technical Expertise</h2>
+                                <span className="ide-section-tag">// technical_skills.ts</span>
                             </div>
                         </div>
-                        <button
-                            className="animation-toggle"
-                            onClick={toggleAnimation}
-                            title={isAnimating ? 'Pause Animation' : 'Play Animation'}
-                        >
-                            {isAnimating ? <Pause size={16} /> : <Play size={16} />}
-                        </button>
+                        <div className="ide-section-controls">
+                            <button
+                                className="animation-toggle"
+                                onClick={toggleAnimation}
+                                title={isAnimating ? 'Pause Animation' : 'Play Animation'}
+                                aria-label={isAnimating ? 'Pause Animation' : 'Play Animation'}
+                            >
+                                {isAnimating ? <Pause size={14} /> : <Play size={14} />}
+                            </button>
+                        </div>
                     </div>
 
                     {/* Interactive Skills Explorer */}

@@ -99,9 +99,16 @@ const ContactSection = () => {
                     transition={{ duration: 0.6, ease: 'easeOut' }}>
 
                     {/* ── Section header ── */}
-                    <div className="section-header">
-                        <Mail className="w-5 h-5 text-primary" />
-                        <h3 className="section-title">Contact &amp; Availability</h3>
+                    <div className="ide-section-header">
+                        <div className="ide-section-header-left">
+                            <div className="ide-section-icon-badge">
+                                <Mail size={20} />
+                            </div>
+                            <div className="ide-section-titles">
+                                <h2 className="ide-section-title">Contact &amp; Availability</h2>
+                                <span className="ide-section-tag">// init_connection.json</span>
+                            </div>
+                        </div>
                     </div>
 
                     {/* ── Top grid: links + status ── */}

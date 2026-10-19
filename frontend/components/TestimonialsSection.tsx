@@ -107,9 +107,9 @@ const TestimonialsSection = () => {
                             /* ── root container ── */
                             #testimonials-root {
                                 position: relative;
-                                max-width: 1200px;
-                                margin: 100px auto 140px auto;
-                                padding: 0 24px;
+                                max-width: 1140px;
+                                margin: 0 auto 52px auto;
+                                padding: 0 20px;
                                 font-family: 'Space Grotesk', sans-serif;
                                 perspective: 1200px;
                             }
@@ -121,37 +121,25 @@ const TestimonialsSection = () => {
                                 background: rgba(15, 23, 42, 0.4);
                                 backdrop-filter: blur(28px);
                                 border: 1px solid rgba(255, 255, 255, 0.08);
-                                border-radius: 40px;
+                                border-radius: 16px;
                                 overflow: hidden;
-                                box-shadow: 0 40px 100px -30px rgba(0, 0, 0, 0.6),
+                                box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.6),
                                             inset 0 0 0 1px rgba(255, 255, 255, 0.03);
                             }
 
                             /* ── section heading ── */
-                            .testi-header {
-                                display: flex;
-                                align-items: center;
-                                justify-content: space-between;
-                                margin-bottom: 30px;
-                                padding-left: 10px;
-                            }
-                            .testi-header-title {
-                                font-size: var(--text-2xl); font-weight: 700; color: #fff;
-                                background: linear-gradient(135deg, #fff 40%, rgba(255,255,255,0.4));
-                                -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-                            }
                             .testi-header-badge {
                                 display: flex; align-items: center; gap: 8px;
                                 padding: 6px 14px; background: rgba(255, 255, 255, 0.05);
                                 border: 1px solid rgba(255, 255, 255, 0.1);
-                                border-radius: 20px; font-size: var(--text-xs); color: rgba(255, 255, 255, 0.6);
+                                border-radius: 20px; font-size: var(--text-xs); color: rgba(255, 255, 255, 0.7);
                                 font-family: var(--font-mono);
                             }
 
                             /* ── slider wrapper ── */
                             .testi-slider {
                                 position: relative;
-                                min-height: 440px;
+                                min-height: 280px;
                                 display: grid;
                                 grid-template-columns: 1fr;
                                 align-items: center;
@@ -334,12 +322,20 @@ const TestimonialsSection = () => {
                             }
                         `}</style>
 
-                        <div className="testi-header">
-                            <div className="testi-header-title">Endorsements</div>
-                            {/* <div className="testi-header-badge">
-                                <Sparkles size={14} className="text-blue-400" />
-                                <span>Premium Collaborations</span>
-                            </div> */}
+                        <div className="ide-section-header">
+                            <div className="ide-section-header-left">
+                                <div className="ide-section-icon-badge purple">
+                                    <Quote size={20} />
+                                </div>
+                                <div className="ide-section-titles">
+                                    <h2 className="ide-section-title">Endorsements &amp; Reviews</h2>
+                                    <span className="ide-section-tag">// client_feedback.md</span>
+                                </div>
+                            </div>
+                            <div className="testi-header-badge">
+                                <Sparkles size={12} className="text-secondary" />
+                                <span>Verified Feedback</span>
+                            </div>
                         </div>
 
                         <div className="testi-container">

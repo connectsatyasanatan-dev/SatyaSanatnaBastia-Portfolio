@@ -469,7 +469,10 @@
    }
 
    #hero-section .hero-stats {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(3, 1fr);
+      max-width: 440px;
+      margin: 20px auto 0 auto;
+      gap: 8px;
    }
 
    #skills-section .stats-overview {
@@ -530,7 +533,10 @@
 
    /* Hero */
    #hero-section .hero-stats {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(3, 1fr);
+      max-width: 480px;
+      margin: 24px auto 0 auto;
+      gap: 10px;
    }
 
    /* Skills */
@@ -662,7 +668,10 @@
    }
 
    #hero-section .hero-stats {
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
+      max-width: 520px;
+      margin: 28px auto 0 auto;
+      gap: 12px;
    }
 
    #hero-section .hero-actions {
@@ -699,7 +708,10 @@
    }
 
    #hero-section .hero-stats {
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
+      max-width: 540px;
+      margin: 28px auto 0 auto;
+      gap: 14px;
    }
 
    #hero-section .hero-actions {
@@ -819,7 +831,10 @@
    }
 
    #hero-section .hero-stats {
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
+      max-width: 580px;
+      margin: 32px auto 0 auto;
+      gap: 16px;
    }
 
    #hero-section .hero-actions {
@@ -942,7 +957,10 @@
    }
 
    #hero-section .hero-stats {
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
+      max-width: 480px;
+      margin: 16px auto 0 auto;
+      gap: 8px;
    }
 
    #hero-section .hero-actions {

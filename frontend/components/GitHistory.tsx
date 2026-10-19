@@ -58,9 +58,16 @@ const GitHistory = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, ease: "easeOut" }}
                 >
-                    <div className="section-header">
-                        <GitCommit />
-                        <h3 className="section-title">Git History (Experience)</h3>
+                    <div className="ide-section-header">
+                        <div className="ide-section-header-left">
+                            <div className="ide-section-icon-badge purple">
+                                <GitCommit size={20} />
+                            </div>
+                            <div className="ide-section-titles">
+                                <h2 className="ide-section-title">Git History &amp; Experience</h2>
+                                <span className="ide-section-tag">// git_history.log</span>
+                            </div>
+                        </div>
                     </div>
 
                     <div className="timeline-container">

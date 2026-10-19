@@ -7,6 +7,11 @@ import portfolioAPI, { Certification } from '@/lib/api'
 import { FALLBACK_CERTIFICATIONS } from '@/lib/fallbackData'
 import { CertificationsSectionSkeleton } from './AppSkeletons'
 
+const isImageBadge = (badge?: string): boolean => {
+    if (!badge) return false
+    return badge.startsWith('http://') || badge.startsWith('https://') || badge.startsWith('/') || badge.startsWith('data:image')
+}
+
 const CertificationsSection = () => {
     const [certifications, setCertifications] = useState<Certification[]>([])
     const [loading, setLoading] = useState(true)
@@ -58,7 +63,6 @@ const CertificationsSection = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, ease: "easeOut" }}
-                    style={{ maxWidth: '1536px', margin: '0 auto 48px auto', padding: '0 var(--space-4, 16px)', position: 'relative' }}
                 >
                     <style>{`
                         .certifications-grid {
@@ -487,17 +491,37 @@ const CertificationsSection = () => {
                                 font-size: 16px;
                             }
                         }
+                        .cert-pill-badge {
+                            display: inline-block;
+                            padding: 3px 9px;
+                            border-radius: 4px;
+                            font-size: 11px;
+                            font-family: 'JetBrains Mono', monospace;
+                            background: rgba(245, 158, 11, 0.12);
+                            border: 1px solid rgba(245, 158, 11, 0.25);
+                            color: #fbbf24;
+                            margin-top: 6px;
+                            font-weight: 500;
+                            width: fit-content;
+                        }
                     `}</style>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px', paddingBottom: '16px', borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                        <Award size={28} style={{ color: 'goldenrod' }} />
-                        <h2 className="section-title" style={{ fontSize: 'var(--text-2xl)', fontWeight: 700, fontFamily: 'var(--font-display)', letterSpacing: '-0.025em', color: 'white', margin: 0 }}>Licenses & Certifications</h2>
+                    <div className="ide-section-header">
+                        <div className="ide-section-header-left">
+                            <div className="ide-section-icon-badge amber">
+                                <Award size={20} />
+                            </div>
+                            <div className="ide-section-titles">
+                                <h2 className="ide-section-title">Licenses &amp; Certifications</h2>
+                                <span className="ide-section-tag">// verified_credentials.json</span>
+                            </div>
+                        </div>
                     </div>
 
                     <div className={`certifications-grid ${certifications.length === 1 ? 'single-item' : ''}`}>
                         {certifications.map((cert, index) => {
                             const isValid = cert.validity?.includes('2025') || cert.validity?.includes('2026') || cert.validity?.toLowerCase().includes('no expiration');
-                            const hasBadge = !!cert.badge;
+                            const hasValidImage = isImageBadge(cert.badge);
 
                             return (
                                 <motion.div
@@ -510,20 +534,26 @@ const CertificationsSection = () => {
                                     onClick={() => setSelectedCert(cert)}
                                 >
                                     <div className="cert-header">
-                                        <div className={`cert-icon-wrapper ${hasBadge ? 'has-image' : ''}`}>
-                                            {hasBadge ? (
+                                        <div className={`cert-icon-wrapper ${hasValidImage ? 'has-image' : ''}`}>
+                                            {hasValidImage ? (
                                                 <img
                                                     src={cert.badge}
                                                     alt={`${cert.name} Badge`}
                                                     style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                                                    onError={(e) => {
+                                                        (e.currentTarget as HTMLElement).style.display = 'none';
+                                                    }}
                                                 />
                                             ) : (
-                                                <Award size={28} />
+                                                <Award size={26} />
                                             )}
                                         </div>
                                         <div className="cert-title-area">
                                             <h4 className="cert-name">{cert.name}</h4>
                                             <p className="cert-issuer">{cert.issuer}</p>
+                                            {cert.badge && !hasValidImage && (
+                                                <span className="cert-pill-badge">{cert.badge}</span>
+                                            )}
                                         </div>
                                     </div>
 
@@ -585,10 +615,16 @@ const CertificationsSection = () => {
                                     </button>
 
                                     <div className="cert-modal-badge">
-                                        {selectedCert.badge ? (
-                                            <img src={selectedCert.badge} alt="Certification Badge" />
+                                        {isImageBadge(selectedCert.badge) ? (
+                                            <img
+                                                src={selectedCert.badge}
+                                                alt="Certification Badge"
+                                                onError={(e) => {
+                                                    (e.currentTarget as HTMLElement).style.display = 'none';
+                                                }}
+                                            />
                                         ) : (
-                                            <Award size={64} style={{ color: 'goldenrod' }} />
+                                            <Award size={64} style={{ color: '#fbbf24' }} />
                                         )}
                                     </div>
 

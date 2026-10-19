@@ -1,7 +1,7 @@
 #projects-section {
-  max-width: 1536px;
-  margin: 0 auto var(--space-12) auto;
-  padding: 0 var(--space-4);
+  max-width: 1140px;
+  margin: 0 auto 52px auto;
+  padding: 0 clamp(14px, 2.5vw, 24px);
 }
 
 #projects-section .section-header {
@@ -498,9 +498,9 @@
 
 /* Testimonials Section Styles */
 #testimonials-section {
-  max-width: 1536px;
-  margin: 0 auto 48px auto;
-  padding: 0 var(--space-4);
+  max-width: 1140px;
+  margin: 0 auto 52px auto;
+  padding: 0 clamp(14px, 2.5vw, 24px);
 }
 
 #testimonials-section .section-header {
@@ -802,9 +802,9 @@
 
 /* Blog Section Styles */
 #blog-section {
-  max-width: 1536px;
-  margin: 0 auto 48px auto;
-  padding: 0 16px;
+  max-width: 1140px;
+  margin: 0 auto 52px auto;
+  padding: 0 clamp(14px, 2.5vw, 24px);
 }
 
 #blog-section .section-header {
@@ -863,8 +863,9 @@
 
 #blog-section .featured-badge {
   position: absolute;
-  top: 16px;
-  left: 16px;
+  top: 18px;
+  right: 18px;
+  left: auto;
   z-index: 10;
 }
 
@@ -1207,9 +1208,9 @@
 
 /* Terminal Section Styles */
 #terminal-section {
-  max-width: 1536px;
-  margin: 0 auto 48px auto;
-  padding: 0 16px;
+  max-width: 1140px;
+  margin: 0 auto 52px auto;
+  padding: 0 clamp(14px, 2.5vw, 24px);
 }
 
 #terminal-section .terminal-window {
@@ -1489,9 +1490,9 @@
 
 /* Contact Section Styles */
 #contact-section {
-  max-width: 1536px;
-  margin: 0 auto 48px auto;
-  padding: 0 16px;
+  max-width: 1140px;
+  margin: 0 auto 52px auto;
+  padding: 0 clamp(14px, 2.5vw, 24px);
 }
 
 #contact-section .section-header {

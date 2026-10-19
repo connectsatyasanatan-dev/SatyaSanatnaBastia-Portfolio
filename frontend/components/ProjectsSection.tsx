@@ -44,7 +44,7 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
                         <div className="pm-header-left">
                             <Terminal size={16} />
                             <span className="pm-filename">{project.filename || 'project'}</span>
-                            <span className="pm-version">v{project.version || '1.0.0'}</span>
+                            <span className="pm-version">{project.version ? (project.version.startsWith('v') ? project.version : `v${project.version}`) : 'v1.0.0'}</span>
                             {project.featured && <span className="pm-featured">⭐ Featured</span>}
                         </div>
                         <button className="pm-close" onClick={onClose} aria-label="Close">
@@ -214,10 +214,15 @@ const ProjectsSection = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6, ease: "easeOut" }}
                     >
-                        <div className="section-header">
-                            <div className="section-header-left">
-                                <Grid3X3 />
-                                <h3 className="section-title">Modules (Projects)</h3>
+                        <div className="ide-section-header">
+                            <div className="ide-section-header-left">
+                                <div className="ide-section-icon-badge">
+                                    <Grid3X3 size={20} />
+                                </div>
+                                <div className="ide-section-titles">
+                                    <h2 className="ide-section-title">Featured Projects &amp; Architecture</h2>
+                                    <span className="ide-section-tag">// production_projects.sh</span>
+                                </div>
                             </div>
                             <div className="view-toggle">
                                 <button onClick={() => setViewMode('grid')} className={`toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}>Grid</button>
@@ -276,7 +281,7 @@ const ProjectsSection = () => {
                                     <div className="project-content">
                                         <div className="project-content-header">
                                             <h4 className="project-name">{project.name}</h4>
-                                            <span className="project-version">v{project.version || '1.0.0'}</span>
+                                            <span className="project-version">{project.version ? (project.version.startsWith('v') ? project.version : `v${project.version}`) : 'v1.0.0'}</span>
                                         </div>
 
                                         <p className="project-description">{project.description}</p>

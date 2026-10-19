@@ -51,9 +51,16 @@ const BlogSection = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, ease: "easeOut" }}
                 >
-                    <div className="section-header">
-                        <BookOpen className="w-5 h-5 text-green-400" />
-                        <h3 className="section-title">Latest Articles & Insights</h3>
+                    <div className="ide-section-header">
+                        <div className="ide-section-header-left">
+                            <div className="ide-section-icon-badge emerald">
+                                <BookOpen size={20} />
+                            </div>
+                            <div className="ide-section-titles">
+                                <h2 className="ide-section-title">Latest Articles &amp; Insights</h2>
+                                <span className="ide-section-tag">// technical_insights.md</span>
+                            </div>
+                        </div>
                     </div>
 
                     <div className="articles-grid">

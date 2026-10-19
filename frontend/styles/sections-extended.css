@@ -1,8 +1,8 @@
 /* Git History Section Styles */
 #git-history-section {
-  max-width: 1536px;
-  margin: 0 auto var(--space-12);
-  padding: 0 var(--space-4);
+  max-width: 1140px;
+  margin: 0 auto 52px auto;
+  padding: 0 clamp(14px, 2.5vw, 24px);
 }
 
 #git-history-section .section-header {
