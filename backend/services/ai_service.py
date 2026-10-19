@@ -209,27 +209,33 @@ def extract_dynamic_suggestions(text: str) -> List[str]:
 
 
 def call_groq_llm(messages: List[Dict[str, str]], api_key: str) -> str | None:
-    """Invoke Groq LLM (Llama 3.3 70B with Llama 3.1 8B fallback)."""
+    """Invoke Groq LLM (Qwen 27B / Llama 3.3 / Llama 3.1)."""
     if not api_key or api_key.startswith("your_"):
         return None
     try:
         import groq
-        client = groq.Groq(api_key=api_key, timeout=3.0)
-        for model in ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]:
+        client = groq.Groq(api_key=api_key, timeout=8.0)
+        # Try active fast models on Groq
+        for model in ["qwen/qwen3.8-27b", "llama-3.3-70b-versatile", "llama-3.1-8b-instant", "openai/gpt-oss-120b"]:
             try:
                 res = client.chat.completions.create(
                     model=model,
                     messages=messages,
-                    max_tokens=500,
+                    max_tokens=1000,
                     temperature=0.7,
                     top_p=0.9,
-                    timeout=3.0,
+                    timeout=8.0,
                 )
-                if res and res.choices and res.choices[0].message.content:
-                    return res.choices[0].message.content.strip()
+                if res and res.choices and res.choices[0].message and res.choices[0].message.content:
+                    content = res.choices[0].message.content.strip()
+                    if content:
+                        return content
             except Exception as m_err:
-                logger.warning(f"Groq {model} error: {m_err}")
-                break  # If auth or key error, break immediately rather than hanging on second model
+                err_str = str(m_err)
+                logger.warning(f"Groq {model} error: {err_str}")
+                # Only break if unauthorized (invalid key), otherwise keep trying other models
+                if "401" in err_str or "unauthorized" in err_str.lower() or "invalid api key" in err_str.lower():
+                    break
     except Exception as e:
         logger.warning(f"Groq client initialization error: {e}")
     return None
@@ -244,20 +250,22 @@ def call_nvidia_nemotron(messages: List[Dict[str, str]], api_key: str) -> str | 
         client = OpenAI(
             base_url="https://integrate.api.nvidia.com/v1",
             api_key=api_key,
-            timeout=3.0,
+            timeout=18.0,
         )
-        for model in ["nvidia/nemotron-3.5-lightning-30b-a3b", "meta/llama-3.3-70b-instruct"]:
+        for model in ["nvidia/nemotron-3.5-lightning-30b-a3b"]:
             try:
                 res = client.chat.completions.create(
                     model=model,
                     messages=messages,
-                    max_tokens=500,
-                    temperature=0.7,
+                    max_tokens=1500,
+                    temperature=0.6,
                     top_p=0.95,
-                    timeout=3.0,
+                    timeout=18.0,
                 )
-                if res and res.choices and res.choices[0].message.content:
-                    return res.choices[0].message.content.strip()
+                if res and res.choices:
+                    msg = res.choices[0].message
+                    if msg.content and msg.content.strip():
+                        return msg.content.strip()
             except Exception as m_err:
                 logger.warning(f"NVIDIA {model} error: {m_err}")
                 break
@@ -511,12 +519,38 @@ def generate_conversational_backup(message: str, history: List[Dict[str, str]], 
             "lead": lead_info,
         }
 
-    # 13. General / Open-ended friendly response
+    # 13. Short acknowledgements (oo, ok, haan, acha, theek hai, cool, hmm)
+    if m in ["oo", "o", "oh", "accha", "acha", "ok", "okay", "haan", "ha", "theek hai", "thik hai", "cool", "sahi hai", "hmm", "hm", "yep", "nice"]:
+        import random
+        acks = [
+            "Haan bhai! Aur batao, kaisa chal raha hai sab? Koi project dekhna hai ya Satya ke bare me kuch poochna hai? 😄",
+            "Bilkul! Batao, aaj kis cheez me help chahiye? Main yahan hoon! 🚀",
+            "Sahi hai! Satya ke featured projects ya tech stack ke baare me bataun?",
+        ]
+        return {
+            "response": random.choice(acks),
+            "suggestions": ["View Projects", "What is your tech stack?", "Contact Satya"],
+            "fallback": False,
+            "lead": lead_info,
+        }
+
+    # 14. Identity / Who are you check
+    if any(k in m for k in ["tu kaun hai", "tu kn hai", "who are you", "who r u", "koun hai", "kaun ho", "tera naam"]):
+        return {
+            "response": (
+                f"Main hoon **Zentara**, {name} ka official AI assistant! 😎\n\n"
+                f"Aap mujhse Satya ke live projects, backend/frontend engineering skills, experience, ya direct hire karne ke bare me kuch bhi poochh sakte ho. Batao, kahan se shuru karein?"
+            ),
+            "suggestions": ["View Projects", "Download Resume", "Contact Satya"],
+            "fallback": False,
+            "lead": lead_info,
+        }
+
+    # 15. General / Open-ended friendly response
     return {
         "response": (
-            f"Arre bilkul! Main yahin hoon aapki help ke liye. 👋\n\n"
-            f"Satya Sanatan ek passionate **{role}** hain (Next.js, React, TypeScript, Python, PostgreSQL).\n\n"
-            f"Unke standout projects dekhne hon, tech stack explore karna ho, resume download karna ho ya direct connect karna ho - bataiye kis baare me baat karein? 🚀"
+            f"Bataiye, aaj main aapki kya help kar sakta hoon? 😊\n\n"
+            f"{name} ke standout projects, tech stack ya unke saath collaboration ke baare me baat karein?"
         ),
         "suggestions": ["View Projects", "What is your tech stack?", "Contact Satya"],
         "fallback": False,
