@@ -93,6 +93,60 @@
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* ═══════════════════════════════════════════════════ */
+/* VS Code Themes                                      */
+/* ═══════════════════════════════════════════════════ */
+[data-theme="dracula"] {
+  --bg-color: #282a36;
+  --sidebar-bg: #1e1f29;
+  --editor-bg: #21222c;
+  --border-color: #44475a;
+  --text-main: #f8f8f2;
+  --text-dim: #b3b9d1;
+  --primary: #bd93f9;
+  --primary-rgb: 189, 147, 249;
+  --primary-glow: rgba(189, 147, 249, 0.35);
+  --secondary: #ff79c6;
+  --secondary-rgb: 255, 121, 198;
+  --accent: #50fa7b;
+  --glass-bg: rgba(30, 31, 41, 0.85);
+  --hover-bg: rgba(68, 71, 90, 0.45);
+}
+
+[data-theme="onedark"] {
+  --bg-color: #1e2227;
+  --sidebar-bg: #181a1f;
+  --editor-bg: #21252b;
+  --border-color: #383e4a;
+  --text-main: #abb2bf;
+  --text-dim: #9aa1ae;
+  --primary: #61afef;
+  --primary-rgb: 97, 175, 239;
+  --primary-glow: rgba(97, 175, 239, 0.35);
+  --secondary: #e06c75;
+  --secondary-rgb: 224, 108, 117;
+  --accent: #98c379;
+  --glass-bg: rgba(24, 26, 31, 0.85);
+  --hover-bg: rgba(56, 62, 74, 0.45);
+}
+
+[data-theme="tokyonight"] {
+  --bg-color: #1a1b26;
+  --sidebar-bg: #13141c;
+  --editor-bg: #16161e;
+  --border-color: #292e42;
+  --text-main: #c0caf5;
+  --text-dim: #7982a9;
+  --primary: #7aa2f7;
+  --primary-rgb: 122, 162, 247;
+  --primary-glow: rgba(122, 162, 247, 0.35);
+  --secondary: #bb9af7;
+  --secondary-rgb: 187, 154, 247;
+  --accent: #7dcfff;
+  --glass-bg: rgba(19, 20, 28, 0.85);
+  --hover-bg: rgba(41, 46, 66, 0.45);
+}
+
 /* CSS Reset and Base Styles */
 * {
   box-sizing: border-box;

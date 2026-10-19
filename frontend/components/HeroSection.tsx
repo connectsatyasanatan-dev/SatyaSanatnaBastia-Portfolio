@@ -60,11 +60,11 @@ const HeroSection = () => {
         { text: `const ${personalInfo?.name?.replace(/\s+/g, '') || 'Developer'} = new Developer;`, type: "const" },
         { text: "", type: "empty" },
         { text: `${personalInfo?.name?.replace(/\s+/g, '') || 'Developer'}.configure({`, type: "configure" },
-        { text: `  role: '${personalInfo?.role || ''}',`, type: "role" },
-        { text: `  experience: '${personalInfo?.experience || ''}',`, type: "experience" },
-        { text: `  location: '${personalInfo?.location || ''}',`, type: "location" },
-        { text: `  status: '${personalInfo?.status || ''}',`, type: "status" },
-        { text: `  email: '${personalInfo?.email || ''}'`, type: "email" },
+        { text: `  role: '${personalInfo?.role || 'Full Stack Developer'}',`, type: "role" },
+        { text: `  experience: '${personalInfo?.experience || '2+ Years'}',`, type: "experience" },
+        { text: `  location: '${personalInfo?.location || 'Bhubaneswar, India'}',`, type: "location" },
+        { text: `  status: '${personalInfo?.status || 'Open to Work'}',`, type: "status" },
+        { text: `  email: '${personalInfo?.email || 'connectsatyasanatan@gmail.com'}'`, type: "email" },
         { text: "});", type: "closing" },
     ]
 
@@ -108,18 +108,18 @@ const HeroSection = () => {
     }
 
     const handleEmailClick = () => {
-        if (!personalInfo?.email) return
-        window.open(`mailto:${personalInfo.email}`, '_blank')
+        const email = personalInfo?.email || 'connectsatyasanatan@gmail.com'
+        window.open(`mailto:${email}`, '_blank')
     }
 
     const handleGithubClick = () => {
-        if (!personalInfo?.github) return
-        window.open(personalInfo.github, '_blank', 'noopener,noreferrer')
+        const gh = personalInfo?.github || 'https://github.com/connectsatyasanatan'
+        window.open(gh, '_blank', 'noopener,noreferrer')
     }
 
     const handleLinkedinClick = () => {
-        if (!personalInfo?.linkedin) return
-        window.open(personalInfo.linkedin, '_blank', 'noopener,noreferrer')
+        const li = personalInfo?.linkedin || 'https://linkedin.com/in/satya-sanatan'
+        window.open(li, '_blank', 'noopener,noreferrer')
     }
 
     const handleResumeClick = () => {
@@ -169,7 +169,7 @@ const HeroSection = () => {
                 return (
                     <>
                         <span style={{ color: 'white', marginLeft: '25px' }}>  role: </span>
-                        <span style={{ color: '#ce9178' }}>'{personalInfo?.role || ''}'</span>
+                        <span style={{ color: '#ce9178' }}>'{personalInfo?.role || 'Full Stack Developer'}'</span>
                         <span style={{ color: 'white' }}>,</span>
                     </>
                 )
@@ -177,7 +177,7 @@ const HeroSection = () => {
                 return (
                     <>
                         <span style={{ color: 'white', marginLeft: '25px' }}>  experience: </span>
-                        <span style={{ color: '#ce9178' }}>'{personalInfo?.experience || ''}'</span>
+                        <span style={{ color: '#ce9178' }}>'{personalInfo?.experience || '2+ Years'}'</span>
                         <span style={{ color: 'white' }}>,</span>
                     </>
                 )
@@ -185,7 +185,7 @@ const HeroSection = () => {
                 return (
                     <>
                         <span style={{ color: 'white', marginLeft: '25px' }}>  location: </span>
-                        <span style={{ color: '#ce9178' }}>'{personalInfo?.location || ''}'</span>
+                        <span style={{ color: '#ce9178' }}>'{personalInfo?.location || 'Bhubaneswar, India'}'</span>
                         <span style={{ color: 'white' }}>,</span>
                     </>
                 )
@@ -193,7 +193,7 @@ const HeroSection = () => {
                 return (
                     <>
                         <span style={{ color: 'white', marginLeft: '25px' }}>  status: </span>
-                        <span style={{ color: '#22c55e' }}>'{personalInfo?.status || ''}'</span>
+                        <span style={{ color: '#22c55e' }}>'{personalInfo?.status || 'Open to Work'}'</span>
                         <span style={{ color: 'white' }}>,</span>
                     </>
                 )
@@ -201,7 +201,7 @@ const HeroSection = () => {
                 return (
                     <>
                         <span style={{ color: 'white', marginLeft: '25px' }}>  email: </span>
-                        <span style={{ color: '#ce9178' }}>'{personalInfo?.email || ''}'</span>
+                        <span style={{ color: '#ce9178' }}>'{personalInfo?.email || 'connectsatyasanatan@gmail.com'}'</span>
                     </>
                 )
             case 'closing':
@@ -216,10 +216,9 @@ const HeroSection = () => {
         }
     }
 
-    const yearsExp = stats?.experience_years ?? achievements?.stats.yearsOfExperience ?? 0
-    const projectsCount = stats?.projects_count ?? achievements?.stats.projectsCompleted ?? 0
-    const clientsCount = achievements?.stats.clientsSatisfied ?? 0
-    const satisfactionRate = clientsCount > 0 ? 100 : 0
+    const yearsExp = stats?.experience_years || achievements?.stats?.yearsOfExperience || 2
+    const projectsCount = stats?.projects_count || achievements?.stats?.projectsCompleted || 15
+    const clientsCount = achievements?.stats?.clientsSatisfied || 12
 
     return (
         <AnimatePresence mode="wait">
@@ -392,10 +391,6 @@ const HeroSection = () => {
                                 <div className="stat-item hover-scale">
                                     <div className="stat-value accent">{clientsCount}+</div>
                                     <div className="stat-label">Clients</div>
-                                </div>
-                                <div className="stat-item hover-scale">
-                                    <div className="stat-value green">{satisfactionRate}%</div>
-                                    <div className="stat-label">Satisfaction</div>
                                 </div>
                             </motion.div>
                         </div>

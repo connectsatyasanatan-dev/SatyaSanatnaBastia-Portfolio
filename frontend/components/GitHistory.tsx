@@ -4,6 +4,7 @@ import { GitCommit, GitMerge, Play, Pause, Diff, Activity } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect, useCallback } from 'react'
 import portfolioAPI, { Experience } from '@/lib/api'
+import { FALLBACK_EXPERIENCES } from '@/lib/fallbackData'
 import { ExperienceSectionSkeleton } from './AppSkeletons'
 
 const GitHistory = () => {
@@ -16,10 +17,14 @@ const GitHistory = () => {
         setHasError(false)
         try {
             const data = await portfolioAPI.getExperience()
-            setExperiences(data)
+            if (data && data.length > 0) {
+                setExperiences(data)
+            } else {
+                setExperiences(FALLBACK_EXPERIENCES)
+            }
         } catch (e) {
             console.error('Failed to load experience', e)
-            setHasError(true)
+            setExperiences(FALLBACK_EXPERIENCES)
         } finally {
             setLoading(false)
         }
@@ -64,7 +69,9 @@ const GitHistory = () => {
                             <div className="timeline-line"></div>
 
                             {experiences.map((exp, index) => {
-                                const isPresent = exp.period.toLowerCase().includes('present') || exp.period.toLowerCase().includes('current');
+                                const periodStr = exp.period || ''
+                                const isPresent = periodStr.toLowerCase().includes('present') || periodStr.toLowerCase().includes('current');
+                                const expColor = exp.color || 'cyan';
                                 const IconComponent = isPresent ? Play : Pause;
                                 return (
                                     <motion.div
@@ -78,17 +85,17 @@ const GitHistory = () => {
                                         <div className="timeline-dot">
                                             <motion.div
                                                 whileHover={{ scale: 1.1 }}
-                                                className={`timeline-dot-inner ${exp.color}`}
+                                                className={`timeline-dot-inner ${expColor}`}
                                             >
-                                                <IconComponent className={`${exp.color}`} />
+                                                <IconComponent className={`${expColor}`} />
                                             </motion.div>
                                         </div>
 
                                         {/* Content card */}
                                         <motion.div
                                             whileHover={{ y: -2 }}
-                                            className={`timeline-content ${exp.color} ${exp.period.includes('Present') ? 'active' : ''}`}
-                                            style={exp.period.includes('Present') ? {
+                                            className={`timeline-content ${expColor} ${isPresent ? 'active' : ''}`}
+                                            style={isPresent ? {
                                                 borderColor: 'var(--primary)',
                                                 boxShadow: '0 0 15px rgba(6, 249, 249, 0.15), inset 0 0 20px rgba(6, 249, 249, 0.05)'
                                             } : {}}
@@ -98,27 +105,27 @@ const GitHistory = () => {
                                                     <div className="timeline-title-row">
                                                         <h4 className="timeline-title">{exp.title}</h4>
                                                         {exp.badge && (
-                                                            <span className={`timeline-badge ${exp.color}`}>
+                                                            <span className={`timeline-badge ${expColor}`}>
                                                                 {exp.badge}
                                                             </span>
                                                         )}
                                                     </div>
-                                                    <p className={`timeline-company ${exp.color}`}>@ {exp.company}</p>
+                                                    <p className={`timeline-company ${expColor}`}>@ {exp.company}</p>
                                                 </div>
                                                 <div className="timeline-meta">
-                                                    <div className={`timeline-period ${exp.period.includes('Present') ? 'active' : ''}`}>
-                                                        {exp.period.includes('Present') && (
+                                                    <div className={`timeline-period ${isPresent ? 'active' : ''}`}>
+                                                        {isPresent && (
                                                             <span className="live-indicator"></span>
                                                         )}
-                                                        {exp.period}
+                                                        {periodStr}
                                                     </div>
-                                                    <div className="timeline-commit">{exp.commit}</div>
+                                                    <div className="timeline-commit">{exp.commit || 'main@head'}</div>
                                                 </div>
                                             </div>
 
                                             <p className="timeline-description">{exp.description}</p>
 
-                                            {exp.achievements && (
+                                            {exp.achievements && exp.achievements.length > 0 && (
                                                 <div className="timeline-achievements">
                                                     <ul>
                                                         {exp.achievements.map((achievement, achIndex) => (
@@ -129,10 +136,10 @@ const GitHistory = () => {
                                             )}
 
                                             <div className="timeline-technologies">
-                                                {exp.technologies.map((tech, techIndex) => (
+                                                {(exp.technologies || []).map((tech, techIndex) => (
                                                     <span
                                                         key={techIndex}
-                                                        className={`tech-tag ${exp.color}`}
+                                                        className={`tech-tag ${expColor}`}
                                                     >
                                                         {tech}
                                                     </span>

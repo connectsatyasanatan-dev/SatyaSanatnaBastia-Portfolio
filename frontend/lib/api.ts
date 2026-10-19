@@ -143,57 +143,151 @@ export interface PortfolioStats {
 }
 
 
+import {
+    FALLBACK_PERSONAL_INFO,
+    FALLBACK_STATS,
+    FALLBACK_ACHIEVEMENTS,
+    FALLBACK_SKILLS,
+    FALLBACK_PROJECTS,
+    FALLBACK_EXPERIENCE,
+    FALLBACK_EDUCATION,
+    FALLBACK_CERTIFICATIONS,
+    FALLBACK_TESTIMONIALS,
+    FALLBACK_BLOG_POSTS
+} from './fallbackData'
+
 class PortfolioAPI {
     private async request<T>(endpoint: string): Promise<T> {
         try {
             const response = await apiClient.get<T>(endpoint)
             return response.data
         } catch (error) {
-            console.error(`API request failed: ${endpoint}`, error)
+            console.warn(`API request failed or unavailable: ${endpoint}. Utilizing resilient fallback.`)
             throw error
         }
     }
 
     async getPersonalInfo(): Promise<PersonalInfo> {
-        return this.request<PersonalInfo>('/personal-info')
+        try {
+            const data = await this.request<PersonalInfo>('/personal-info')
+            if (!data) return FALLBACK_PERSONAL_INFO
+            return {
+                ...FALLBACK_PERSONAL_INFO,
+                ...data,
+                name: (data.name && data.name !== 'Developer') ? data.name : FALLBACK_PERSONAL_INFO.name,
+                role: data.role || FALLBACK_PERSONAL_INFO.role,
+                title: data.title || FALLBACK_PERSONAL_INFO.title,
+                location: data.location || FALLBACK_PERSONAL_INFO.location,
+                status: data.status || FALLBACK_PERSONAL_INFO.status,
+                experience: data.experience || FALLBACK_PERSONAL_INFO.experience,
+                email: data.email || FALLBACK_PERSONAL_INFO.email,
+                github: data.github || FALLBACK_PERSONAL_INFO.github,
+                linkedin: data.linkedin || FALLBACK_PERSONAL_INFO.linkedin,
+                bio: data.bio || FALLBACK_PERSONAL_INFO.bio,
+                availability: data.availability || FALLBACK_PERSONAL_INFO.availability,
+                timezone: data.timezone || FALLBACK_PERSONAL_INFO.timezone,
+            }
+        } catch {
+            return FALLBACK_PERSONAL_INFO
+        }
     }
 
     async getSkills(): Promise<Record<string, SkillCategory>> {
-        return this.request<Record<string, SkillCategory>>('/skills')
+        try {
+            const data = await this.request<Record<string, SkillCategory>>('/skills')
+            if (!data || Object.keys(data).length === 0) return FALLBACK_SKILLS
+            // Check if skills arrays are actually populated
+            const totalSkills = Object.values(data).reduce((acc, cat) => acc + (cat.skills?.length || 0), 0)
+            return totalSkills > 0 ? data : FALLBACK_SKILLS
+        } catch {
+            return FALLBACK_SKILLS
+        }
     }
 
     async getProjects(featured?: boolean): Promise<Project[]> {
-        const endpoint = featured ? '/projects?featured=true' : '/projects'
-        return this.request<Project[]>(endpoint)
+        try {
+            const endpoint = featured ? '/projects?featured=true' : '/projects'
+            const data = await this.request<Project[]>(endpoint)
+            if (!data || data.length === 0) {
+                return featured ? FALLBACK_PROJECTS.filter(p => p.featured) : FALLBACK_PROJECTS
+            }
+            return data
+        } catch {
+            return featured ? FALLBACK_PROJECTS.filter(p => p.featured) : FALLBACK_PROJECTS
+        }
     }
 
     async getExperience(): Promise<Experience[]> {
-        return this.request<Experience[]>('/experience')
+        try {
+            const data = await this.request<Experience[]>('/experience')
+            return (data && data.length > 0) ? data : FALLBACK_EXPERIENCE
+        } catch {
+            return FALLBACK_EXPERIENCE
+        }
     }
 
     async getEducation(): Promise<Education[]> {
-        return this.request<Education[]>('/education')
+        try {
+            const data = await this.request<Education[]>('/education')
+            return (data && data.length > 0) ? data : FALLBACK_EDUCATION
+        } catch {
+            return FALLBACK_EDUCATION
+        }
     }
 
     async getCertifications(): Promise<Certification[]> {
-        return this.request<Certification[]>('/certifications')
+        try {
+            const data = await this.request<Certification[]>('/certifications')
+            return (data && data.length > 0) ? data : FALLBACK_CERTIFICATIONS
+        } catch {
+            return FALLBACK_CERTIFICATIONS
+        }
     }
 
     async getAchievements(): Promise<Achievements> {
-        return this.request<Achievements>('/achievements')
+        try {
+            const data = await this.request<Achievements>('/achievements')
+            if (!data || !data.stats || (data.stats.yearsOfExperience === 0 && data.stats.projectsCompleted === 0)) {
+                return FALLBACK_ACHIEVEMENTS
+            }
+            return data
+        } catch {
+            return FALLBACK_ACHIEVEMENTS
+        }
     }
 
     async getTestimonials(): Promise<Testimonial[]> {
-        return this.request<Testimonial[]>('/testimonials')
+        try {
+            const data = await this.request<Testimonial[]>('/testimonials')
+            return (data && data.length > 0) ? data : FALLBACK_TESTIMONIALS
+        } catch {
+            return FALLBACK_TESTIMONIALS
+        }
     }
 
     async getBlogPosts(featured?: boolean): Promise<BlogPost[]> {
-        const endpoint = featured ? '/blog?featured=true' : '/blog'
-        return this.request<BlogPost[]>(endpoint)
+        try {
+            const endpoint = featured ? '/blog?featured=true' : '/blog'
+            const data = await this.request<BlogPost[]>(endpoint)
+            if (!data || data.length === 0) {
+                return featured ? FALLBACK_BLOG_POSTS.filter(p => p.featured) : FALLBACK_BLOG_POSTS
+            }
+            return data
+        } catch {
+            return featured ? FALLBACK_BLOG_POSTS.filter(p => p.featured) : FALLBACK_BLOG_POSTS
+        }
     }
 
     async getStats(): Promise<PortfolioStats> {
-        return this.request<PortfolioStats>('/stats')
+        try {
+            const data = await this.request<PortfolioStats>('/stats')
+            if (!data || (data.experience_years === 0 && data.projects_count === 0)) {
+                return FALLBACK_STATS
+            }
+            return data
+        } catch {
+            return FALLBACK_STATS
+        }
     }
 
     async submitContactForm(data: { name: string; email: string; subject?: string; message: string }) {

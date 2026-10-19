@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Play, Settings, Bell, Menu, X } from 'lucide-react'
+import { Play, Settings, Bell, Menu, X, Search, Palette } from 'lucide-react'
+import { openCommandPalette } from '@/components/CommandPalette'
 
 const languageSequences = [
     {
@@ -186,17 +187,66 @@ const Header = () => {
                     <a href="#">Run</a>
                 </div>
             </div>
+
+            {/* VS Code Command Center Search Pill */}
+            <button
+                type="button"
+                className="vscode-search-pill"
+                onClick={() => openCommandPalette()}
+                title="Search files, sections, and commands (Ctrl+P / Cmd+K)"
+                aria-label="Open Command Palette"
+            >
+                <div className="search-inner">
+                    <Search className="search-icon" />
+                    <span className="search-text">satya-portfolio — Search files & commands</span>
+                </div>
+                <kbd className="search-kbd">Ctrl+P</kbd>
+            </button>
+
             <div className="header-right">
-                <div className="run-build-btn">
+                <div
+                    className="run-build-btn"
+                    onClick={() => openCommandPalette()}
+                    title="Quick Commands"
+                >
                     <Play className="play-icon" />
                     <span className="btn-text-full">Run Build</span>
                     <span className="btn-text-short">Run</span>
                 </div>
                 <div className="header-buttons">
-                    <button className="header-btn">
+                    <button
+                        type="button"
+                        className="header-btn mobile-search-btn"
+                        title="Search & Commands (Ctrl+P)"
+                        onClick={() => openCommandPalette()}
+                        aria-label="Search Commands"
+                    >
+                        <Search />
+                    </button>
+                    <button
+                        type="button"
+                        className="header-btn"
+                        title="Change Theme (Dracula, Tokyo Night, One Dark, Cyberpunk)"
+                        onClick={() => openCommandPalette()}
+                        aria-label="Change Theme"
+                    >
+                        <Palette />
+                    </button>
+                    <button
+                        type="button"
+                        className="header-btn"
+                        title="Settings & Palette"
+                        onClick={() => openCommandPalette()}
+                        aria-label="Settings"
+                    >
                         <Settings />
                     </button>
-                    <button className="header-btn">
+                    <button
+                        type="button"
+                        className="header-btn"
+                        title="Notifications"
+                        aria-label="Notifications"
+                    >
                         <Bell />
                     </button>
                 </div>

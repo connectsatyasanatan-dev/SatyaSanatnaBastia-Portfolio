@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Award, Calendar, X, ExternalLink, Activity } from 'lucide-react'
 import portfolioAPI, { Certification } from '@/lib/api'
+import { FALLBACK_CERTIFICATIONS } from '@/lib/fallbackData'
 import { CertificationsSectionSkeleton } from './AppSkeletons'
 
 const CertificationsSection = () => {
@@ -24,9 +25,14 @@ const CertificationsSection = () => {
         const fetchData = async () => {
             try {
                 const certData = await portfolioAPI.getCertifications()
-                setCertifications(certData)
+                if (certData && certData.length > 0) {
+                    setCertifications(certData)
+                } else {
+                    setCertifications(FALLBACK_CERTIFICATIONS)
+                }
             } catch (error) {
                 console.error('Failed to fetch certifications:', error)
+                setCertifications(FALLBACK_CERTIFICATIONS)
             } finally {
                 setLoading(false)
             }

@@ -4,6 +4,7 @@ import { Terminal, Download, Star, GitFork, Grid3X3, Eye, Github, X, ExternalLin
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect, useCallback } from 'react'
 import portfolioAPI, { Project } from '@/lib/api'
+import { FALLBACK_PROJECTS } from '@/lib/fallbackData'
 import { ProjectsSectionSkeleton } from './AppSkeletons'
 
 // ── Project Detail Modal ──────────────────────────────────
@@ -158,10 +159,14 @@ const ProjectsSection = () => {
         setHasError(false)
         try {
             const data = await portfolioAPI.getProjects()
-            setProjects(data)
+            if (data && data.length > 0) {
+                setProjects(data)
+            } else {
+                setProjects(FALLBACK_PROJECTS)
+            }
         } catch (error) {
             console.error('Failed to fetch projects:', error)
-            setHasError(true)
+            setProjects(FALLBACK_PROJECTS)
         } finally {
             setLoading(false)
         }
@@ -201,7 +206,7 @@ const ProjectsSection = () => {
                     >
                         <ProjectsSectionSkeleton />
                     </motion.div>
-                ) : hasError ? null : projects.length === 0 ? null : (
+                ) : (
                     <motion.section
                         key="projects-content"
                         id="projects-section"

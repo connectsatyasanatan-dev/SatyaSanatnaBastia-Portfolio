@@ -12,7 +12,6 @@ import {
     Target,
     Brain,
     Rocket,
-    Star,
     ChevronRight,
     Play,
     Pause
@@ -237,7 +236,7 @@ const SkillsSection = () => {
                                             </div>
                                         </div>
                                         <div className="skills-count">
-                                            {activeSkillData.skills.length} Skills
+                                            {activeSkillData.skills?.length || 0} Skills
                                         </div>
                                     </div>
 
@@ -248,7 +247,7 @@ const SkillsSection = () => {
                                         animate="visible"
                                         key={activeCategory} // Force re-animation on category change
                                     >
-                                        {activeSkillData.skills.map((skill, index) => {
+                                        {(activeSkillData.skills || []).map((skill, index) => {
                                             const skillLevel = getSkillLevel(skill.level)
                                             const isHovered = hoveredSkill === skill.name
 
@@ -263,50 +262,28 @@ const SkillsSection = () => {
                                                         '--skill-color': skillLevel.color,
                                                     } as React.CSSProperties}
                                                 >
-                                                    <div className="skill-card-header">
-                                                        <div className="skill-name">{skill.name}</div>
-                                                        <div className="skill-level-badge" style={{ backgroundColor: skillLevel.color }}>
-                                                            {skillLevel.label}
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="skill-metrics">
-                                                        <div className="skill-metric">
-                                                            <span className="metric-label">Experience</span>
-                                                            <span className="metric-value">{skill.years} years</span>
-                                                        </div>
-                                                        <div className="skill-metric">
-                                                            <span className="metric-label">Proficiency</span>
-                                                            <span className="metric-value">{skill.level}%</span>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="skill-progress-container">
-                                                        <div className="skill-progress-track">
-                                                            <motion.div
-                                                                className="skill-progress-fill"
-                                                                initial={{ width: 0 }}
-                                                                animate={{ width: `${skill.level}%` }}
-                                                                transition={{ duration: 1, ease: "easeOut" }}
-                                                                style={{
+                                                    <div className="skill-card-content">
+                                                        <div className="skill-name-row">
+                                                            <span 
+                                                                className="skill-dot" 
+                                                                style={{ 
                                                                     backgroundColor: skillLevel.color,
-                                                                }}
-                                                            ></motion.div>
+                                                                    boxShadow: `0 0 8px ${skillLevel.color}`
+                                                                }} 
+                                                            />
+                                                            <span className="skill-name">{skill.name}</span>
                                                         </div>
-                                                        <div className="skill-stars">
-                                                            {[...Array(5)].map((_, starIndex) => (
-                                                                <Star
-                                                                    key={starIndex}
-                                                                    size={12}
-                                                                    className={`skill-star ${starIndex < Math.floor(skill.level / 20) ? 'filled' : ''}`}
-                                                                    style={{
-                                                                        color: starIndex < Math.floor(skill.level / 20) ? skillLevel.color : '#273a3a',
-                                                                    }}
-                                                                />
-                                                            ))}
-                                                        </div>
+                                                        <span 
+                                                            className="skill-level-badge" 
+                                                            style={{ 
+                                                                color: skillLevel.color,
+                                                                borderColor: `${skillLevel.color}40`,
+                                                                backgroundColor: `${skillLevel.color}15`
+                                                            }}
+                                                        >
+                                                            {skillLevel.label}
+                                                        </span>
                                                     </div>
-
                                                     <div className="skill-card-glow" style={{ backgroundColor: skillLevel.color }}></div>
                                                 </motion.div>
                                             )

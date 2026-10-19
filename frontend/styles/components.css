@@ -189,6 +189,84 @@
   height: 16px;
 }
 
+/* VS Code Command Center Search Pill */
+.vscode-search-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 4px 12px;
+  color: var(--text-dim);
+  font-size: var(--text-xs);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  max-width: 440px;
+  width: 100%;
+  margin: 0 16px;
+  height: 28px;
+}
+
+.vscode-search-pill:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(6, 249, 249, 0.4);
+  color: var(--text-main);
+  box-shadow: 0 0 12px rgba(6, 249, 249, 0.15);
+}
+
+.vscode-search-pill .search-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vscode-search-pill .search-icon {
+  width: 13px;
+  height: 13px;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.vscode-search-pill .search-text {
+  font-family: var(--font-sans);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.vscode-search-pill .search-kbd {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+  padding: 1px 5px;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+  line-height: 1.2;
+}
+
+.mobile-search-btn {
+  display: none !important;
+}
+
+@media (max-width: 860px) {
+  .vscode-search-pill {
+    display: none !important;
+  }
+  .mobile-search-btn {
+    display: flex !important;
+  }
+}
+
 /* Responsive Header */
 @media (min-width: 1024px) {
   #portfolio-header .mobile-menu-btn {

@@ -1,101 +1,220 @@
 'use client'
 
-import { Terminal, Minimize2, Maximize2, X } from 'lucide-react'
+import React, { useState, useEffect, useRef } from 'react'
+import { Terminal, Minimize2, Maximize2, X, CornerDownLeft } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useState, useEffect } from 'react'
 import { TerminalSectionSkeleton } from './AppSkeletons'
+import { applyTheme } from '@/lib/theme'
 
-const TerminalSection = () => {
-    const [currentCommand, setCurrentCommand] = useState('')
-    const [commandHistory, setCommandHistory] = useState<string[]>([])
+interface TerminalLog {
+    text: string
+    type: 'command' | 'success' | 'info' | 'warning' | 'highlight' | 'dim' | 'default'
+}
+
+const INITIAL_LOGS: TerminalLog[] = [
+    { text: '$ git status', type: 'command' },
+    { text: "On branch main", type: 'dim' },
+    { text: "Your branch is up to date with 'origin/main'.", type: 'dim' },
+    { text: '$ npm run build', type: 'command' },
+    { text: '✔ Creating an optimized production build', type: 'success' },
+    { text: '✔ Compiled successfully in 1.4s', type: 'success' },
+    { text: '✔ Linting and checking validity of types', type: 'success' },
+    { text: '✔ System loaded with fail-safe fallbacks active', type: 'info' },
+    { text: "Route (app)                              Size     First Load JS", type: 'dim' },
+    { text: "┌ ○ /                                    142 B          87.4 kB", type: 'dim' },
+    { text: "└ ○ /about                               139 B          87.4 kB", type: 'dim' },
+    { text: '$ echo "Ready for new opportunities! Type \'help\' for CLI commands 🚀"', type: 'command' },
+    { text: "Ready for new opportunities! Type 'help' for CLI commands 🚀", type: 'highlight' },
+]
+
+export default function TerminalSection() {
     const [isMinimized, setIsMinimized] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
+    const [logs, setLogs] = useState<TerminalLog[]>(INITIAL_LOGS)
+    const [inputVal, setInputVal] = useState('')
+    const [history, setHistory] = useState<string[]>([])
+    const [historyIdx, setHistoryIdx] = useState<number>(-1)
 
-    const terminalLogs = [
-        "$ git status",
-        "On branch main",
-        "Your branch is up to date with 'origin/main'.",
-        "",
-        "Changes to be committed:",
-        "  (use \"git reset HEAD <file>...\" to unstage)",
-        "",
-        "        modified:   src/components/Hero.tsx",
-        "        new file:   src/components/Projects.tsx",
-        "",
-        "$ npm run build",
-        "✔ Creating an optimized production build",
-        "✔ Compiled successfully",
-        "✔ Linting and checking validity of types",
-        "✔ Collecting page data",
-        "✔ Generating static pages (5/5)",
-        "✔ Finalizing page optimization",
-        "",
-        "Route (app)                              Size     First Load JS",
-        "┌ ○ /                                    142 B          87.4 kB",
-        "└ ○ /about                               139 B          87.4 kB",
-        "+ First Load JS shared by all            87.3 kB",
-        "  ├ chunks/webpack-8fa1640cc84ba8ef.js   750 B",
-        "  ├ chunks/fd9d1056-2821b0f0cabcd8bd.js  44.3 kB",
-        "  ├ chunks/main-app-4f41eed9b4f4b9b8.js  216 B",
-        "  └ chunks/main-c67cccb185a5d5a3.js      42.1 kB",
-        "",
-        "$ npm run type-check",
-        "✔ No TypeScript errors found",
-        "",
-        "$ echo 'Ready for new opportunities! 🚀'",
-        "Ready for new opportunities! 🚀",
-        ""
-    ]
-
-    const typewriterCommands = [
-        "whoami",
-        "ls -la skills/",
-        "cat experience.json",
-        "git log --oneline",
-        "npm run build"
-    ]
+    const inputRef = useRef<HTMLInputElement>(null)
+    const contentRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
-        let commandIndex = 0
-        let charIndex = 0
+        const timer = setTimeout(() => setIsLoading(false), 500)
+        return () => clearTimeout(timer)
+    }, [])
 
-        const typeCommand = () => {
-            if (commandIndex < typewriterCommands.length) {
-                const command = typewriterCommands[commandIndex]
-                if (charIndex < command.length) {
-                    setCurrentCommand(command.slice(0, charIndex + 1))
-                    charIndex++
-                    setTimeout(typeCommand, 100)
-                } else {
-                    setTimeout(() => {
-                        setCommandHistory(prev => [...prev, `$ ${command}`])
-                        setCurrentCommand('')
-                        charIndex = 0
-                        commandIndex++
-                        setTimeout(typeCommand, 1000)
-                    }, 2000)
-                }
-            } else {
-                // Reset and start over
-                setTimeout(() => {
-                    setCommandHistory([])
-                    commandIndex = 0
-                    charIndex = 0
-                    typeCommand()
-                }, 5000)
+    const scrollToBottom = () => {
+        setTimeout(() => {
+            if (contentRef.current) {
+                contentRef.current.scrollTop = contentRef.current.scrollHeight
             }
+        }, 10)
+    }
+
+    const executeCommand = (raw: string) => {
+        const cmd = raw.trim()
+        if (!cmd) return
+
+        setHistory(prev => [...prev, cmd])
+        setHistoryIdx(-1)
+
+        const newLogs: TerminalLog[] = [...logs, { text: `$ ${cmd}`, type: 'command' }]
+        const parts = cmd.split(' ')
+        const root = parts[0].toLowerCase()
+        const arg = parts.slice(1).join(' ').trim().toLowerCase()
+
+        switch (root) {
+            case 'help':
+                newLogs.push(
+                    { text: '── Available Portfolio CLI Commands ──', type: 'highlight' },
+                    { text: '  whoami          — Identity & background summary', type: 'info' },
+                    { text: '  skills          — Tech stack breakdown by domain', type: 'info' },
+                    { text: '  projects        — Featured projects & architecture', type: 'info' },
+                    { text: '  contact         — Direct email, phone & profiles', type: 'info' },
+                    { text: '  theme [name]    — Switch theme (cyberpunk | dracula | onedark | tokyonight)', type: 'info' },
+                    { text: '  stats           — Telemetry, lines of code & commits', type: 'info' },
+                    { text: '  resume          — Download Curriculum Vitae (PDF)', type: 'info' },
+                    { text: '  palette         — Launch VS Code Command Palette', type: 'info' },
+                    { text: '  clear           — Reset terminal console', type: 'info' }
+                )
+                break
+
+            case 'whoami':
+                newLogs.push(
+                    { text: '👤 Satya Sanatan Sahoo', type: 'highlight' },
+                    { text: 'Role: Full Stack Developer & AI Solutions Engineer', type: 'success' },
+                    { text: 'Focus: High-performance Web Applications, Scalable APIs & Agentic AI', type: 'info' },
+                    { text: 'Location: Bhubaneswar, Odisha, India (UTC +05:30)', type: 'dim' },
+                    { text: 'Status: Open to Full-time Opportunities & High-impact Contracts', type: 'success' }
+                )
+                break
+
+            case 'skills':
+                newLogs.push(
+                    { text: '⚡ Core Technical Arsenal:', type: 'highlight' },
+                    { text: '  Frontend : React 18, Next.js 14, TypeScript, Vanilla CSS3, Framer Motion', type: 'info' },
+                    { text: '  Backend  : Python 3.11, Flask, Node.js, Express, REST APIs, WebSockets', type: 'info' },
+                    { text: '  Database : PostgreSQL, Redis, MongoDB, SQLAlchemy, psycopg2', type: 'info' },
+                    { text: '  DevOps   : Docker, GitHub Actions CI/CD, AWS EC2, Linux, Nginx', type: 'info' },
+                    { text: '  AI/ML    : Groq AI, LangChain, RAG Pipelines, Prompt Engineering', type: 'info' }
+                )
+                break
+
+            case 'projects':
+                newLogs.push(
+                    { text: '🚀 Key Featured Projects:', type: 'highlight' },
+                    { text: '  1. VS Code Interactive Portfolio — IDE simulator in Next.js + Flask', type: 'success' },
+                    { text: '  2. Zentara AI Representative — Custom agent for automated visitor interaction', type: 'success' },
+                    { text: '  3. CodeSnippet Cloud Manager — Multi-language snippet manager with tags', type: 'success' },
+                    { text: '  4. DevPulse Telemetry Dashboard — Real-time analytics with charts', type: 'success' },
+                    { text: 'Tip: Press Ctrl+P or type "palette" to jump directly to any project.', type: 'dim' }
+                )
+                break
+
+            case 'contact':
+                newLogs.push(
+                    { text: '📬 Contact Coordinates:', type: 'highlight' },
+                    { text: '  Email    : satyasanatansahoo96@gmail.com', type: 'success' },
+                    { text: '  Phone    : +91 7978252276', type: 'info' },
+                    { text: '  LinkedIn : https://linkedin.com/in/satya-sanatan', type: 'info' },
+                    { text: '  GitHub   : https://github.com/connectsatyasanatan', type: 'info' }
+                )
+                break
+
+            case 'theme':
+                if (!arg) {
+                    newLogs.push(
+                        { text: 'Available themes: cyberpunk, dracula, onedark, tokyonight', type: 'highlight' },
+                        { text: 'Usage: theme dracula', type: 'dim' }
+                    )
+                } else if (['cyberpunk', 'dracula', 'onedark', 'tokyonight'].includes(arg)) {
+                    applyTheme(arg as any)
+                    newLogs.push({ text: `✔ Applied theme: ${arg}`, type: 'success' })
+                } else {
+                    newLogs.push({ text: `Unknown theme "${arg}". Valid options: cyberpunk, dracula, onedark, tokyonight`, type: 'warning' })
+                }
+                break
+
+            case 'stats':
+                newLogs.push(
+                    { text: '📊 Developer Metrics:', type: 'highlight' },
+                    { text: '  Projects Completed : 15+', type: 'info' },
+                    { text: '  Years Experience   : 2+', type: 'info' },
+                    { text: '  GitHub Commits     : 1,420+', type: 'info' },
+                    { text: '  Lines of Code      : 120,000+', type: 'info' },
+                    { text: '  Coffee Consumed    : 1,024 cups ☕', type: 'dim' }
+                )
+                break
+
+            case 'resume':
+                newLogs.push({ text: '✔ Opening resume in new tab...', type: 'success' })
+                if (typeof window !== 'undefined') {
+                    window.open('/resume.pdf', '_blank')
+                }
+                break
+
+            case 'palette':
+                newLogs.push({ text: 'Opening Command Palette...', type: 'dim' })
+                if (typeof window !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent('open_command_palette'))
+                }
+                break
+
+            case 'clear':
+                setLogs([])
+                setInputVal('')
+                return
+
+            case 'sudo':
+                if (cmd.includes('rm -rf')) {
+                    newLogs.push(
+                        { text: '🚨 Nice try! This incident will be reported to Santa Claus 🎅', type: 'highlight' },
+                        { text: 'Permission denied: root sandbox is locked.', type: 'warning' }
+                    )
+                } else {
+                    newLogs.push({ text: 'User is not in the sudoers file. Incident logged.', type: 'warning' })
+                }
+                break
+
+            default:
+                newLogs.push({
+                    text: `zsh: command not found: ${cmd}. Type 'help' for available commands.`,
+                    type: 'warning'
+                })
         }
 
-        const timer = setTimeout(typeCommand, 2000)
-        return () => clearTimeout(timer)
-    }, [])
+        setLogs(newLogs)
+        setInputVal('')
+        scrollToBottom()
+    }
 
-    // Simulate an initial loading state for the terminal
-    const [isLoading, setIsLoading] = useState(true)
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.preventDefault()
+            executeCommand(inputVal)
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault()
+            if (history.length === 0) return
+            const nextIdx = historyIdx === -1 ? history.length - 1 : Math.max(0, historyIdx - 1)
+            setHistoryIdx(nextIdx)
+            setInputVal(history[nextIdx] || '')
+        } else if (e.key === 'ArrowDown') {
+            e.preventDefault()
+            if (historyIdx === -1) return
+            const nextIdx = historyIdx + 1
+            if (nextIdx >= history.length) {
+                setHistoryIdx(-1)
+                setInputVal('')
+            } else {
+                setHistoryIdx(nextIdx)
+                setInputVal(history[nextIdx] || '')
+            }
+        }
+    }
 
-    useEffect(() => {
-        const timer = setTimeout(() => setIsLoading(false), 800)
-        return () => clearTimeout(timer)
-    }, [])
+    const focusInput = () => {
+        inputRef.current?.focus()
+    }
 
     return (
         <AnimatePresence mode="wait">
@@ -118,6 +237,7 @@ const TerminalSection = () => {
                 >
                     <motion.div
                         className={`terminal-window ${isMinimized ? 'minimized' : ''}`}
+                        onClick={focusInput}
                     >
                         {/* Terminal header */}
                         <div className="terminal-header">
@@ -128,8 +248,12 @@ const TerminalSection = () => {
                             </div>
                             <div className="terminal-controls">
                                 <button
-                                    onClick={() => setIsMinimized(!isMinimized)}
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        setIsMinimized(!isMinimized)
+                                    }}
                                     className="control-btn"
+                                    aria-label={isMinimized ? "Maximize terminal" : "Minimize terminal"}
                                 >
                                     {isMinimized ? (
                                         <Maximize2 className="w-3 h-3 text-text-dim hover:text-white" />
@@ -137,7 +261,14 @@ const TerminalSection = () => {
                                         <Minimize2 className="w-3 h-3 text-text-dim hover:text-white" />
                                     )}
                                 </button>
-                                <button className="control-btn close">
+                                <button
+                                    className="control-btn close"
+                                    aria-label="Clear terminal"
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        setLogs([])
+                                    }}
+                                >
                                     <X className="w-3 h-3 text-text-dim hover:text-red-400" />
                                 </button>
                             </div>
@@ -145,44 +276,46 @@ const TerminalSection = () => {
 
                         {/* Terminal content */}
                         {!isMinimized && (
-                            <div className="terminal-content">
+                            <div className="terminal-content" ref={contentRef}>
                                 <div className="terminal-logs">
-                                    {terminalLogs.map((log, index) => (
-                                        <motion.div
+                                    {logs.map((log, index) => (
+                                        <div
                                             key={index}
-                                            initial={{ opacity: 0, x: -10 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            transition={{ duration: 0.3, delay: index * 0.05 }}
-                                            className={`terminal-line ${log.startsWith('$') ? 'command' :
-                                                log.includes('✔') || log.includes('✅') ? 'success' :
-                                                    log.includes('🔗') || log.includes('🔍') ? 'info' :
-                                                        log.includes('modified:') || log.includes('new file:') ? 'warning' :
-                                                            log.includes('Ready for new opportunities!') ? 'highlight' :
-                                                                log.startsWith('  ') ? 'dim' :
-                                                                    'default'
-                                                }`}
+                                            className={`terminal-line ${log.type}`}
                                         >
-                                            {log || '\u00A0'}
-                                        </motion.div>
+                                            {log.text || '\u00A0'}
+                                        </div>
                                     ))}
                                 </div>
 
-                                {/* Command history */}
-                                {commandHistory.map((cmd, index) => (
-                                    <motion.div
-                                        key={index}
-                                        initial={{ opacity: 0, x: -10 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        className="terminal-line command"
-                                    >
-                                        {cmd}
-                                    </motion.div>
-                                ))}
+                                {/* Interactive CLI Input Form */}
+                                <form
+                                    className="terminal-input-form"
+                                    onSubmit={(e) => {
+                                        e.preventDefault()
+                                        executeCommand(inputVal)
+                                    }}
+                                >
+                                    <span className="terminal-prompt">
+                                        <span className="prompt-full">user@satya-portfolio:~$</span>
+                                        <span className="prompt-short">satya:~$</span>
+                                    </span>
+                                    <input
+                                        ref={inputRef}
+                                        type="text"
+                                        className="terminal-input"
+                                        value={inputVal}
+                                        onChange={(e) => setInputVal(e.target.value)}
+                                        onKeyDown={handleKeyDown}
+                                        placeholder="type 'help', 'whoami', 'skills', 'theme dracula'..."
+                                        autoComplete="off"
+                                        spellCheck={false}
+                                    />
+                                    <button type="submit" style={{ display: 'none' }} aria-hidden="true" />
+                                </form>
 
-                                {/* Current typing command */}
-                                <div className="terminal-line command current">
-                                    <span>$ {currentCommand}</span>
-                                    <span className="cursor">|</span>
+                                <div className="terminal-hint">
+                                    💡 Type &apos;help&apos; for CLI commands • Press &apos;Ctrl+P&apos; for VS Code Command Palette
                                 </div>
                             </div>
                         )}
@@ -201,11 +334,11 @@ const TerminalSection = () => {
                         </div>
                         <div className="stat-indicator">
                             <div className="status-dot success"></div>
-                            <span>Build: Successful</span>
+                            <span>Build: Passing</span>
                         </div>
                         <div className="stat-indicator">
                             <div className="status-dot warning"></div>
-                            <span>Build: Passing</span>
+                            <span>Fail-Safe: Active</span>
                         </div>
                     </motion.div>
                 </motion.section>
@@ -213,5 +346,3 @@ const TerminalSection = () => {
         </AnimatePresence>
     )
 }
-
-export default TerminalSection

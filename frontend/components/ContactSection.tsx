@@ -62,15 +62,20 @@ const ContactSection = () => {
         }
     }
 
+    const emailVal = personalInfo?.email || 'connectsatyasanatan@gmail.com'
+    const githubVal = personalInfo?.github || 'https://github.com/connectsatyasanatan'
+    const linkedinVal = personalInfo?.linkedin || 'https://linkedin.com/in/satya-sanatan'
+    const twitterVal = personalInfo?.twitter || 'https://twitter.com/satyasanatan'
+
     const contactLinks = [
-        { icon: Mail, label: 'Email', value: personalInfo?.email, href: personalInfo?.email ? `mailto:${personalInfo.email}` : '#', color: '#06f9f9' },
-        { icon: Github, label: 'GitHub', value: personalInfo?.github, href: personalInfo?.github || '#', color: '#ffffff' },
-        { icon: Linkedin, label: 'LinkedIn', value: personalInfo?.linkedin, href: personalInfo?.linkedin || '#', color: '#60a5fa' },
-        { icon: Twitter, label: 'Twitter', value: personalInfo?.twitter, href: personalInfo?.twitter || '#', color: '#38bdf8' },
+        { icon: Mail, label: 'Email', value: emailVal, href: `mailto:${emailVal}`, color: '#06f9f9' },
+        { icon: Github, label: 'GitHub', value: githubVal, href: githubVal, color: '#ffffff' },
+        { icon: Linkedin, label: 'LinkedIn', value: linkedinVal, href: linkedinVal, color: '#60a5fa' },
+        { icon: Twitter, label: 'Twitter', value: twitterVal, href: twitterVal, color: '#38bdf8' },
     ]
 
     const statusItems = [
-        { icon: MapPin, label: 'Location', value: personalInfo?.location || '—', color: '#f97316' },
+        { icon: MapPin, label: 'Location', value: personalInfo?.location || 'Bhubaneswar, Odisha, India', color: '#f97316' },
         { icon: Calendar, label: 'Availability', value: personalInfo?.availability || 'Available for opportunities', color: '#22c55e' },
         { icon: Coffee, label: 'Timezone', value: personalInfo?.timezone || 'IST (UTC+5:30)', color: '#eab308' },
     ]

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Quote, Star, User, Building, ChevronLeft, ChevronRight, Play, Pause, Sparkles } from 'lucide-react'
 import portfolioAPI, { Testimonial } from '@/lib/api'
+import { FALLBACK_TESTIMONIALS } from '@/lib/fallbackData'
 import { TestimonialsSectionSkeleton } from './AppSkeletons'
 
 const TestimonialsSection = () => {
@@ -17,9 +18,14 @@ const TestimonialsSection = () => {
         const fetchTestimonials = async () => {
             try {
                 const data = await portfolioAPI.getTestimonials()
-                setTestimonials(data)
+                if (data && data.length > 0) {
+                    setTestimonials(data)
+                } else {
+                    setTestimonials(FALLBACK_TESTIMONIALS)
+                }
             } catch (error) {
                 console.error('Failed to fetch testimonials:', error)
+                setTestimonials(FALLBACK_TESTIMONIALS)
             } finally {
                 setLoading(false)
             }

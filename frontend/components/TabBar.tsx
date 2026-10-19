@@ -143,7 +143,7 @@ const TabBar = ({ activeSection }: TabBarProps) => {
             {/* Breadcrumb */}
             <div className="breadcrumb" aria-label="File path">
                 <div className="breadcrumb-path">
-                    <span>portfolio-v2</span>
+                    <span>Satya's Portfolio</span>
                     <ChevronRight aria-hidden />
                     <span>src</span>
                     <ChevronRight aria-hidden />

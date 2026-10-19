@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { BookOpen, Clock, Tag, ArrowRight, TrendingUp } from 'lucide-react'
 import portfolioAPI, { BlogPost } from '@/lib/api'
+import { FALLBACK_BLOG_POSTS } from '@/lib/fallbackData'
 import { BlogSectionSkeleton } from './AppSkeletons'
 
 const BlogSection = () => {
@@ -16,10 +17,14 @@ const BlogSection = () => {
         setHasError(false)
         try {
             const data = await portfolioAPI.getBlogPosts()
-            setBlogPosts(data)
+            if (data && data.length > 0) {
+                setBlogPosts(data)
+            } else {
+                setBlogPosts(FALLBACK_BLOG_POSTS)
+            }
         } catch (error) {
             console.error('Failed to fetch blog posts:', error)
-            setHasError(true)
+            setBlogPosts(FALLBACK_BLOG_POSTS)
         } finally {
             setLoading(false)
         }
@@ -38,7 +43,7 @@ const BlogSection = () => {
                 >
                     <BlogSectionSkeleton />
                 </motion.div>
-            ) : hasError ? null : blogPosts.length === 0 ? null : (
+            ) : (
                 <motion.section
                     key="blog-content"
                     id="blog-section"

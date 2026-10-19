@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { GraduationCap, Calendar, MapPin, Star, BookOpen, Award, Lightbulb, ChevronRight, Sparkles, Binary, BrainCircuit, FlaskConical, Code2, Play, Pause } from 'lucide-react'
 import portfolioAPI, { Education } from '@/lib/api'
+import { FALLBACK_EDUCATION } from '@/lib/fallbackData'
 import { EducationSectionSkeleton } from './AppSkeletons'
 
 /* ─── Decorative particles ─── */
@@ -56,9 +57,14 @@ const EducationSection = () => {
         const fetchData = async () => {
             try {
                 const eduData = await portfolioAPI.getEducation()
-                setEducation([...eduData].reverse())
+                if (eduData && eduData.length > 0) {
+                    setEducation([...eduData].reverse())
+                } else {
+                    setEducation([...FALLBACK_EDUCATION].reverse())
+                }
             } catch (error) {
                 console.error('Failed to fetch education:', error)
+                setEducation([...FALLBACK_EDUCATION].reverse())
             } finally {
                 setLoading(false)
             }

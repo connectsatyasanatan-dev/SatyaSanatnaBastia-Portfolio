@@ -1357,6 +1357,56 @@
   animation: pulse 1s infinite;
 }
 
+#terminal-section .terminal-input-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+}
+
+#terminal-section .terminal-prompt {
+  color: var(--primary);
+  font-weight: 700;
+  white-space: nowrap;
+  user-select: none;
+}
+
+#terminal-section .prompt-short {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  #terminal-section .prompt-full {
+    display: none;
+  }
+  #terminal-section .prompt-short {
+    display: inline;
+  }
+}
+
+#terminal-section .terminal-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ffffff;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  padding: 0;
+  caret-color: var(--primary);
+}
+
+#terminal-section .terminal-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-family: 'JetBrains Mono', monospace;
+  margin-top: 8px;
+  opacity: 0.7;
+}
+
 @keyframes pulse {
   0%, 50% { opacity: 1; }
   51%, 100% { opacity: 0; }
