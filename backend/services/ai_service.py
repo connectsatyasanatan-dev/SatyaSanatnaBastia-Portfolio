@@ -212,11 +212,12 @@ MISSION & MINDSET (CONVERT CLIENTS & WIN PROJECTS):
      📱 100% flawless responsiveness across smartphones, tablets, and desktops
      🔒 Secure, robust, and scalable foundation built to grow with their business
 
-4. **DEAL CLOSING & LEAD CAPTURE (ACTIVE NEXT STEPS):**
-   - Guide every prospective client toward starting the project:
-     • "Aapka project kis type ka hai ya koi specific reference design aapke dimaag me hai?"
-     • "Aap apna email/phone number yahan chat me share kar sakte hain, ya seedha connectsatyasanatan@gmail.com par email bhej sakte hain."
-     • "Hum ek quick discovery call schedule karke requirements finalise kar sakte hain aur kaam start kar sakte hain!"
+4. **INSTANT SCOPING & FORCE-CONNECT DEAL CLOSING GATE (CRITICAL RULE):**
+   - Jab bhi client kisi project ki baat kare (3D website, SaaS, web app, AI tool, etc.) ya timeline/cost/features ke baare me puchhe:
+     a. **Provide a Definite Timeline:** Hamesha ek realistic, professional timeline provide karein (e.g. "Target Delivery: 3–4 Weeks standard production sprint").
+     b. **Force Connection Before Moving Forward:** Client ko clearly force karein connect hone ke liye:
+        "Is production timeline aur engineering sprint ko lock karne ke liye, aage badhne se pehle hum ek quick 15-minute discovery call ya email consultation schedule karenge. Niche diye gaye Blueprint Gate me apna contact number/email aur preferred time slot daalkar submit karein, ya direct Satya ko connectsatyasanatan@gmail.com par email karein taaki Satya aapke project architecture ko directly review karke sign-off karein."
+     c. Call/Email pe connect hue bina final commitments na de kar unhe discovery call/email par aane ke liye compelling aur decisive banayein.
 
 5. **TONE & FLUENCY:**
    - Polished, energetic, sharp, polite, and thoroughly professional.
@@ -473,6 +474,25 @@ def generate_conversational_backup(message: str, history: List[Dict[str, str]], 
             "lead": lead_info,
         }
 
+    # 4.5. Custom Project Inquiries & Instant Scoping (3D Website, SaaS, App, Custom Build)
+    scoping_keywords = ["3d", "scope", "blueprint", "banana hai", "banwana hai", "quotation", "price", "cost", "build a website", "saas banana", "app banana"]
+    if any(w in m for w in scoping_keywords):
+        return {
+            "response": (
+                "Arre bilkul, 100% ho payega! 🚀 Satya next-gen, futuristic aur market-standard digital products engineer karte hain.\n\n"
+                "Chahe buttery-smooth 60fps interactive 3D web experience ho, high-conversion SaaS platform ho, ya enterprise-grade AI applications — Satya visual luxury, ultra-fast load speed aur production scalability ko blend karke deliver karte hain.\n\n"
+                "⏱️ **Standard Production Delivery**: **3–4 Weeks Sprint**\n"
+                "• **Phase 1 (Days 1–7)**: Architecture, Interactive UI/3D Prototype & Visual Direction\n"
+                "• **Phase 2 (Days 8–18)**: Core Engineering, Responsive Micro-Interactions & Scalable Backend API\n"
+                "• **Phase 3 (Days 19–25)**: 60fps Optimization, Multi-Device QA & Production Deployment\n\n"
+                "🔒 **Next Step (Timeline Lock-In)**:\n"
+                "Is delivery sprint timeline ko lock karne aur formal engineering sign-off ke liye, aage badhne se pehle hum ek quick **15-minute discovery call** ya email consultation karenge. Niche diye gaye Blueprint Gate me apni details submit karein taaki Satya aapke project scope ko directly review karke call schedule kar sakein!"
+            ),
+            "suggestions": ["Lock In Timeline & Book Call", "View Projects", "Contact Satya"],
+            "fallback": False,
+            "lead": lead_info,
+        }
+
     # 5. Projects
     if any(w in m for w in ["project", "code", "built", "work", "portfolio", "github", "demo", "projects", "vscode", "ide", "zentara"]):
         projects = db.get_projects() or []
@@ -707,6 +727,36 @@ def get_ai_response(user_message: str, history: List[Dict[str, str]], client_hou
         print(f"[{time.strftime('%H:%M:%S')}] 🔄 [FAILOVER] Groq unavailable -> Switching to NVIDIA Nemotron 3.5 Lightning 30B...", flush=True)
         ai_text = call_nvidia_nemotron(messages, nvidia_key)
 
+    # Detect if conversation is scoping a project or discussing requirements
+    is_scoping = any(k in cleaned_message.lower() for k in [
+        "scope", "blueprint", "timeline", "estimate", "quotation", "price", "cost", 
+        "banana hai", "banwana hai", "project", "3d", "build", "website", "saas", "app", "hire"
+    ]) or any(k in (ai_text or "").lower() for k in ["timeline", "sprint", "scope", "discovery call", "deliver", "blueprint"])
+
+    project_type = "Custom Modern Web Application"
+    msg_low = cleaned_message.lower()
+    if "3d" in msg_low:
+        project_type = "Next-Gen 3D Interactive Web Experience"
+    elif "saas" in msg_low:
+        project_type = "Full-Stack Scalable SaaS Platform"
+    elif "ai" in msg_low or "bot" in msg_low:
+        project_type = "AI-Powered Enterprise Intelligence System"
+    elif "ecommerce" in msg_low or "store" in msg_low:
+        project_type = "High-Conversion E-Commerce Portal"
+    elif "app" in msg_low or "mobile" in msg_low:
+        project_type = "Cross-Platform Modern Web & Mobile App"
+
+    blueprint_data = {
+        "isScoping": True,
+        "projectType": project_type,
+        "estimatedTime": "3–4 Weeks",
+        "phases": [
+            {"phase": "Phase 1: Architecture & Interactive UI/3D Prototype", "time": "Days 1–7"},
+            {"phase": "Phase 2: Core Engineering & Scalable Backend DB", "time": "Days 8–18"},
+            {"phase": "Phase 3: 60fps Optimization, QA & Production Launch", "time": "Days 19–25"}
+        ]
+    } if is_scoping else None
+
     # 3. If any live LLM succeeded, return the response
     if ai_text:
         print(f"[{time.strftime('%H:%M:%S')}] ✨ [AI CHAT SUCCESS] Response delivered successfully!\n{'='*55}\n", flush=True)
@@ -716,9 +766,13 @@ def get_ai_response(user_message: str, history: List[Dict[str, str]], client_hou
             "fallback": False,
             "timestamp": time.time(),
             "lead": lead_info,
+            "blueprint": blueprint_data,
         }
 
     # 4. If external LLMs encounter network or key issues, seamlessly engage the visitor
     # Zero error messages. Natural, genuine conversation grounded in live portfolio data.
     print(f"[{time.strftime('%H:%M:%S')}] ℹ️ [AI CHAT] External LLMs reached timeout/unreachable. Serving via live grounded engine.\n{'='*55}\n", flush=True)
-    return generate_conversational_backup(cleaned_message, history, db, greeting)
+    fallback_res = generate_conversational_backup(cleaned_message, history, db, greeting)
+    if blueprint_data and isinstance(fallback_res, dict):
+        fallback_res["blueprint"] = blueprint_data
+    return fallback_res

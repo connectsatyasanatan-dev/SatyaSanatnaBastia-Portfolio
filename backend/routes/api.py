@@ -397,3 +397,50 @@ def chat_ai():
             pass
         return jsonify(fallback)
 
+
+@api.route("/chat/lock-lead", methods=["POST"])
+def lock_project_lead():
+    """
+    Project Scoping Lead Lock-in:
+    Forces the client to connect via call or email before proceeding,
+    storing their project blueprint, target timeline, contact info, and preferred call slot in PostgreSQL.
+    """
+    try:
+        data = request.get_json(silent=True) or {}
+        email = (data.get("email") or "").strip()
+        phone = (data.get("phone") or "").strip()
+        name = (data.get("name") or "Prospective Client").strip()
+        company = (data.get("company") or "").strip()
+        slot = (data.get("preferredSlot") or "Earliest Available").strip()
+        project_type = (data.get("projectType") or "Custom Digital Product").strip()
+        estimated_time = (data.get("estimatedTime") or "3-4 Weeks").strip()
+        session_id = data.get("sessionId")
+
+        if not email and not phone:
+            return jsonify({"success": False, "error": "Email or Phone is required"}), 400
+
+        lead_message = (
+            f"[PROJECT SCOPING LOCKED] Project: {project_type} | Target Delivery: {estimated_time} | "
+            f"Preferred Call Slot: {slot} | Client: {name} ({company or 'Individual'})"
+        )
+
+        lead_id = db.add_ai_lead({
+            "name": name,
+            "email": email,
+            "phone": phone,
+            "company": company,
+            "message": lead_message,
+            "session_id": session_id,
+        })
+
+        logger.info(f"Project scoping lead locked: ID={lead_id}, Name={name}, Email={email}, Slot={slot}")
+
+        return jsonify({
+            "success": True,
+            "leadId": lead_id,
+            "message": f"Project blueprint locked! Satya will contact you for the {slot} slot.",
+        })
+    except Exception as e:
+        logger.error(f"Error locking lead: {e}")
+        return jsonify({"success": False, "error": "Could not lock lead"}), 500
+

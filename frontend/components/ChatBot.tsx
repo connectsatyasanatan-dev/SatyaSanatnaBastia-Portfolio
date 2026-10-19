@@ -4,10 +4,18 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
     Send, X, ChevronDown, User,
     Zap, Code2, Briefcase, Mail, Star,
-    Mic, MicOff, RotateCcw, Copy, Check, Sparkles
+    Mic, MicOff, RotateCcw, Copy, Check, Sparkles,
+    Calendar, CheckCircle2, Clock
 } from 'lucide-react';
 
 // ── Types ─────────────────────────────────────────────────
+export interface ProjectBlueprint {
+    isScoping: boolean;
+    projectType: string;
+    estimatedTime: string;
+    phases?: { phase: string; time: string }[];
+}
+
 interface Message {
     id: string;
     text: string;
@@ -17,6 +25,7 @@ interface Message {
     suggestions?: string[];
     copied?: boolean;
     isFallback?: boolean;
+    blueprint?: ProjectBlueprint;
 }
 
 interface HistoryItem {
@@ -41,12 +50,12 @@ const TOOLTIP_MESSAGES = [
 
 // ── Quick chips ───────────────────────────────────────────
 const CHIPS: Chip[] = [
+    { label: '🚀 Scope Project', icon: <Sparkles size={12} />, query: 'Mujhe ek project scope aur delivery blueprint chahiye' },
     { label: 'Projects', icon: <Code2 size={12} />, query: 'Tell me about your projects' },
     { label: 'Skills', icon: <Zap size={12} />, query: 'What is your tech stack?' },
     { label: 'Experience', icon: <Briefcase size={12} />, query: 'Tell me about your experience' },
     { label: 'Hire Me', icon: <Star size={12} />, query: 'Are you available for hire?' },
     { label: 'Contact', icon: <Mail size={12} />, query: 'How can I contact you?' },
-    { label: 'AI Work', icon: <Sparkles size={12} />, query: 'Tell me about your AI projects' },
 ];
 
 // ── Client-side conversational backup (smooth, polite, zero technical error exposure) ────────
@@ -110,6 +119,158 @@ function ZentaraAvatar({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
             alt="AI Assistant"
             style={{ width: d, height: d, objectFit: 'cover', borderRadius: '50%', display: 'block' }}
         />
+    );
+}
+
+// ── Project Scoping & Force-Connect Lock-In Gate ───────────
+function ProjectScopingCard({
+    blueprint,
+    sessionId,
+    onSuccess,
+}: {
+    blueprint: ProjectBlueprint;
+    sessionId: string;
+    onSuccess: (text: string) => void;
+}) {
+    const [name, setName] = useState('');
+    const [contact, setContact] = useState('');
+    const [slot, setSlot] = useState('Tomorrow Afternoon (IST)');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isLocked, setIsLocked] = useState(false);
+    const [error, setError] = useState('');
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const trimmed = contact.trim();
+        if (!trimmed) {
+            setError('Please enter your email or phone number');
+            return;
+        }
+        setIsSubmitting(true);
+        setError('');
+        try {
+            const baseUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api').replace(/\/$/, '');
+            const res = await fetch(`${baseUrl}/chat/lock-lead`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: name.trim() || 'Prospective Client',
+                    email: trimmed.includes('@') ? trimmed : '',
+                    phone: !trimmed.includes('@') ? trimmed : '',
+                    preferredSlot: slot,
+                    projectType: blueprint.projectType,
+                    estimatedTime: blueprint.estimatedTime,
+                    sessionId,
+                }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                setIsLocked(true);
+                onSuccess(`🎉 SPRINT LOCKED! Satya will connect with you on ${trimmed} for your ${slot} discovery session.`);
+            } else {
+                setError(data.error || 'Failed to submit request');
+            }
+        } catch {
+            // Offline/direct mailto fallback
+            window.open(
+                `mailto:connectsatyasanatan@gmail.com?subject=Project%20Scoping%20-%20${encodeURIComponent(blueprint.projectType)}&body=Name:%20${encodeURIComponent(name)}%0AContact:%20${encodeURIComponent(contact)}%0APreferred%20Slot:%20${encodeURIComponent(slot)}%0AProject:%20${encodeURIComponent(blueprint.projectType)}%20(${encodeURIComponent(blueprint.estimatedTime)})`,
+                '_blank'
+            );
+            setIsLocked(true);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    if (isLocked) {
+        return (
+            <div className="cb-blueprint-success">
+                <div className="cb-blueprint-success-title">
+                    <CheckCircle2 size={15} /> Sprint Timeline & Call Registered!
+                </div>
+                <div className="cb-blueprint-success-desc">
+                    Satya ko aapka Project Blueprint aur meeting request notify kar diya gaya hai. Hum aapse jaldi hi specified slot par call/email ke zariye connect karenge! 🚀
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="cb-blueprint-card">
+            <div className="cb-blueprint-header">
+                <div className="cb-blueprint-title">
+                    <Sparkles size={14} /> Project Architecture Blueprint
+                </div>
+                <span className="cb-blueprint-badge">Target: {blueprint.estimatedTime}</span>
+            </div>
+
+            <div className="cb-blueprint-type">
+                🎯 Scope: <span>{blueprint.projectType}</span>
+            </div>
+
+            {blueprint.phases && blueprint.phases.length > 0 && (
+                <div className="cb-blueprint-phases">
+                    {blueprint.phases.map((p, i) => (
+                        <div key={i} className="cb-blueprint-phase">
+                            <span className="cb-blueprint-phase-title">{p.phase}</span>
+                            <span className="cb-blueprint-phase-time">{p.time}</span>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            <div className="cb-blueprint-gate">
+                <div className="cb-blueprint-gate-title">
+                    <Calendar size={13} /> Lock In Timeline & Schedule 15-Min Scoping Call
+                </div>
+                <div className="cb-blueprint-gate-desc">
+                    Preliminary blueprint ready hai. Is engineering timeline ko lock karne aur formal architecture sign-off ke liye, Satya sir se direct consultation schedule karein:
+                </div>
+
+                <form className="cb-blueprint-form" onSubmit={handleSubmit}>
+                    <input
+                        type="text"
+                        className="cb-blueprint-input"
+                        placeholder="Your Name or Company"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                    />
+                    <input
+                        type="text"
+                        className="cb-blueprint-input"
+                        placeholder="Email or WhatsApp Number *"
+                        value={contact}
+                        onChange={(e) => setContact(e.target.value)}
+                        required
+                    />
+                    <select
+                        className="cb-blueprint-select"
+                        value={slot}
+                        onChange={(e) => setSlot(e.target.value)}
+                    >
+                        <option value="Tomorrow Afternoon (IST)">Tomorrow Afternoon (IST)</option>
+                        <option value="Today Evening (IST)">Today Evening (IST)</option>
+                        <option value="This Weekend (IST)">This Weekend (IST)</option>
+                        <option value="Flexible (Email Me First)">Flexible (Email Me First)</option>
+                    </select>
+
+                    {error && <div style={{ color: '#f87171', fontSize: 10 }}>{error}</div>}
+
+                    <button type="submit" className="cb-blueprint-submit" disabled={isSubmitting}>
+                        {isSubmitting ? 'Submitting...' : '🔒 Lock In Timeline & Book Call'}
+                    </button>
+
+                    <a
+                        className="cb-blueprint-alt"
+                        href={`mailto:connectsatyasanatan@gmail.com?subject=Project%20Scoping%20Inquiry%20-%20${encodeURIComponent(blueprint.projectType)}`}
+                        target="_blank"
+                        rel="noreferrer"
+                    >
+                        Or email directly: connectsatyasanatan@gmail.com
+                    </a>
+                </form>
+            </div>
+        </div>
     );
 }
 
@@ -213,21 +374,51 @@ export default function ChatBot() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen]);
 
+// ── Client-side Scoping Blueprint Helper ──────────────────
+function getClientBlueprint(msg: string): ProjectBlueprint | undefined {
+    const m = msg.toLowerCase();
+    const isScoping = ['scope', 'blueprint', 'timeline', 'estimate', 'quotation', 'price', 'cost', 'banana hai', 'banwana hai', '3d', 'project', 'build', 'website', 'saas', 'app'].some(k => m.includes(k));
+    if (!isScoping) return undefined;
+
+    let projectType = "Custom Modern Web Application";
+    if (m.includes("3d")) projectType = "Next-Gen 3D Interactive Web Experience";
+    else if (m.includes("saas")) projectType = "Full-Stack Scalable SaaS Platform";
+    else if (m.includes("ai") || m.includes("bot")) projectType = "AI-Powered Enterprise Intelligence System";
+    else if (m.includes("ecommerce") || m.includes("store")) projectType = "High-Conversion E-Commerce Portal";
+
+    return {
+        isScoping: true,
+        projectType,
+        estimatedTime: "3–4 Weeks",
+        phases: [
+            { phase: "Phase 1: Architecture & Interactive UI/3D Prototype", time: "Days 1–7" },
+            { phase: "Phase 2: Core Engineering & Scalable Backend DB", time: "Days 8–18" },
+            { phase: "Phase 3: 60fps Optimization, QA & Production Launch", time: "Days 19–25" }
+        ]
+    };
+}
+
     // ── Stream message ────────────────────────────────────
-    const streamBotMessage = (fullText: string, suggestions: string[] = [], isFallback = false) => {
+    const streamBotMessage = (
+        fullText: string,
+        suggestions: string[] = [],
+        isFallback = false,
+        blueprint?: ProjectBlueprint
+    ) => {
         const id = Date.now().toString();
         setMessages(prev => [...prev, {
             id, text: '', isBot: true, timestamp: new Date(),
             isStreaming: true, suggestions: [], isFallback, canRetry: false,
+            blueprint,
         }]);
         setIsTyping(false);
         let i = 0;
         const tick = () => {
-            i++;
+            i += 2;
             const done = i >= fullText.length;
             setMessages(prev => prev.map(m =>
                 m.id === id
-                    ? { ...m, text: fullText.slice(0, i), isStreaming: !done, suggestions: done ? suggestions : [] }
+                    ? { ...m, text: fullText.slice(0, Math.min(i, fullText.length)), isStreaming: !done, suggestions: done ? suggestions : [] }
                     : m
             ));
             if (!done) streamRef.current = setTimeout(tick, 10);
@@ -236,7 +427,13 @@ export default function ChatBot() {
     };
 
     // ── API call (Connected directly to Flask Backend AI Engine) ─────
-    const getBotResponse = async (userMsg: string): Promise<{ response: string; suggestions: string[]; isFallback: boolean; sentiment: string }> => {
+    const getBotResponse = async (userMsg: string): Promise<{
+        response: string;
+        suggestions: string[];
+        isFallback: boolean;
+        sentiment: string;
+        blueprint?: ProjectBlueprint;
+    }> => {
         try {
             const controller = new AbortController();
             const timeout = setTimeout(() => controller.abort(), 65000);
@@ -253,13 +450,25 @@ export default function ChatBot() {
                 const aiSuggestions = (data.suggestions && data.suggestions.length > 0)
                     ? data.suggestions
                     : extractSuggestions(data.response);
-                return { response: data.response, suggestions: aiSuggestions, isFallback: Boolean(data.fallback), sentiment: data.sentiment || 'neutral' };
+                return {
+                    response: data.response,
+                    suggestions: aiSuggestions,
+                    isFallback: Boolean(data.fallback),
+                    sentiment: data.sentiment || 'neutral',
+                    blueprint: data.blueprint || getClientBlueprint(userMsg),
+                };
             }
         } catch {
             // silently fall through to smart fallback
         }
         // If fetch fails completely (e.g. temporary network glitch)
-        return { response: buildClientFallback(userMsg), suggestions: ["View Projects", "What is your tech stack?", "Contact Satya"], isFallback: false, sentiment: 'neutral' };
+        return {
+            response: buildClientFallback(userMsg),
+            suggestions: ["View Projects", "What is your tech stack?", "Contact Satya"],
+            isFallback: false,
+            sentiment: 'neutral',
+            blueprint: getClientBlueprint(userMsg),
+        };
     };
 
     // ── Smart Action or Send ──────────────────────────────
@@ -304,7 +513,7 @@ export default function ChatBot() {
         setCharCount(0);
         setIsTyping(true);
 
-        const { response, suggestions, isFallback, sentiment } = await getBotResponse(msg);
+        const { response, suggestions, isFallback, sentiment, blueprint } = await getBotResponse(msg);
         setUserSentiment(sentiment as 'frustrated' | 'neutral' | 'positive');
 
         // If API failed entirely, use client-side smart fallback
@@ -312,7 +521,7 @@ export default function ChatBot() {
         const finalSuggestions = response ? suggestions : extractSuggestions(finalResponse);
 
         setHistory(prev => [...prev, { role: 'assistant', content: finalResponse }]);
-        streamBotMessage(finalResponse, finalSuggestions, isFallback);
+        streamBotMessage(finalResponse, finalSuggestions, isFallback, blueprint);
     };
 
     // ── Input ─────────────────────────────────────────────
@@ -487,6 +696,15 @@ export default function ChatBot() {
                                         )}
                                     </div>
                                 </div>
+                                {msg.isBot && !msg.isStreaming && msg.blueprint && (
+                                    <ProjectScopingCard
+                                        blueprint={msg.blueprint}
+                                        sessionId={sessionId}
+                                        onSuccess={(feedbackText) => {
+                                            sendMessage(feedbackText);
+                                        }}
+                                    />
+                                )}
                                 {msg.isBot && !msg.isStreaming && msg.suggestions && msg.suggestions.length > 0 && (
                                     <div className="cb-suggestions">
                                         {msg.suggestions.map((s, i) => (
