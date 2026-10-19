@@ -135,6 +135,13 @@ export default function ChatBot() {
     // Tooltip state
     const [showTooltip, setShowTooltip] = useState(false);
     const [tooltipIdx, setTooltipIdx] = useState(0);
+    const [hasSpeech, setHasSpeech] = useState(false);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+            setHasSpeech(true);
+        }
+    }, []);
 
     const [sessionId] = useState(() => {
         if (typeof window !== 'undefined') {
@@ -347,7 +354,6 @@ export default function ChatBot() {
         rec.start(); setIsListening(true);
     };
 
-    const hasSpeech = typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
     const tip = TOOLTIP_MESSAGES[tooltipIdx];
 
     // ── Render ────────────────────────────────────────────

@@ -131,11 +131,14 @@ export const HeroSectionSkeleton = () => {
                     </div>
                 </div>
                 <div className="space-y-4">
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                        <div key={i} className="mb-2">
-                             <Skeleton variant="text" width={`${Math.floor(Math.random() * 40 + 30)}%`} style={{ animationDelay: `${i * 0.05}s` }} />
-                        </div>
-                    ))}
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => {
+                        const widths = ['68%', '52%', '60%', '42%', '55%', '48%', '64%', '58%']
+                        return (
+                            <div key={i} className="mb-2">
+                                 <Skeleton variant="text" width={widths[(i - 1) % widths.length]} style={{ animationDelay: `${i * 0.05}s` }} />
+                            </div>
+                        )
+                    })}
                 </div>
                 <div className="mt-8 flex justify-center">
                     <Skeleton variant="rect" width="150px" height="45px" glow />
@@ -283,20 +286,26 @@ export const SidebarSkeleton = () => {
                     <Skeleton variant="circle" width={16} height={16} />
                 </div>
                 <div className="space-y-4">
-                    {[1, 2, 3].map((i) => (
-                        <div key={i} className="flex gap-2 items-center" style={{ animationDelay: `${i * 0.1}s` }}>
-                            <Skeleton width={12} height={12} />
-                            <Skeleton width={16} height={16} glow />
-                            <Skeleton variant="text" width={`${Math.floor(Math.random() * 40 + 40)}%`} />
-                        </div>
-                    ))}
-                    <div className="pl-6 space-y-4 pt-2">
-                        {[1, 2, 3, 4].map((i) => (
-                            <div key={i} className="flex gap-2 items-center" style={{ animationDelay: `${(i + 3) * 0.1}s` }}>
-                                <Skeleton width={14} height={14} />
-                                <Skeleton variant="text" width={`${Math.floor(Math.random() * 30 + 30)}%`} />
+                    {[1, 2, 3].map((i) => {
+                        const rowWidths = ['65%', '45%', '70%']
+                        return (
+                            <div key={i} className="flex gap-2 items-center" style={{ animationDelay: `${i * 0.1}s` }}>
+                                <Skeleton width={12} height={12} />
+                                <Skeleton width={16} height={16} glow />
+                                <Skeleton variant="text" width={rowWidths[(i - 1) % rowWidths.length]} />
                             </div>
-                        ))}
+                        )
+                    })}
+                    <div className="pl-6 space-y-4 pt-2">
+                        {[1, 2, 3, 4].map((i) => {
+                            const subRowWidths = ['42%', '55%', '38%', '50%']
+                            return (
+                                <div key={i} className="flex gap-2 items-center" style={{ animationDelay: `${(i + 3) * 0.1}s` }}>
+                                    <Skeleton width={14} height={14} />
+                                    <Skeleton variant="text" width={subRowWidths[(i - 1) % subRowWidths.length]} />
+                                </div>
+                            )
+                        })}
                     </div>
                 </div>
             </div>
@@ -347,9 +356,12 @@ export const TerminalSectionSkeleton = () => {
                 <Skeleton width="100px" height="15px" />
             </div>
             <div className="p-6 space-y-4">
-                {[1, 2, 3, 4, 5, 6].map((i) => (
-                    <Skeleton key={i} variant="text" width={`${Math.floor(Math.random() * 50 + 20)}%`} />
-                ))}
+                {[1, 2, 3, 4, 5, 6].map((i) => {
+                    const termWidths = ['45%', '65%', '35%', '55%', '40%', '28%']
+                    return (
+                        <Skeleton key={i} variant="text" width={termWidths[(i - 1) % termWidths.length]} />
+                    )
+                })}
             </div>
         </div>
     )

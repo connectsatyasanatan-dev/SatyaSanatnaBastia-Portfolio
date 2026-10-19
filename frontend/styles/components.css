@@ -1138,3 +1138,48 @@ body.resizing * {
   outline-offset: -2px;
 }
 
+/* ── Global Background Tech Symbols ── */
+.global-bg-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: -1;
+  background-color: #000000ff;
+}
+
+.bg-tech-symbol {
+  position: absolute;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px;
+  opacity: 0;
+  animation: float-symbol linear infinite;
+  color: var(--primary); 
+  text-shadow: 0 0 8px var(--primary-glow);
+  font-weight: 700;
+  user-select: none;
+}
+
+.bg-tech-symbol.purple {
+  color: rgba(139, 92, 246, 0.9);
+}
+
+.bg-tech-symbol.pink {
+  color: rgba(236, 72, 153, 0.9);
+}
+
+.bg-tech-symbol.dim {
+  font-size: 12px;
+}
+
+.bg-tech-symbol.large {
+  font-size: 32px;
+}
+
+@keyframes float-symbol {
+  0%   { opacity: 0; transform: translateY(100px) rotate(0deg) scale(0.9); }
+  15%  { opacity: var(--max-opacity, 0.6); }
+  85%  { opacity: var(--max-opacity, 0.6); }
+  100% { opacity: 0; transform: translateY(-300px) rotate(var(--rot, 20deg)) scale(1.1); }
+}
+
