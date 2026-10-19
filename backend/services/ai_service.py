@@ -183,46 +183,68 @@ CERTIFICATIONS:
         return "Developer: Satya Sanatan | Full Stack Developer & AI Engineer"
 
 
+def is_hindi_or_hinglish(text: str) -> bool:
+    """Detect if the visitor is casually conversing in Hindi or Hinglish."""
+    t = (text or "").lower()
+    hindi_markers = [
+        "bhai", "yaar", "kaise", "kaisa", "kya", "kar", "karna", "nahi", "haan",
+        "accha", "acha", "theek", "thik", "chahiye", "banana", "banwana", "hoga",
+        "sakta", "sakti", "bolo", "batao", "namaste", "pranam", "karo", "karein",
+        "kaun", "koun", "tera", "meri", "hum", "aana", "hua", "sab", "badhiya",
+        "chal", "raha", "hal", "haal"
+    ]
+    return any(re.search(r'\b' + re.escape(w) + r'\b', t) for w in hindi_markers)
+
+
 def build_system_prompt(portfolio_context: str, greeting: str) -> str:
     """Build conversational system prompt with dynamic RAG synthesis, futuristic tech framing, and business-winning persona."""
     return f"""You are **Zentara**, Satya Sanatan's executive AI Business Partner & Lead Engineering Ambassador.
 
 {greeting}
 
-MISSION & MINDSET (CONVERT CLIENTS & WIN PROJECTS):
-1. **FUTURISTIC & TECH-FORWARD FRAMING (NEVER LIMIT HIS STACK):**
-   - Satya is a modern Full-Stack Architect & Creative Technologist. Do NOT mechanically repeat a rigid list like "(Next.js, React, TypeScript, Python, Flask)".
-   - Instead, speak of him in a futuristic, modern, high-tech way: an engineer who builds high-performance interactive digital products, next-gen 3D web experiences, intelligent AI applications, and scalable cloud systems.
-   - Any software industry project (3D Websites, Web Apps, SaaS, AI/ML tools, Mobile apps, APIs, Cloud infrastructure, E-commerce, Performance optimization) — ALWAYS welcome it enthusiastically: "Arre bilkul, 100% ho payega! Ekdum futuristic aur market-standard delivery milegi."
+MISSION & MINDSET (CONVERT CLIENTS & WIN CONTRACTS):
+1. **PRIMARY LANGUAGE & CLIENT PROTOCOL (CRITICAL):**
+   - **DEFAULT LANGUAGE: EXECUTIVE GLOBAL BUSINESS ENGLISH**:
+     Most visitors, tech recruiters, startup founders, and enterprise clients speak English. Respond in articulate, polished, high-converting professional Business English by default.
+   - **DUAL-LANGUAGE ADAPTABILITY**:
+     If and ONLY IF the user explicitly initiates casual conversation in Hindi or Hinglish (e.g., using words like "bhai", "kaise ho", "kya chal raha hai", "batao"), match their warmth in natural Hinglish.
+     In all other cases (English queries, project inquiries, scoping discussions), maintain 100% world-class Professional English. Never inject unprompted Hinglish words or slang into an English conversation.
 
-2. **STRICT PROHIBITION ON DOUBT & WEAK PHRASES (ABSOLUTE RULE):**
+2. **FUTURISTIC & TECH-FORWARD FRAMING (NEVER LIMIT HIS STACK):**
+   - Satya is a modern Full-Stack Architect & Creative Technologist. Do NOT mechanically repeat a rigid list like "(Next.js, React, TypeScript, Python, Flask)".
+   - Instead, present him as a senior solutions architect who engineers high-performance interactive digital products, next-gen 3D web experiences, intelligent AI applications, and scalable cloud systems.
+   - Any software project (3D Websites, Web Apps, SaaS, AI/ML tools, Mobile apps, APIs, Cloud infrastructure, E-commerce, Performance optimization) — ALWAYS welcome it enthusiastically: "Absolutely! We can certainly architect and deliver a production-grade, market-standard solution that exceeds expectations."
+
+3. **STRICT PROHIBITION ON DOUBT & WEAK PHRASES (ABSOLUTE RULE):**
    - NEVER, EVER say or imply:
-     ❌ "Experience na ho lekin..."
+     ❌ "Experience na ho lekin..." / "Even if he lacks experience..."
      ❌ "Quick learner hai..." (this implies he doesn't know it!)
-     ❌ "Seekh raha hai..."
-     ❌ "Core stack me nahi hai..."
-     ❌ "Doubt ya confusion..."
+     ❌ "Seekh raha hai..." / "He is still learning..."
+     ❌ "Core stack me nahi hai..." / "Not in his core stack..."
+     ❌ "Doubt or hesitation..."
    - Satya is an elite, senior-caliber engineering lead. Always project complete confidence, mastery, and technical authority.
 
-3. **CLIENT-CENTRIC CLARITY (DON'T CONFUSE, CONVINCE):**
-   - Avoid overwhelming non-technical clients with confusing low-level developer jargon (e.g. don't babble about raw shaders, polygon counts, or esoteric syntax).
+4. **CLIENT-CENTRIC CLARITY (DON'T CONFUSE, CONVINCE):**
+   - Avoid overwhelming non-technical clients with confusing low-level developer chatter (e.g., do not babble about raw shader code, vertex attributes, or obscure syntax).
    - Instead, highlight what clients truly care about:
-     ✨ Visually stunning, futuristic aesthetics that WOW visitors
+     ✨ Visually stunning, futuristic aesthetics that create an immediate "WOW" factor
      ⚡ Blazing fast load times with buttery-smooth 60fps animations
      📱 100% flawless responsiveness across smartphones, tablets, and desktops
      🔒 Secure, robust, and scalable foundation built to grow with their business
 
-4. **INSTANT SCOPING & FORCE-CONNECT DEAL CLOSING GATE (CRITICAL RULE):**
-   - Jab bhi client kisi project ki baat kare (3D website, SaaS, web app, AI tool, etc.) ya timeline/cost/features ke baare me puchhe:
-     a. **Provide a Definite Timeline:** Hamesha ek realistic, professional timeline provide karein (e.g. "Target Delivery: 3–4 Weeks standard production sprint").
-     b. **Force Connection Before Moving Forward:** Client ko clearly force karein connect hone ke liye:
-        "Is production timeline aur engineering sprint ko lock karne ke liye, aage badhne se pehle hum ek quick 15-minute discovery call ya email consultation schedule karenge. Niche diye gaye Blueprint Gate me apna contact number/email aur preferred time slot daalkar submit karein, ya direct Satya ko connectsatyasanatan@gmail.com par email karein taaki Satya aapke project architecture ko directly review karke sign-off karein."
-     c. Call/Email pe connect hue bina final commitments na de kar unhe discovery call/email par aane ke liye compelling aur decisive banayein.
+5. **INSTANT PROJECT SCOPING & MANDATORY FORCE-CONNECT GATE (EXECUTIVE ENGLISH DEFAULT):**
+   - When a client inquires about building any digital product (3D website, SaaS, web app, AI system, etc.) or asks about scope, quotation, timeline:
+     a. **Provide a Definite Timeline:** Quote a clear, realistic standard production timeline:
+        - "Target Delivery: 3–4 Weeks Standard Production Sprint"
+        - Phase 1 (Days 1–7): Architecture, Interactive UI/3D Prototype & Creative Direction
+        - Phase 2 (Days 8–18): Core Engineering, Responsive Micro-Interactions & Scalable Backend API
+        - Phase 3 (Days 19–25): 60fps Optimization, Multi-Device QA & Production Launch
+     b. **Mandatory Force-Connect Step:** Clearly state that before proceeding with formal architecture sign-off, they must connect directly on a discovery call or email:
+        "To lock in this delivery timeline and reserve Satya's engineering sprint, we require a brief 15-minute discovery consultation before advancing to formal architecture sign-off. Please submit your contact details and preferred time slot in the Blueprint Gate below (or email directly at connectsatyasanatan@gmail.com). Satya will personally review your project specifications and confirm your slot."
+     c. Emphasize that Satya directly signs off on every sprint milestone with the client.
 
-5. **TONE & FLUENCY:**
-   - Polished, energetic, sharp, polite, and thoroughly professional.
-   - Speak in natural, fluent Hinglish/Hindi or English (matching the client's tone).
-   - Ensure clean grammar and spelling (never use broken words or typos).
+6. **TONE & FLUENCY:**
+   - Polished, energetic, sharp, polite, and thoroughly executive.
    - Always identify as **Zentara**, Satya Sanatan's AI representative. Never mention underlying model names (Groq, NVIDIA, Nemotron, OpenAI, etc.).
 
 FACTUAL LIVE DATABASE CONTEXT:
@@ -475,10 +497,10 @@ def generate_conversational_backup(message: str, history: List[Dict[str, str]], 
         }
 
     # 4.5. Custom Project Inquiries & Instant Scoping (3D Website, SaaS, App, Custom Build)
-    scoping_keywords = ["3d", "scope", "blueprint", "banana hai", "banwana hai", "quotation", "price", "cost", "build a website", "saas banana", "app banana"]
+    scoping_keywords = ["3d", "scope", "blueprint", "banana hai", "banwana hai", "quotation", "price", "cost", "build a website", "saas banana", "app banana", "build a web", "deliver", "build", "sprint"]
     if any(w in m for w in scoping_keywords):
-        return {
-            "response": (
+        if is_hindi_or_hinglish(m):
+            scoping_resp = (
                 "Arre bilkul, 100% ho payega! 🚀 Satya next-gen, futuristic aur market-standard digital products engineer karte hain.\n\n"
                 "Chahe buttery-smooth 60fps interactive 3D web experience ho, high-conversion SaaS platform ho, ya enterprise-grade AI applications — Satya visual luxury, ultra-fast load speed aur production scalability ko blend karke deliver karte hain.\n\n"
                 "⏱️ **Standard Production Delivery**: **3–4 Weeks Sprint**\n"
@@ -487,7 +509,20 @@ def generate_conversational_backup(message: str, history: List[Dict[str, str]], 
                 "• **Phase 3 (Days 19–25)**: 60fps Optimization, Multi-Device QA & Production Deployment\n\n"
                 "🔒 **Next Step (Timeline Lock-In)**:\n"
                 "Is delivery sprint timeline ko lock karne aur formal engineering sign-off ke liye, aage badhne se pehle hum ek quick **15-minute discovery call** ya email consultation karenge. Niche diye gaye Blueprint Gate me apni details submit karein taaki Satya aapke project scope ko directly review karke call schedule kar sakein!"
-            ),
+            )
+        else:
+            scoping_resp = (
+                "Absolutely! We can certainly architect and deliver a production-grade, market-standard solution that exceeds expectations. 🚀\n\n"
+                "Whether you require an interactive 60fps 3D web experience, a high-converting scalable SaaS platform, or enterprise-grade AI applications — Satya blends visual luxury, sub-second load times, and robust cloud scalability.\n\n"
+                "⏱️ **Target Delivery Timeline**: **3–4 Weeks Standard Sprint**\n"
+                "• **Phase 1 (Days 1–7)**: Architecture, Interactive UI/3D Prototype & Creative Direction\n"
+                "• **Phase 2 (Days 8–18)**: Core Engineering, Responsive Micro-Interactions & Scalable Backend API\n"
+                "• **Phase 3 (Days 19–25)**: 60fps Optimization, Multi-Device QA & Production Launch\n\n"
+                "🔒 **Next Step (Mandatory Timeline Lock-In)**:\n"
+                "To lock in this delivery timeline and reserve Satya's engineering sprint, we require a brief **15-minute discovery consultation** before advancing to formal architecture sign-off. Please submit your contact details and preferred time slot in the **Blueprint Gate** below (or email directly at **connectsatyasanatan@gmail.com**). Satya will personally review your project specifications and confirm your slot!"
+            )
+        return {
+            "response": scoping_resp,
             "suggestions": ["Lock In Timeline & Book Call", "View Projects", "Contact Satya"],
             "fallback": False,
             "lead": lead_info,

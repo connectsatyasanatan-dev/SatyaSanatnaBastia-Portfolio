@@ -50,7 +50,7 @@ const TOOLTIP_MESSAGES = [
 
 // ── Quick chips ───────────────────────────────────────────
 const CHIPS: Chip[] = [
-    { label: '🚀 Scope Project', icon: <Sparkles size={12} />, query: 'Mujhe ek project scope aur delivery blueprint chahiye' },
+    { label: '🚀 Scope Project', icon: <Sparkles size={12} />, query: 'I would like a project scope and delivery blueprint for a new digital product' },
     { label: 'Projects', icon: <Code2 size={12} />, query: 'Tell me about your projects' },
     { label: 'Skills', icon: <Zap size={12} />, query: 'What is your tech stack?' },
     { label: 'Experience', icon: <Briefcase size={12} />, query: 'Tell me about your experience' },
@@ -189,7 +189,7 @@ function ProjectScopingCard({
                     <CheckCircle2 size={15} /> Sprint Timeline & Call Registered!
                 </div>
                 <div className="cb-blueprint-success-desc">
-                    Satya ko aapka Project Blueprint aur meeting request notify kar diya gaya hai. Hum aapse jaldi hi specified slot par call/email ke zariye connect karenge! 🚀
+                    Your Project Blueprint and consultation request have been securely noted. Satya will review your technical specifications and connect with you at your chosen slot via email/WhatsApp! 🚀
                 </div>
             </div>
         );
@@ -224,7 +224,7 @@ function ProjectScopingCard({
                     <Calendar size={13} /> Lock In Timeline & Schedule 15-Min Scoping Call
                 </div>
                 <div className="cb-blueprint-gate-desc">
-                    Preliminary blueprint ready hai. Is engineering timeline ko lock karne aur formal architecture sign-off ke liye, Satya sir se direct consultation schedule karein:
+                    Preliminary architecture blueprint is prepared. To lock in this delivery timeline and conduct formal architecture sign-off, schedule a direct 15-minute scoping consultation with Satya:
                 </div>
 
                 <form className="cb-blueprint-form" onSubmit={handleSubmit}>
@@ -248,16 +248,16 @@ function ProjectScopingCard({
                         value={slot}
                         onChange={(e) => setSlot(e.target.value)}
                     >
-                        <option value="Tomorrow Afternoon (IST)">Tomorrow Afternoon (IST)</option>
+                        <option value="Tomorrow Afternoon (IST / Flexible)">Tomorrow Afternoon (IST / Flexible)</option>
                         <option value="Today Evening (IST)">Today Evening (IST)</option>
                         <option value="This Weekend (IST)">This Weekend (IST)</option>
-                        <option value="Flexible (Email Me First)">Flexible (Email Me First)</option>
+                        <option value="Flexible (Email Consultation First)">Flexible (Email Consultation First)</option>
                     </select>
 
                     {error && <div style={{ color: '#f87171', fontSize: 10 }}>{error}</div>}
 
                     <button type="submit" className="cb-blueprint-submit" disabled={isSubmitting}>
-                        {isSubmitting ? 'Submitting...' : '🔒 Lock In Timeline & Book Call'}
+                        {isSubmitting ? 'Submitting...' : '🔒 Lock In Timeline & Schedule Call'}
                     </button>
 
                     <a
