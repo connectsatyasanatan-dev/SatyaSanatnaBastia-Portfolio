@@ -54,44 +54,37 @@ export default function AppContainer({ children }: AppContainerProps) {
 
     return (
         <>
-            <AnimatePresence mode="wait">
+            <AnimatePresence>
                 {isLoading && (
                     <PreLoader key="loader" onLoadingComplete={() => setIsLoading(false)} />
                 )}
             </AnimatePresence>
 
-            {!isLoading && (
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.5 }}
-                    className="app-container"
-                >
-                    <GlobalBackground />
-                    <Header />
+            <div className="app-container">
+                <GlobalBackground />
+                <Header />
 
-                    <div className="app-body">
-                        <ResizableSidebar
-                            minWidth={200}
-                            maxWidth={600}
-                            defaultWidth={288}
-                            activeSection={activeSection}
-                        />
+                <div className="app-body">
+                    <ResizableSidebar
+                        minWidth={200}
+                        maxWidth={600}
+                        defaultWidth={288}
+                        activeSection={activeSection}
+                    />
 
-                        <main className="editor-main" style={{ background: 'transparent' }}>
-                            <div className="grid-overlay grid-pattern" />
+                    <main className="editor-main" style={{ background: 'transparent' }}>
+                        <div className="grid-overlay grid-pattern" />
 
-                            <TabBar activeSection={activeSection} />
+                        <TabBar activeSection={activeSection} />
 
-                            <div className="main-content" style={{ backgroundColor: 'rgba(17, 24, 24, 0.4)' }}>
-                                {children}
-                            </div>
+                        <div className="main-content" style={{ backgroundColor: 'rgba(17, 24, 24, 0.4)' }}>
+                            {children}
+                        </div>
 
-                            <ScrollToTop />
-                        </main>
-                    </div>
-                </motion.div>
-            )}
+                        <ScrollToTop />
+                    </main>
+                </div>
+            </div>
         </>
     )
 }

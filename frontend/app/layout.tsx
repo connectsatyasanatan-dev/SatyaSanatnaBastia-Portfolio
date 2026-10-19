@@ -16,6 +16,14 @@ export const metadata: Metadata = {
         default: "Satya Sanatan | Full Stack Developer",
         template: "%s | Satya Sanatan"
     },
+    icons: {
+        icon: [
+            { url: '/images/Polished Bearded Avatar in Hoodie.png' },
+            { url: '/icon.png' }
+        ],
+        shortcut: '/images/Polished Bearded Avatar in Hoodie.png',
+        apple: '/images/Polished Bearded Avatar in Hoodie.png',
+    },
     description: 'A modern VS Code inspired developer portfolio built with Next.js, React, and Flask.',
     keywords: ["Satya Sanatan", "Full Stack Developer", "Portfolio", "React", "Next.js", "Python", "Flask", "Developer"],
     authors: [{ name: "Satya Sanatan" }],
@@ -87,6 +95,9 @@ export default function RootLayout({
                     href="https://fonts.googleapis.com/css2?family=Noto+Serif+Devanagari:wght@400;700&family=Noto+Sans+Oriya:wght@400;700&display=swap"
                     rel="stylesheet"
                 />
+                <link rel="icon" type="image/png" href="/images/Polished Bearded Avatar in Hoodie.png" />
+                <link rel="shortcut icon" href="/images/Polished Bearded Avatar in Hoodie.png" />
+                <link rel="apple-touch-icon" href="/images/Polished Bearded Avatar in Hoodie.png" />
             </head>
             <body className={`${inter.className}`} style={{ background: 'var(--background-dark)', color: 'white', fontFamily: 'var(--font-display)' }}>
                 <Providers>

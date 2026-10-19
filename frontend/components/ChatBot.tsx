@@ -108,13 +108,13 @@ function RenderMessage({ text }: { text: string }) {
 
 // ── Zentara Avatar ────────────────────────────────────────
 function ZentaraAvatar({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
-    const dims: Record<string, number> = { sm: 16, md: 24, lg: 28 };
+    const dims: Record<string, number> = { sm: 18, md: 26, lg: 44 };
     const d = dims[size];
     return (
         <img
-            src="/images/Zentara-logo.png"
-            alt="Zentara"
-            style={{ width: d, height: d, objectFit: 'contain', borderRadius: '50%', display: 'block' }}
+            src="/images/Polished Bearded Avatar in Hoodie.png"
+            alt="AI Assistant"
+            style={{ width: d, height: d, objectFit: 'cover', borderRadius: '50%', display: 'block' }}
         />
     );
 }
