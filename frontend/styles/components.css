@@ -142,8 +142,8 @@
 }
 
 #portfolio-header .run-build-btn span {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
   transition: color 0.2s;
 }
 
@@ -424,7 +424,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 11px;
+  font-size: var(--text-2xs);
   font-weight: 600;
   color: var(--text-dim);
   text-transform: uppercase;
@@ -670,7 +670,7 @@
 }
 
 #portfolio-tabbar .breadcrumb-info span {
-  font-size: 10px;
+  font-size: var(--text-2xs);
   color: var(--text-dim);
 }
 

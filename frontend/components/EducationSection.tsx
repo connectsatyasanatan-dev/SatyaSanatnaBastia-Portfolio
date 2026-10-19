@@ -167,20 +167,20 @@ const EducationSection = () => {
                             .edu-header-icon { color: #06f9f9; position: relative; z-index: 1; }
                             .edu-header-text { flex: 1; min-width: 0; }
                             .edu-header-title {
-                                font-size: 26px; font-weight: 800;
+                                font-size: var(--text-2xl); font-weight: 700;
                                 letter-spacing: -.03em; color: #fff; margin: 0;
                                 background: linear-gradient(90deg, #fff 40%, #06f9f9 100%);
                                 -webkit-background-clip: text; -webkit-text-fill-color: transparent;
                                 background-clip: text;
                             }
                             .edu-header-sub {
-                                font-size: 12px; color: rgba(255,255,255,.4);
-                                font-family: 'JetBrains Mono', monospace;
+                                font-size: var(--text-xs); color: rgba(255,255,255,.4);
+                                font-family: var(--font-mono);
                                 letter-spacing: .06em; margin-top: 2px;
                             }
                             .edu-header-badge {
                                 display: inline-flex; align-items: center; gap: 5px;
-                                font-size: 11px; font-family: 'JetBrains Mono', monospace;
+                                font-size: var(--text-xs); font-family: var(--font-mono);
                                 color: #06f9f9; background: rgba(6,249,249,.08);
                                 border: 1px solid rgba(6,249,249,.2); padding: 4px 12px;
                                 border-radius: 20px; letter-spacing: .05em;
@@ -266,17 +266,17 @@ const EducationSection = () => {
                             }
                             .edu-nav-info { flex: 1; min-width: 0; }
                             .edu-nav-degree {
-                                font-size: 13px; font-weight: 700; color: #fff;
+                                font-size: var(--text-sm); font-weight: 600; color: #fff;
                                 white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
                                 line-height: 1.3; margin-bottom: 3px;
                             }
                             .edu-nav-school {
-                                font-size: 11px; color: rgba(255,255,255,.45);
+                                font-size: var(--text-xs); color: rgba(255,255,255,.5);
                                 white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
                             }
                             .edu-nav-year {
-                                font-family: 'JetBrains Mono', monospace;
-                                font-size: 10px; color: #06f9f9; opacity: .7;
+                                font-family: var(--font-mono);
+                                font-size: var(--text-2xs); color: #06f9f9; opacity: .8;
                                 margin-top: 4px;
                             }
                             .edu-nav-arrow {

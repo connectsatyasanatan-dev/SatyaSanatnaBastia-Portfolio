@@ -143,22 +143,22 @@
   color: white;
   margin-bottom: var(--space-3);
   letter-spacing: -0.03em;
-  line-height: 1.1;
+  line-height: 1.15;
 }
 
 #hero-section .hero-title {
-  font-size: var(--text-2xl);
+  font-size: var(--text-xl);
   color: var(--primary);
-  font-weight: 700;
+  font-weight: 600;
   margin-bottom: var(--space-4);
-  letter-spacing: 0.05em;
+  letter-spacing: 0.02em;
   text-transform: capitalize;
 }
 
 #hero-section .hero-description {
   color: var(--text-dim);
-  font-size: var(--text-lg);
-  line-height: 1.6;
+  font-size: var(--text-base);
+  line-height: 1.65;
   max-width: 65ch;
   margin: 0 auto;
 }
@@ -258,8 +258,9 @@
 #hero-section .stat-value.green { color: #22c55e; }
 
 #hero-section .stat-label {
-  font-size: 11px;
+  font-size: var(--text-xs);
   color: var(--text-dim);
+  font-weight: 500;
 }
 
 /* Extra small screen hero fixes */
@@ -289,7 +290,7 @@
   }
 
   #hero-section .stat-label {
-    font-size: 10px;
+    font-size: var(--text-xs);
   }
 
   #hero-section .hero-btn {
@@ -452,14 +453,15 @@
 
 .profile-grid-item .label {
   display: block;
-  font-size: 9px;
+  font-size: var(--text-2xs);
   text-transform: uppercase;
   color: var(--text-dim);
-  letter-spacing: 1px;
+  letter-spacing: 0.05em;
+  font-weight: 500;
 }
 
 .profile-grid-item .value {
-  font-size: 11px;
+  font-size: var(--text-sm);
   font-weight: bold;
   color: white;
 }
@@ -480,14 +482,14 @@
   .execution-modal-overlay { padding: 8px; }
   .execution-modal-body { padding: 14px; }
   .profile-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .profile-grid-item .label { font-size: 8px; letter-spacing: 0.5px; }
-  .profile-grid-item .value { font-size: 10px; }
-  .profile-badge h2 { font-size: 17px; }
+  .profile-grid-item .label { font-size: var(--text-2xs); letter-spacing: 0.03em; }
+  .profile-grid-item .value { font-size: var(--text-xs); }
+  .profile-badge h2 { font-size: 18px; }
   .profile-main-info h3 { font-size: 16px; }
   .profile-content { padding: 12px; }
-  .terminal-wrapper { font-size: 11px; padding: 10px; max-height: 200px; }
+  .terminal-wrapper { font-size: 12px; padding: 10px; max-height: 200px; }
   .profile-actions { flex-direction: row; gap: 8px; }
-  .profile-actions .hero-btn { font-size: 11px; padding: 8px 6px; }
+  .profile-actions .hero-btn { font-size: 12px; padding: 8px 6px; }
 }
 
 @media (max-width: 360px) {
@@ -603,9 +605,9 @@
 }
 
 #skills-section .section-title {
-  font-size: 20px;
-  font-weight: bold;
-  font-family: 'Space Grotesk', sans-serif;
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  font-family: var(--font-display);
   letter-spacing: -0.025em;
 }
 
@@ -911,24 +913,12 @@
   #hero-section {
     padding: 0 32px;
   }
-  
-  #hero-section .hero-title {
-    font-size: 40px;
-  }
-  
-  #hero-section .hero-subtitle {
-    font-size: 20px;
-  }
 }
 
 @media (min-width: 1024px) {
   #hero-section {
     grid-template-columns: 1fr 1fr;
     padding: 0;
-  }
-  
-  #hero-section .hero-title {
-    font-size: 46px;
   }
 }
 

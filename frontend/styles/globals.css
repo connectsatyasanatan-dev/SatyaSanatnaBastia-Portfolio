@@ -26,25 +26,57 @@
   --space-8: clamp(2rem, 1.6rem + 2vw, 4rem);
   --space-12: clamp(3rem, 2.4rem + 3vw, 6rem);
 
-  /* Fluid Typography */
-  --font-xs: clamp(0.7rem, 0.65rem + 0.25vw, 0.85rem);
-  --font-sm: clamp(0.8rem, 0.75rem + 0.25vw, 0.95rem);
-  --font-base: clamp(0.9rem, 0.85rem + 0.25vw, 1.05rem);
-  --font-lg: clamp(1.1rem, 1rem + 0.5vw, 1.35rem);
-  --font-xl: clamp(1.4rem, 1.25rem + 0.75vw, 1.8rem);
-  --font-2xl: clamp(1.5rem, 1.3rem + 1vw, 2.5rem);
-  --font-3xl: clamp(1.8rem, 1.5rem + 1.25vw, 3.2rem);
-  --font-4xl: clamp(2.2rem, 1.8rem + 1.5vw, 4rem);
+  /* Font Families */
+  --font-sans: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', Menlo, Monaco, Consolas, monospace;
+  --font-code: 'JetBrains Mono', monospace;
 
-  /* Aliases for convenience */
-  --text-xs: var(--font-xs);
-  --text-sm: var(--font-sm);
-  --text-base: var(--font-base);
-  --text-lg: var(--font-lg);
-  --text-xl: var(--font-xl);
-  --text-2xl: var(--font-2xl);
-  --text-3xl: var(--font-3xl);
-  --text-4xl: var(--font-4xl);
+  /* Font Weights */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  /* Line Heights */
+  --leading-none: 1;
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose: 2;
+
+  /* Letter Spacing */
+  --tracking-tighter: -0.035em;
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
+
+  /* Standardized Typography Scale */
+  --text-2xs: clamp(0.6875rem, 0.65rem + 0.15vw, 0.75rem);   /* 11px - 12px: micro badges, line numbers */
+  --text-xs: clamp(0.75rem, 0.72rem + 0.15vw, 0.8125rem);    /* 12px - 13px: captions, metadata, status */
+  --text-sm: clamp(0.8125rem, 0.79rem + 0.15vw, 0.875rem);   /* 13px - 14px: secondary text, table cells, tabs */
+  --text-base: clamp(0.875rem, 0.85rem + 0.2vw, 0.9375rem);  /* 14px - 15px: standard body, inputs, buttons */
+  --text-md: clamp(0.9375rem, 0.9rem + 0.25vw, 1.0625rem);   /* 15px - 17px: primary body, card titles */
+  --text-lg: clamp(1.0625rem, 1rem + 0.35vw, 1.25rem);       /* 17px - 20px: component heading H4, sub-cards */
+  --text-xl: clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem);        /* 20px - 24px: subsection heading H3 */
+  --text-2xl: clamp(1.5rem, 1.35rem + 0.75vw, 1.75rem);      /* 24px - 28px: section heading H2 */
+  --text-3xl: clamp(1.875rem, 1.6rem + 1.1vw, 2.25rem);      /* 30px - 36px: main hero/page title H1 */
+  --text-4xl: clamp(2.25rem, 1.85rem + 1.5vw, 2.75rem);      /* 36px - 44px: hero accent display */
+
+  /* Backward Compatibility Aliases */
+  --font-2xs: var(--text-2xs);
+  --font-xs: var(--text-xs);
+  --font-sm: var(--text-sm);
+  --font-base: var(--text-base);
+  --font-md: var(--text-md);
+  --font-lg: var(--text-lg);
+  --font-xl: var(--text-xl);
+  --font-2xl: var(--text-2xl);
+  --font-3xl: var(--text-3xl);
+  --font-4xl: var(--text-4xl);
 
   /* Utilities */
   --header-height: clamp(40px, 36px + 1vw, 48px);
@@ -75,7 +107,7 @@ body {
   margin: 0;
   padding: 0;
   overflow: hidden;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -83,9 +115,9 @@ body {
 body {
   background-color: var(--bg-color);
   color: var(--text-main);
-  font-family: var(--font-mono);
-  font-size: var(--font-base);
-  line-height: 1.5;
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
 }
 
 /* Custom scrollbar */
@@ -261,12 +293,39 @@ body {
 
 /* Utility Classes */
 .font-mono {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
 }
 
-.font-display {
-  font-family: 'Space Grotesk', sans-serif;
+.font-display,
+.font-sans {
+  font-family: var(--font-sans);
 }
+
+.text-2xs { font-size: var(--text-2xs); }
+.text-xs { font-size: var(--text-xs); }
+.text-sm { font-size: var(--text-sm); }
+.text-base { font-size: var(--text-base); }
+.text-md { font-size: var(--text-md); }
+.text-lg { font-size: var(--text-lg); }
+.text-xl { font-size: var(--text-xl); }
+.text-2xl { font-size: var(--text-2xl); }
+.text-3xl { font-size: var(--text-3xl); }
+.text-4xl { font-size: var(--text-4xl); }
+
+.font-normal { font-weight: var(--font-normal); }
+.font-medium { font-weight: var(--font-medium); }
+.font-semibold { font-weight: var(--font-semibold); }
+.font-bold { font-weight: var(--font-bold); }
+
+.leading-none { line-height: var(--leading-none); }
+.leading-tight { line-height: var(--leading-tight); }
+.leading-snug { line-height: var(--leading-snug); }
+.leading-normal { line-height: var(--leading-normal); }
+.leading-relaxed { line-height: var(--leading-relaxed); }
+
+.tracking-tight { letter-spacing: var(--tracking-tight); }
+.tracking-normal { letter-spacing: var(--tracking-normal); }
+.tracking-wide { letter-spacing: var(--tracking-wide); }
 
 .text-primary {
   color: var(--primary);

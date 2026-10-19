@@ -64,16 +64,16 @@
    }
 
    #hero-section .hero-name {
-      font-size: 22px;
+      font-size: var(--text-3xl);
       line-height: 1.2;
    }
 
    #hero-section .hero-title {
-      font-size: 13px;
+      font-size: var(--text-base);
    }
 
    #hero-section .hero-description {
-      font-size: 12px;
+      font-size: var(--text-sm);
    }
 
    #hero-section .hero-actions {
@@ -112,11 +112,11 @@
    }
 
    #hero-section .stat-label {
-      font-size: 9px;
+      font-size: var(--text-xs);
    }
 
    #hero-section .code-content {
-      font-size: 9px;
+      font-size: var(--text-xs);
       padding: 8px 6px;
    }
 
@@ -152,7 +152,7 @@
    }
 
    #skills-section .stat-description {
-      font-size: 10px;
+      font-size: var(--text-xs);
    }
 
    #skills-section .skills-grid {
@@ -165,11 +165,11 @@
    }
 
    #skills-section .category-title {
-      font-size: 14px;
+      font-size: var(--text-md);
    }
 
    #skills-section .skill-name {
-      font-size: 12px;
+      font-size: var(--text-sm);
    }
 
    #skills-section .achievements-grid {
@@ -221,7 +221,7 @@
    #projects-section .project-terminal {
       height: 120px;
       padding: 10px;
-      font-size: 10px;
+      font-size: var(--text-xs);
    }
 
    #projects-section .project-content {
@@ -229,11 +229,11 @@
    }
 
    #projects-section .project-name {
-      font-size: 14px;
+      font-size: var(--text-base);
    }
 
    #projects-section .project-description {
-      font-size: 12px;
+      font-size: var(--text-sm);
    }
 
    #projects-section .project-footer {
@@ -253,7 +253,7 @@
    }
 
    .testi-header-title {
-      font-size: 20px !important;
+      font-size: var(--text-2xl) !important;
    }
 
    .testi-slide {
@@ -321,7 +321,7 @@
    }
 
    #terminal-section .terminal-window {
-      font-size: 10px;
+      font-size: var(--text-xs);
    }
 
    #terminal-section .terminal-stats {
@@ -525,7 +525,7 @@
 
    /* Section titles */
    .section-title {
-      font-size: 16px !important;
+      font-size: var(--text-2xl) !important;
    }
 
    /* Hero */
@@ -575,7 +575,7 @@
    }
 
    .testi-header-title {
-      font-size: 24px !important;
+      font-size: var(--text-2xl) !important;
    }
 
    .testi-slide {

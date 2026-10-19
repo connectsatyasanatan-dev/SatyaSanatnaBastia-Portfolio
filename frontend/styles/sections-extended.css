@@ -21,9 +21,9 @@
 }
 
 #git-history-section .section-title {
-  font-size: 20px;
-  font-weight: bold;
-  font-family: 'Space Grotesk', sans-serif;
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  font-family: var(--font-display);
   letter-spacing: -0.025em;
   color: white;
 }
@@ -204,10 +204,10 @@
 
 #git-history-section .timeline-badge {
   padding: 4px 8px;
-  font-size: 10px;
+  font-size: var(--text-2xs);
   border-radius: 12px;
   border: 1px solid;
-  font-weight: bold;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -290,8 +290,8 @@
 }
 
 #git-history-section .timeline-commit {
-  font-size: 10px;
-  opacity: 0.7;
+  font-size: var(--text-xs);
+  opacity: 0.8;
 }
 
 #git-history-section .timeline-description {
@@ -335,8 +335,8 @@
 }
 
 #git-history-section .tech-tag {
-  font-size: 11px;
-  font-family: 'JetBrains Mono', monospace;
+  font-size: var(--text-2xs);
+  font-family: var(--font-mono);
   padding: 4px 8px;
   border-radius: 4px;
   border: 1px solid;

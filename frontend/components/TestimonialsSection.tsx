@@ -130,7 +130,7 @@ const TestimonialsSection = () => {
                                 padding-left: 10px;
                             }
                             .testi-header-title {
-                                font-size: 32px; font-weight: 800; color: #fff;
+                                font-size: var(--text-2xl); font-weight: 700; color: #fff;
                                 background: linear-gradient(135deg, #fff 40%, rgba(255,255,255,0.4));
                                 -webkit-background-clip: text; -webkit-text-fill-color: transparent;
                             }
@@ -138,8 +138,8 @@ const TestimonialsSection = () => {
                                 display: flex; align-items: center; gap: 8px;
                                 padding: 6px 14px; background: rgba(255, 255, 255, 0.05);
                                 border: 1px solid rgba(255, 255, 255, 0.1);
-                                border-radius: 20px; font-size: 13px; color: rgba(255, 255, 255, 0.6);
-                                font-family: 'JetBrains Mono', monospace;
+                                border-radius: 20px; font-size: var(--text-xs); color: rgba(255, 255, 255, 0.6);
+                                font-family: var(--font-mono);
                             }
 
                             /* ── slider wrapper ── */
@@ -182,10 +182,10 @@ const TestimonialsSection = () => {
                             .testi-info {
                                 display: flex; flex-direction: column; gap: 4px;
                             }
-                            .testi-name { font-size: 22px; font-weight: 700; color: #fff; margin: 0; }
+                            .testi-name { font-size: var(--text-lg); font-weight: 700; color: #fff; margin: 0; }
                             .testi-position {
                                 display: flex; align-items: center; gap: 8px;
-                                font-size: 14px; color: rgba(255, 255, 255, 0.4);
+                                font-size: var(--text-sm); color: rgba(255, 255, 255, 0.6);
                             }
 
                             .testi-stars {
@@ -195,11 +195,15 @@ const TestimonialsSection = () => {
                             .star-empty { color: rgba(255, 255, 255, 0.1); }
 
                             .testi-quote-text {
-                                font-size: 26px; font-weight: 500; line-height: 1.5; color: #fff;
-                                letter-spacing: -0.01em; margin: 0 0 40px 0;
+                                font-size: clamp(1.125rem, 1rem + 0.6vw, 1.375rem);
+                                font-weight: 500;
+                                line-height: 1.6;
+                                color: #fff;
+                                letter-spacing: -0.01em;
+                                margin: 0 0 40px 0;
                                 max-width: 800px;
                             }
-                            @media (max-width: 768px) { .testi-quote-text { font-size: 20px; } }
+                            @media (max-width: 768px) { .testi-quote-text { font-size: 1.125rem; } }
 
                             /* ── navigation controls ── */
                             .testi-nav {

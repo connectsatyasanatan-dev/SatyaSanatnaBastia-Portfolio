@@ -485,7 +485,7 @@ const CertificationsSection = () => {
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px', paddingBottom: '16px', borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
                         <Award size={28} style={{ color: 'goldenrod' }} />
-                        <h3 style={{ fontSize: '24px', fontWeight: 'bold', fontFamily: "'Space Grotesk', sans-serif", letterSpacing: '-0.025em', color: 'white', margin: 0 }}>Licenses & Certifications</h3>
+                        <h2 className="section-title" style={{ fontSize: 'var(--text-2xl)', fontWeight: 700, fontFamily: 'var(--font-display)', letterSpacing: '-0.025em', color: 'white', margin: 0 }}>Licenses & Certifications</h2>
                     </div>
 
                     <div className={`certifications-grid ${certifications.length === 1 ? 'single-item' : ''}`}>
