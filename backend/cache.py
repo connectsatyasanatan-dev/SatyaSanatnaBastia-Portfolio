@@ -22,3 +22,9 @@ def set_cache(key: str, data, ttl: int = _CACHE_TTL):
 def invalidate_cache(*keys):
     for k in keys:
         _cache.pop(k, None)
+    # Also automatically invalidate AI assistant grounded context cache
+    try:
+        from services.ai_service import invalidate_context_cache
+        invalidate_context_cache()
+    except Exception:
+        pass
