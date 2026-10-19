@@ -17,7 +17,7 @@ frontend/.env.local
 frontend/.env.development.local
 frontend/.env.test.local
 frontend/.env.production.local
-# Keep .env.local.example in source control — it is the safe template
+# Keep .env.local.example in source control - it is the safe template
 
 # ─── Debug / logs ────────────────────────────────────────────────────────────
 npm-debug.log*

@@ -14,7 +14,7 @@ ENV/
 
 # ─── Environment variables (NEVER commit real .env!) ─────────────────────────
 .env
-# Keep .env.example in source control — it is the safe template
+# Keep .env.example in source control - it is the safe template
 
 # ─── Build artifacts ─────────────────────────────────────────────────────────
 dist/

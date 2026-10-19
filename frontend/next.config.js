@@ -2,11 +2,28 @@
 const nextConfig = {
   compress: true,
   poweredByHeader: false,
+  swcMinify: true,
   eslint: {
     ignoreDuringBuilds: true,
   },
   typescript: {
     ignoreBuildErrors: true,
+  },
+  experimental: {
+    optimizePackageImports: [
+      'lucide-react',
+      'framer-motion',
+      'recharts',
+      '@tanstack/react-query',
+    ],
+  },
+  webpack: (config, { dev }) => {
+    if (dev) {
+      config.cache = {
+        type: 'filesystem',
+      };
+    }
+    return config;
   },
 
   async rewrites() {

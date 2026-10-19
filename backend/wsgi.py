@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-wsgi.py — WSGI entry point for production servers (gunicorn, uWSGI).
+wsgi.py - WSGI entry point for production servers (gunicorn, uWSGI).
 
 Usage:
   Development:  python wsgi.py

@@ -32,7 +32,7 @@ const Header = () => {
 
     const current = languageSequences[seqIndex]
 
-    // Wait for fonts before starting typewriter — prevents FOUT
+    // Wait for fonts before starting typewriter - prevents FOUT
     useEffect(() => {
         if (typeof document === 'undefined') return
         const start = () => setPhase('typing')
@@ -198,7 +198,7 @@ const Header = () => {
             >
                 <div className="search-inner">
                     <Search className="search-icon" />
-                    <span className="search-text">satya-portfolio — Search files & commands</span>
+                    <span className="search-text">satya-portfolio - Search files & commands</span>
                 </div>
                 <kbd className="search-kbd">Ctrl+P</kbd>
             </button>

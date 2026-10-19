@@ -119,7 +119,7 @@ const TabBar = ({ activeSection }: TabBarProps) => {
                     )
                 })}
 
-                {/* Closed tabs — ghost pills to reopen */}
+                {/* Closed tabs - ghost pills to reopen */}
                 {SECTION_FILES.filter((f) => !openTabs.includes(f.id)).map((file) => (
                     <div
                         key={`closed-${file.id}`}

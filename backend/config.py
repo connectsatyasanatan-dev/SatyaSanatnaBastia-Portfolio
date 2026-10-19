@@ -1,5 +1,5 @@
 """
-config.py — Flask configuration
+config.py - Flask configuration
 Reads all settings from environment variables (backed by .env via python-dotenv).
 Never hard-code secrets here; use .env for local development.
 """
@@ -43,11 +43,11 @@ class Config:
         elif not cls.SECRET_KEY:
             cls.SECRET_KEY = "dev-secret-key-change-in-production"
             _log.warning(
-                "SECRET_KEY not set — using insecure dev default. Set it before production."
+                "SECRET_KEY not set - using insecure dev default. Set it before production."
             )
 
     # ------------------------------------------------------------------ #
-    # CORS — comma-separated list of allowed origins
+    # CORS - comma-separated list of allowed origins
     # Example (local):      http://localhost:3000
     # Example (production): https://your-portfolio.com
     # ------------------------------------------------------------------ #

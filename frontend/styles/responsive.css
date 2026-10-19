@@ -1,5 +1,5 @@
 /* ============================================================
-   RESPONSIVE.CSS — Complete responsive overrides
+   RESPONSIVE.CSS - Complete responsive overrides
    Breakpoints: 480px | 640px | 768px | 1024px | 1280px
    ============================================================ */
 
@@ -789,7 +789,7 @@
    }
 }
 
-/* ── min-width: 1024px (desktop — sidebar visible) ──────── */
+/* ── min-width: 1024px (desktop - sidebar visible) ──────── */
 @media (min-width: 1024px) {
 
    .resizable-sidebar-container {
@@ -985,7 +985,7 @@
    }
 }
 
-/* ── Scrollbar — thinner on mobile ──────────────────────── */
+/* ── Scrollbar - thinner on mobile ──────────────────────── */
 @media (max-width: 768px) {
    ::-webkit-scrollbar {
       width: 4px;
@@ -1011,7 +1011,7 @@
    }
 }
 
-/* ── Mobile Sidebar — hamburger menu ────────────────────── */
+/* ── Mobile Sidebar - hamburger menu ────────────────────── */
 @media (max-width: 1023px) {
 
    /* Sidebar is always rendered but positioned off-screen */

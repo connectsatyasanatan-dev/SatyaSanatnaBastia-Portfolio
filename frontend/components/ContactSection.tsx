@@ -132,7 +132,7 @@ const ContactSection = () => {
                                         </div>
                                         <div className="method-info">
                                             <div className="method-label">{m.label}</div>
-                                            <div className="method-value">{m.value || '—'}</div>
+                                            <div className="method-value">{m.value || '-'}</div>
                                         </div>
                                         <div className="method-arrow">→</div>
                                     </motion.a>
@@ -202,7 +202,7 @@ const ContactSection = () => {
                             </div>
                             <div className="cf-chrome-title">
                                 <Terminal size={13} />
-                                <span>contact.json — Send Message</span>
+                                <span>contact.json - Send Message</span>
                             </div>
                             <div className="cf-chrome-lang">JSON</div>
                         </div>

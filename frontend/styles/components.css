@@ -1112,7 +1112,7 @@ body.resizing * {
   }
 }
 
-/* Closed tab — ghost style, click to reopen */
+/* Closed tab - ghost style, click to reopen */
 #portfolio-tabbar .tab-item.tab-closed {
   opacity: 0.35;
   border-top-color: transparent !important;

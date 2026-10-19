@@ -1,5 +1,5 @@
 """
-database.py — PostgreSQL only, using psycopg2
+database.py - PostgreSQL only, using psycopg2
 Set DATABASE_URL env var: postgresql://user:password@host:5432/dbname
 """
 

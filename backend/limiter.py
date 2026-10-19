@@ -1,5 +1,5 @@
 """
-limiter.py — Shared Flask-Limiter instance.
+limiter.py - Shared Flask-Limiter instance.
 Import this in app.py to init_app() and in routes to apply decorators.
 """
 

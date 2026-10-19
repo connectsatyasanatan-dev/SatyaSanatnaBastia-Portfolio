@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-backup.py — Database Backup & Restore Utility for PostgreSQL Portfolio DB
+backup.py - Database Backup & Restore Utility for PostgreSQL Portfolio DB
 
 Usage:
   # Create a timestamped backup JSON in backend/backups/

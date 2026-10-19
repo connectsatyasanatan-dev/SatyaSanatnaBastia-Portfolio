@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 @api.route("/health", methods=["GET"])
 def health_check():
-    """Health check — verifies DB connectivity"""
+    """Health check - verifies DB connectivity"""
     try:
         conn = get_connection()
         cur = conn.cursor()

@@ -67,15 +67,15 @@ export default function TerminalSection() {
             case 'help':
                 newLogs.push(
                     { text: '── Available Portfolio CLI Commands ──', type: 'highlight' },
-                    { text: '  whoami          — Identity & background summary', type: 'info' },
-                    { text: '  skills          — Tech stack breakdown by domain', type: 'info' },
-                    { text: '  projects        — Featured projects & architecture', type: 'info' },
-                    { text: '  contact         — Direct email, phone & profiles', type: 'info' },
-                    { text: '  theme [name]    — Switch theme (cyberpunk | dracula | onedark | tokyonight)', type: 'info' },
-                    { text: '  stats           — Telemetry, lines of code & commits', type: 'info' },
-                    { text: '  resume          — Download Curriculum Vitae (PDF)', type: 'info' },
-                    { text: '  palette         — Launch VS Code Command Palette', type: 'info' },
-                    { text: '  clear           — Reset terminal console', type: 'info' }
+                    { text: '  whoami          - Identity & background summary', type: 'info' },
+                    { text: '  skills          - Tech stack breakdown by domain', type: 'info' },
+                    { text: '  projects        - Featured projects & architecture', type: 'info' },
+                    { text: '  contact         - Direct email, phone & profiles', type: 'info' },
+                    { text: '  theme [name]    - Switch theme (cyberpunk | dracula | onedark | tokyonight)', type: 'info' },
+                    { text: '  stats           - Telemetry, lines of code & commits', type: 'info' },
+                    { text: '  resume          - Download Curriculum Vitae (PDF)', type: 'info' },
+                    { text: '  palette         - Launch VS Code Command Palette', type: 'info' },
+                    { text: '  clear           - Reset terminal console', type: 'info' }
                 )
                 break
 
@@ -103,10 +103,10 @@ export default function TerminalSection() {
             case 'projects':
                 newLogs.push(
                     { text: '🚀 Key Featured Projects:', type: 'highlight' },
-                    { text: '  1. VS Code Interactive Portfolio — IDE simulator in Next.js + Flask', type: 'success' },
-                    { text: '  2. Zentara AI Representative — Custom agent for automated visitor interaction', type: 'success' },
-                    { text: '  3. CodeSnippet Cloud Manager — Multi-language snippet manager with tags', type: 'success' },
-                    { text: '  4. DevPulse Telemetry Dashboard — Real-time analytics with charts', type: 'success' },
+                    { text: '  1. VS Code Interactive Portfolio - IDE simulator in Next.js + Flask', type: 'success' },
+                    { text: '  2. Zentara AI Representative - Custom agent for automated visitor interaction', type: 'success' },
+                    { text: '  3. CodeSnippet Cloud Manager - Multi-language snippet manager with tags', type: 'success' },
+                    { text: '  4. DevPulse Telemetry Dashboard - Real-time analytics with charts', type: 'success' },
                     { text: 'Tip: Press Ctrl+P or type "palette" to jump directly to any project.', type: 'dim' }
                 )
                 break
@@ -244,7 +244,7 @@ export default function TerminalSection() {
                             <div className="terminal-title">
                                 <Terminal className="w-4 h-4 text-primary" />
                                 <span className="title-text">Terminal</span>
-                                <span className="title-info">— zsh — 80×24</span>
+                                <span className="title-info">- zsh - 80×24</span>
                             </div>
                             <div className="terminal-controls">
                                 <button

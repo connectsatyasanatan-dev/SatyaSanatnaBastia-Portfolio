@@ -175,7 +175,7 @@ const AnalyticsTab = () => {
     }, [data])
 
     const bounceDisplay = useMemo(() => {
-        if (!data) return '—'
+        if (!data) return '-'
         const b = data.bounceRate ?? 0
         return `${Math.min(100, Math.max(0, b)).toFixed(1)}%`
     }, [data])

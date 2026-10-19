@@ -138,7 +138,7 @@ const ResizableSidebar = ({
         return () => document.removeEventListener('keydown', handleKeyDown)
     }, [])
 
-    // Mobile swipe gesture — swipe right to open, swipe left to close
+    // Mobile swipe gesture - swipe right to open, swipe left to close
     useEffect(() => {
         const SWIPE_THRESHOLD = 50   // min px horizontal travel
         const ANGLE_LIMIT = 35       // max degrees off horizontal

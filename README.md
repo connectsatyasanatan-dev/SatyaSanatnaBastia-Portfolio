@@ -1,6 +1,6 @@
-# 🖥️ Developer Portfolio — Full-Stack
+# 🖥️ Developer Portfolio - Full-Stack
 
-> VS Code-themed developer portfolio — **Next.js 14** frontend + **Flask REST API** backend.  
+> VS Code-themed developer portfolio - **Next.js 14** frontend + **Flask REST API** backend.  
 > Clean monorepo structure with `frontend/` and `backend/` fully separated.
 
 ---
@@ -114,8 +114,8 @@ portfolio-root/
 │   ├── cache.py                # Caching layer
 │   ├── limiter.py              # Rate limiting setup
 │   ├── requirements.txt        # Python dependencies
-│   ├── .env.example            # Safe template — commit this
-│   ├── .env                    # Real secrets — NEVER commit
+│   ├── .env.example            # Safe template - commit this
+│   ├── .env                    # Real secrets - NEVER commit
 │   │
 │   ├── routes/                 # Flask route blueprints
 │   │   ├── api.py              # Public API endpoints
@@ -145,7 +145,7 @@ portfolio-root/
 
 ---
 
-## ⚡ Quick Start — Development
+## ⚡ Quick Start - Development
 
 ### 1. Clone the repo
 
@@ -185,28 +185,30 @@ cd ..
 ```
 
 > **Database:** PostgreSQL required. Create a local DB first:
+>
 > ```bash
 > psql -U postgres -c "CREATE DATABASE portfolio_dev;"
 > ```
+>
 > Then set `DATABASE_URL=postgresql://postgres:your_password@localhost:5432/portfolio_dev` in `backend/.env`
 
 ### 4. Start Both Servers
 
-**Option A — One command (recommended):**
+**Option A - One command (recommended):**
 
 ```powershell
 cd frontend
 npm run dev:all
 ```
 
-**Option B — Two separate terminals:**
+**Option B - Two separate terminals:**
 
 ```powershell
-# Terminal 1 — Frontend
+# Terminal 1 - Frontend
 cd frontend
 npm run dev
 
-# Terminal 2 — Backend
+# Terminal 2 - Backend
 cd backend
 venv\Scripts\Activate.ps1
 python run.py
@@ -215,7 +217,7 @@ python run.py
 ### 5. Open in Browser
 
 | Service     | URL                              |
-|-------------|----------------------------------|
+| ----------- | -------------------------------- |
 | Frontend    | http://localhost:3000            |
 | Backend API | http://localhost:5000            |
 | API Health  | http://localhost:5000/api/health |
@@ -225,27 +227,27 @@ python run.py
 
 ## 🔌 API Endpoints
 
-| Method | Endpoint                      | Description                |
-|--------|-------------------------------|----------------------------|
-| GET    | `/api/health`                 | Health check               |
-| GET    | `/api/personal-info`          | Personal information       |
-| GET    | `/api/skills`                 | All skills by category     |
-| GET    | `/api/projects`               | All projects               |
-| GET    | `/api/projects?featured=true` | Featured projects only     |
-| GET    | `/api/experience`             | Work experience            |
-| GET    | `/api/education`              | Education history          |
-| GET    | `/api/certifications`         | Certifications             |
-| GET    | `/api/achievements`           | Stats & achievements       |
-| GET    | `/api/testimonials`           | Testimonials               |
-| GET    | `/api/blog`                   | Blog posts                 |
-| GET    | `/api/stats`                  | Aggregate portfolio stats  |
-| POST   | `/api/contact`                | Submit contact form        |
-| POST   | `/api/admin/login`            | Admin login (dual JWT + HttpOnly cookie) |
-| POST   | `/api/admin/refresh`          | Rotate access token (RTR + HttpOnly)     |
-| POST   | `/api/admin/logout`           | Revoke tokens server-side & delete cookie|
-| GET    | `/api/admin/backup`           | Download full DB snapshot (JSON)         |
-| POST   | `/api/admin/restore`          | Restore DB from JSON snapshot            |
-| GET    | `/api/admin/dashboard`        | Admin dashboard data (JWT)               |
+| Method | Endpoint                      | Description                               |
+| ------ | ----------------------------- | ----------------------------------------- |
+| GET    | `/api/health`                 | Health check                              |
+| GET    | `/api/personal-info`          | Personal information                      |
+| GET    | `/api/skills`                 | All skills by category                    |
+| GET    | `/api/projects`               | All projects                              |
+| GET    | `/api/projects?featured=true` | Featured projects only                    |
+| GET    | `/api/experience`             | Work experience                           |
+| GET    | `/api/education`              | Education history                         |
+| GET    | `/api/certifications`         | Certifications                            |
+| GET    | `/api/achievements`           | Stats & achievements                      |
+| GET    | `/api/testimonials`           | Testimonials                              |
+| GET    | `/api/blog`                   | Blog posts                                |
+| GET    | `/api/stats`                  | Aggregate portfolio stats                 |
+| POST   | `/api/contact`                | Submit contact form                       |
+| POST   | `/api/admin/login`            | Admin login (dual JWT + HttpOnly cookie)  |
+| POST   | `/api/admin/refresh`          | Rotate access token (RTR + HttpOnly)      |
+| POST   | `/api/admin/logout`           | Revoke tokens server-side & delete cookie |
+| GET    | `/api/admin/backup`           | Download full DB snapshot (JSON)          |
+| POST   | `/api/admin/restore`          | Restore DB from JSON snapshot             |
+| GET    | `/api/admin/dashboard`        | Admin dashboard data (JWT)                |
 
 ---
 
@@ -261,6 +263,7 @@ python backup.py --restore backups/<filename>.json       # 1-second full DB rest
 ```
 
 Comprehensive documentation is available in:
+
 - [API Reference & Technical Specification](./documentation/API_Reference.md)
 - [Project Architecture & System Specification](./documentation/Project_Architecture.md)
 - [Security & Database Backup Operations Manual](./documentation/Security_and_Backup_Guide.md)
@@ -281,7 +284,7 @@ def get_projects():
 ```
 
 ```typescript
-// frontend/lib/api.ts — use in any component:
+// frontend/lib/api.ts - use in any component:
 import { portfolioAPI } from "@/lib/api";
 
 const projects = await portfolioAPI.getProjects(/* featured= */ true);
@@ -294,13 +297,13 @@ const projects = await portfolioAPI.getProjects(/* featured= */ true);
 ### Frontend (`frontend/.env.local`)
 
 | Variable              | Description                | Default                     |
-|-----------------------|----------------------------|-----------------------------|
+| --------------------- | -------------------------- | --------------------------- |
 | `NEXT_PUBLIC_API_URL` | Flask backend API base URL | `http://localhost:5000/api` |
 
 ### Backend (`backend/.env`)
 
 | Variable              | Description                     | Required |
-|-----------------------|---------------------------------|----------|
+| --------------------- | ------------------------------- | -------- |
 | `DATABASE_URL`        | PostgreSQL connection string    | ✅       |
 | `SECRET_KEY`          | Flask session secret            | ✅       |
 | `JWT_SECRET_KEY`      | JWT signing key                 | ✅       |
@@ -322,7 +325,7 @@ const projects = await portfolioAPI.getProjects(/* featured= */ true);
 Run these from the `frontend/` folder:
 
 | Script                  | Description                                   |
-|-------------------------|-----------------------------------------------|
+| ----------------------- | --------------------------------------------- |
 | `npm run dev`           | Start Next.js dev server (port 3000)          |
 | `npm run build`         | Build Next.js for production                  |
 | `npm run start`         | Start Next.js production server               |
@@ -336,20 +339,20 @@ Run these from the `frontend/` folder:
 
 ## 🏗️ Tech Stack
 
-| Layer           | Technology              |
-|-----------------|-------------------------|
-| Frontend        | Next.js 14 (App Router) |
-| UI Library      | React 18                |
-| Styling         | Vanilla CSS             |
-| Animation       | Framer Motion           |
-| Icons           | Lucide React            |
-| Language        | TypeScript              |
-| Backend         | Flask 2.3 (Python)      |
-| Auth            | PyJWT                   |
-| Email           | Flask-Mail              |
-| CORS            | Flask-CORS              |
-| Database        | PostgreSQL (psycopg2)   |
-| Server          | Gunicorn (production)   |
+| Layer      | Technology              |
+| ---------- | ----------------------- |
+| Frontend   | Next.js 14 (App Router) |
+| UI Library | React 18                |
+| Styling    | Vanilla CSS             |
+| Animation  | Framer Motion           |
+| Icons      | Lucide React            |
+| Language   | TypeScript              |
+| Backend    | Flask 2.3 (Python)      |
+| Auth       | PyJWT                   |
+| Email      | Flask-Mail              |
+| CORS       | Flask-CORS              |
+| Database   | PostgreSQL (psycopg2)   |
+| Server     | Gunicorn (production)   |
 
 ---
 

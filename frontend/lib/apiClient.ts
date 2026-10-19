@@ -9,7 +9,7 @@ const apiClient = axios.create({
     headers: { 'Content-Type': 'application/json' },
 });
 
-// ── Request interceptor — attach JWT for admin routes ────────
+// ── Request interceptor - attach JWT for admin routes ────────
 apiClient.interceptors.request.use(
     (config) => {
         if (typeof window !== 'undefined' && config.url?.includes('/admin')) {
@@ -21,7 +21,7 @@ apiClient.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-// ── Response interceptor — handle 401 with transparent auto-refresh ───────────
+// ── Response interceptor - handle 401 with transparent auto-refresh ───────────
 let isRefreshingAxios = false;
 let refreshSubscribers: ((token: string) => void)[] = [];
 

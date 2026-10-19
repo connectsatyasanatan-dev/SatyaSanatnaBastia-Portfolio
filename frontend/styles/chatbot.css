@@ -1,5 +1,5 @@
 /* ============================================================
-   CHATBOT — uses portfolio theme vars (--primary, --accent)
+   CHATBOT - uses portfolio theme vars (--primary, --accent)
    ============================================================ */
 
 /* ── FAB Button ─────────────────────────────────────────── */
@@ -38,7 +38,7 @@
   z-index: 1;
 }
 
-/* Inner container — clips logo to FAB circle */
+/* Inner container - clips logo to FAB circle */
 .cb-fab-inner {
   width: 44px;
   height: 44px;
@@ -330,7 +330,7 @@ body.is-preloading .cb-fab-inner img {
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* Message wrap — holds bubble + suggestions */
+/* Message wrap - holds bubble + suggestions */
 .cb-msg-wrap {
   display: flex;
   flex-direction: column;

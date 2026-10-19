@@ -21,13 +21,13 @@ export default function Footer() {
         <footer className="site-footer">
             <div className="site-footer__inner">
 
-                {/* Left — tagline */}
+                {/* Left - tagline */}
                 <p className="site-footer__copy">
                     <Heart size={13} className="site-footer__heart" />
                     Built with passion by <span>{info?.name || 'Developer'}</span> · {year}
                 </p>
 
-                {/* Center — visitor count */}
+                {/* Center - visitor count */}
                 <div className="site-footer__visitors">
                     <Users size={13} />
                     <span>
@@ -35,7 +35,7 @@ export default function Footer() {
                     </span>
                 </div>
 
-                {/* Right — email */}
+                {/* Right - email */}
                 {info?.email && (
                     <a
                         href={`mailto:${info.email}`}

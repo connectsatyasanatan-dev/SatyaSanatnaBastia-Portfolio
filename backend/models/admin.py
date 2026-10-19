@@ -23,7 +23,7 @@ JWT_AUDIENCE = "portfolio-admin"
 
 
 def _build_credentials():
-    """Build admin credentials at startup — hashes password with bcrypt via werkzeug."""
+    """Build admin credentials at startup - hashes password with bcrypt via werkzeug."""
     username = os.getenv("ADMIN_USERNAME")
     password = os.getenv("ADMIN_PASSWORD")
     email = os.getenv("ADMIN_EMAIL")

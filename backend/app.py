@@ -1,6 +1,6 @@
 """
-app.py — Flask application factory
-Pure REST API backend — no template rendering.
+app.py - Flask application factory
+Pure REST API backend - no template rendering.
 All HTML is served by the Next.js / Vite frontend.
 """
 
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 logging.getLogger("httpx").setLevel(logging.WARNING)
 logging.getLogger("httpcore").setLevel(logging.WARNING)
 
-# Rate limiter — shared instance, attached to app in factory
+# Rate limiter - shared instance, attached to app in factory
 # (defined in limiter.py to avoid circular imports)
 
 
@@ -33,7 +33,7 @@ def create_app(config_class: type = Config) -> Flask:
     app = Flask(__name__)
     app.config.from_object(config_class)
 
-    # Validate secrets in production — raises RuntimeError if misconfigured
+    # Validate secrets in production - raises RuntimeError if misconfigured
     config_class.validate_production_secrets()
 
     # ------------------------------------------------------------------
@@ -56,7 +56,7 @@ def create_app(config_class: type = Config) -> Flask:
     app.register_blueprint(admin, url_prefix="/api/admin")
 
     # ------------------------------------------------------------------
-    # Root — API index
+    # Root - API index
     # ------------------------------------------------------------------
     @app.route("/")
     def index():
@@ -84,7 +84,7 @@ def create_app(config_class: type = Config) -> Flask:
         )
 
     # ------------------------------------------------------------------
-    # Error handlers — always return JSON
+    # Error handlers - always return JSON
     # ------------------------------------------------------------------
     @app.errorhandler(400)
     def bad_request(error):
@@ -124,7 +124,7 @@ def create_app(config_class: type = Config) -> Flask:
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-        # HSTS — only meaningful over HTTPS; safe to set always
+        # HSTS - only meaningful over HTTPS; safe to set always
         response.headers["Strict-Transport-Security"] = (
             "max-age=31536000; includeSubDomains"
         )
