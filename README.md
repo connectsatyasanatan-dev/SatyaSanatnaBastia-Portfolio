@@ -1,3 +1,12 @@
+---
+title: Developer Portfolio
+emoji: 💻
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 7860
+---
+
 # 🖥️ Developer Portfolio - Full-Stack
 
 > VS Code-themed developer portfolio - **Next.js 14** frontend + **Flask REST API** backend.  
