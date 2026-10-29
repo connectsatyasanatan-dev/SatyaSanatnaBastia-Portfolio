@@ -175,7 +175,7 @@ export default function CommandPalette() {
                 color: '#60a5fa',
                 action: () => {
                     setIsOpen(false)
-                    window.open('https://linkedin.com/in/satya-sanatan', '_blank', 'noopener,noreferrer')
+                    window.open('https://www.linkedin.com/in/satya-sanatan-bastia-298644223/', '_blank', 'noopener,noreferrer')
                 }
             },
             {

@@ -57,7 +57,7 @@ def get_portfolio_context(db) -> str:
         email = personal.get("email") or "connectsatyasanatan@gmail.com"
         availability = personal.get("availability") or "Available for full-time roles & freelance contracts"
         github = personal.get("github") or "https://github.com/connectsatyasanatan"
-        linkedin = personal.get("linkedin") or "https://linkedin.com/in/satya-sanatan"
+        linkedin = personal.get("linkedin") or "https://www.linkedin.com/in/satya-sanatan-bastia-298644223/"
 
         # Skills from DB
         skills_lines = []

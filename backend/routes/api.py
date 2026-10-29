@@ -475,8 +475,8 @@ def llms_context():
         location    = personal.get("location", "Bhubaneswar, Odisha, India")
         email       = personal.get("email",    "connectsatyasanatan@gmail.com")
         bio         = personal.get("bio",       "")
-        github      = personal.get("github",   "https://github.com/satyasanatan")
-        linkedin    = personal.get("linkedin", "https://linkedin.com/in/satyasanatan")
+        github      = personal.get("github",   "https://github.com/connectsatyasanatan")
+        linkedin    = personal.get("linkedin", "https://www.linkedin.com/in/satya-sanatan-bastia-298644223/")
         portfolio   = "https://satyasanatnabastia.onrender.com"
 
         # ── Group skills by category ─────────────────────────────────────────
@@ -633,7 +633,7 @@ def aeo_data():
         location = personal.get("location") or "Bhubaneswar, Odisha, India"
         email = personal.get("email") or "connectsatyasanatan@gmail.com"
         github = personal.get("github") or "https://github.com/connectsatyasanatan"
-        linkedin = personal.get("linkedin") or "https://linkedin.com/in/satya-sanatan"
+        linkedin = personal.get("linkedin") or "https://www.linkedin.com/in/satya-sanatan-bastia-298644223/"
         availability = personal.get("availability") or "Open to full-time roles and freelance contracts"
 
         all_skills = []

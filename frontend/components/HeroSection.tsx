@@ -132,7 +132,7 @@ const HeroSection = () => {
     }
 
     const handleLinkedinClick = () => {
-        const li = personalInfo?.linkedin || 'https://linkedin.com/in/satya-sanatan'
+        const li = personalInfo?.linkedin || 'https://www.linkedin.com/in/satya-sanatan-bastia-298644223/'
         window.open(li, '_blank', 'noopener,noreferrer')
     }
 

@@ -114,9 +114,9 @@ export default function TerminalSection() {
             case 'contact':
                 newLogs.push(
                     { text: '📬 Contact Coordinates:', type: 'highlight' },
-                    { text: '  Email    : satyasanatansahoo96@gmail.com', type: 'success' },
+                    { text: '  Email    : connectsatyasanatan@gmail.com', type: 'success' },
                     { text: '  Phone    : +91 7978252276', type: 'info' },
-                    { text: '  LinkedIn : https://linkedin.com/in/satya-sanatan', type: 'info' },
+                    { text: '  LinkedIn : https://www.linkedin.com/in/satya-sanatan-bastia-298644223/', type: 'info' },
                     { text: '  GitHub   : https://github.com/connectsatyasanatan', type: 'info' }
                 )
                 break

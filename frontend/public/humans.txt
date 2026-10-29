@@ -4,8 +4,8 @@
   Developer & Designer: Satya Sanatan Bastia
   Contact: connectsatyasanatan [at] gmail [dot] com
   Portfolio: https://satyasanatnabastia.onrender.com
-  GitHub: https://github.com/satyasanatan
-  LinkedIn: https://linkedin.com/in/satyasanatan
+  GitHub: https://github.com/connectsatyasanatan
+  LinkedIn: https://www.linkedin.com/in/satya-sanatan-bastia-298644223/
   Location: Bhubaneswar, Odisha, India
 
 /* THANKS */

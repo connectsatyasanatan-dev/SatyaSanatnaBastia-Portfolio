@@ -64,7 +64,7 @@ const ContactSection = () => {
 
     const emailVal = personalInfo?.email || 'connectsatyasanatan@gmail.com'
     const githubVal = personalInfo?.github || 'https://github.com/connectsatyasanatan'
-    const linkedinVal = personalInfo?.linkedin || 'https://linkedin.com/in/satya-sanatan'
+    const linkedinVal = personalInfo?.linkedin || 'https://www.linkedin.com/in/satya-sanatan-bastia-298644223/'
     const twitterVal = personalInfo?.twitter || 'https://twitter.com/satyasanatan'
 
     const contactLinks = [

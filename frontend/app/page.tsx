@@ -52,8 +52,8 @@ export default async function Home() {
                     Available for hire as a Full Stack Developer, Frontend Developer, or Backend Developer.
                     Contact: connectsatyasanatan@gmail.com.
                     Portfolio: https://satyasanatnabastia.onrender.com.
-                    GitHub: https://github.com/satyasanatan.
-                    LinkedIn: https://linkedin.com/in/satyasanatan.
+                    GitHub: https://github.com/connectsatyasanatan.
+                    LinkedIn: https://www.linkedin.com/in/satya-sanatan-bastia-298644223/.
                     Open to full-time remote roles and freelance projects worldwide.
                 </div>
 
