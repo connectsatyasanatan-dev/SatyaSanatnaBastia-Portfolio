@@ -19,13 +19,17 @@
    }
 
    #portfolio-header .header-right {
-      display: none;
+      display: flex;
+      flex-shrink: 0;
+      margin-left: auto;
+      gap: 6px;
    }
 
    #portfolio-header .mobile-menu-btn {
       width: 32px;
       height: 32px;
       margin-right: 8px;
+      flex-shrink: 0;
    }
 
    #portfolio-header .mobile-menu-btn svg {
@@ -34,7 +38,9 @@
    }
 
    #portfolio-header .header-title-container {
-      max-width: 150px;
+      max-width: none;
+      flex: 1 1 auto;
+      min-width: 0;
    }
 
    /* ── TabBar ── */

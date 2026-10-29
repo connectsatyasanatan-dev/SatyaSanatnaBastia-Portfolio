@@ -18,7 +18,10 @@
 #portfolio-header .header-left {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--space-3);
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
 }
 
 #portfolio-header .header-logo {
@@ -64,8 +67,10 @@
   display: flex;
   align-items: center;
   min-width: 0;
-  max-width: clamp(120px, 40vw, 240px);
+  flex: 1 1 auto;
+  max-width: 340px;
   overflow: hidden;
+  position: relative;
 }
 
 
@@ -76,16 +81,20 @@
   margin: 0;
   white-space: nowrap;
   font-size: var(--text-sm);
+  overflow: hidden;
+  text-overflow: clip;
+  flex-shrink: 1;
 }
 
 #portfolio-header .header-cursor {
   display: inline-block;
-  margin-left: var(--space-1);
+  margin-left: 2px;
   width: 2px;
-  height: 1.2rem;
+  height: 1.15rem;
   background: #daa522;
   vertical-align: middle;
   box-shadow: 0 0 6px rgba(218, 165, 32, 0.8);
+  flex-shrink: 0;
 }
 
 #portfolio-header .header-nav {
@@ -94,6 +103,7 @@
   align-items: center;
   gap: var(--space-4);
   margin-left: var(--space-4);
+  flex-shrink: 0;
 }
 
 #portfolio-header .header-nav a {
@@ -112,6 +122,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 #portfolio-header .run-build-btn {
