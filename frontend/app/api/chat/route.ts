@@ -12,8 +12,8 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
         const flaskBase = (
             process.env.FLASK_API_URL ||
-            process.env.NEXT_PUBLIC_API_URL ||
-            'http://localhost:5000/api'
+            (process.env.BACKEND_URL ? `${process.env.BACKEND_URL}/api` : null) ||
+            'http://127.0.0.1:5000/api'
         ).replace(/\/$/, '');
 
         const response = await fetch(`${flaskBase}/chat`, {
