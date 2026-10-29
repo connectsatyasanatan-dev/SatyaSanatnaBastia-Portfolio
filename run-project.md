@@ -153,7 +153,7 @@ Agar backend aur frontend dono chal rahe hain, toh admin panel open karein:
 
 - **URL:** `http://localhost:3000/admin`
 - **Username:** `Admin`
-- **Password:** `Admin@123`
+- **Password:** `Admin@12345!`
 
 > Production mein jaane se pehle in credentials ko zaroor change kar dein.
 
@@ -226,11 +226,11 @@ Agar 3.11 install nahi hai toh install karke phir se venv create karein.
 
 Frontend folder se ye commands run karein:
 
-| Command | Description |
-| :--- | :--- |
-| `npm run dev:all` | Frontend + Backend dono start karein |
-| `npm run dev` | Sirf frontend start karein |
-| `npm run backend:dev` | Sirf backend start karein |
+| Command                 | Description                                               |
+| :---------------------- | :-------------------------------------------------------- |
+| `npm run dev:all`       | Frontend + Backend dono start karein                      |
+| `npm run dev`           | Sirf frontend start karein                                |
+| `npm run backend:dev`   | Sirf backend start karein                                 |
 | `npm run backend:setup` | Backend virtual environment aur dependencies setup karein |
 
 ---
