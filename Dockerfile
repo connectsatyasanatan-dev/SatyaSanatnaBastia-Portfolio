@@ -1,7 +1,7 @@
 # -------------------------------------------------------------
 # Stage 1: Build Next.js Frontend
 # -------------------------------------------------------------
-FROM node:18-alpine AS frontend-builder
+FROM node:20-alpine AS frontend-builder
 # Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
 RUN apk add --no-cache libc6-compat
 WORKDIR /app/frontend
@@ -23,7 +23,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     gcc \
     libpq-dev \
-    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
