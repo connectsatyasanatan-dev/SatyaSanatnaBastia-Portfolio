@@ -24,7 +24,7 @@ const nextConfig = {
     const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000'
     return [
       {
-        source: '/api/:path((?!chat).*)',
+        source: '/api/:path*',
         destination: `${backendUrl}/api/:path*`,
       },
     ]
@@ -50,7 +50,7 @@ const nextConfig = {
       },
       {
         // Cache public API responses briefly on CDN
-        source: '/api/(personal-info|skills|projects|experience|education|certifications|achievements|testimonials|blog|stats)',
+        source: '/api/:path*',
         headers: [
           { key: 'Cache-Control', value: 'public, s-maxage=300, stale-while-revalidate=60' },
         ],
