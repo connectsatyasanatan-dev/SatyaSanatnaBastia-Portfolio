@@ -9,6 +9,7 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  transpilePackages: ['recharts'],
 
   webpack: (config, { dev }) => {
     if (dev) {
