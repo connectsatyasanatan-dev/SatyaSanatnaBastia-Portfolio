@@ -55,11 +55,16 @@ ADMIN_CREDENTIALS = _build_credentials()
 
 
 def verify_username(plain_username: str) -> bool:
-    """Constant-time comparison for username to prevent timing attacks."""
+    """Constant-time comparison for username or email to prevent timing attacks."""
     if not plain_username:
         return False
     creds = get_admin_credentials()
-    return hmac.compare_digest(plain_username.strip(), creds["username"])
+    clean_input = plain_username.strip()
+    return (
+        hmac.compare_digest(clean_input, creds["username"])
+        or hmac.compare_digest(clean_input.lower(), creds["username"].lower())
+        or hmac.compare_digest(clean_input.lower(), creds.get("email", "").lower())
+    )
 
 
 def verify_password(plain_password: str) -> bool:
