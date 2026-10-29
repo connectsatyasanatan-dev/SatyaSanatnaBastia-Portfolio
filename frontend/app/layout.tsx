@@ -26,9 +26,13 @@ export const metadata: Metadata = {
     },
     description: 'A modern VS Code inspired developer portfolio built with Next.js, React, and Flask.',
     keywords: ["Satya Sanatan", "Full Stack Developer", "Portfolio", "React", "Next.js", "Python", "Flask", "Developer"],
-    authors: [{ name: "Satya Sanatan" }],
-    creator: "Satya Sanatan",
-    publisher: "Satya Sanatan",
+    authors: [{ name: "Satya Sanatan Bastia", url: "https://satya-sanatan.com" }],
+    creator: "Satya Sanatan Bastia",
+    publisher: "Satya Sanatan Bastia",
+    other: {
+        copyright: "Copyright (c) Satya Sanatan Bastia. All Rights Reserved. This code is for viewing/evaluation purposes only. No reproduction, modification, or commercial re-hosting is permitted without explicit permission.",
+        "author-signature": "Satya Sanatan Bastia",
+    },
     alternates: {
         canonical: "https://satya-sanatan.com", // Replace with your domain
     },
@@ -103,6 +107,28 @@ export default function RootLayout({
                 <Providers>
                     {children}
                 </Providers>
+                {/* Hidden digital watermark & attribution */}
+                <script
+                    id="author-watermark"
+                    dangerouslySetInnerHTML={{
+                        __html: `
+                          (function() {
+                            if (typeof window !== 'undefined') {
+                              var badge = "%c\\n   ARCHITECTED & ENGINEERED BY SATYA SANATAN BASTIA\\n   Copyright (c) Satya Sanatan Bastia. All Rights Reserved.\\n   This code is for viewing/evaluation purposes only.\\n   No reproduction, modification, or commercial re-hosting is permitted without explicit permission.\\n";
+                              console.log(badge, "color: #38bdf8; font-weight: bold; font-family: monospace; font-size: 12px; line-height: 1.6; background: #020617; padding: 10px 16px; border-left: 4px solid #00ffcc; border-radius: 4px;");
+                            }
+                          })();
+                        `,
+                    }}
+                />
+                <div
+                    id="digital-signature-watermark"
+                    data-creator="Satya Sanatan Bastia"
+                    data-copyright="Copyright (c) Satya Sanatan Bastia. All Rights Reserved."
+                    data-notice="This code is for viewing/evaluation purposes only. No reproduction, modification, or commercial re-hosting is permitted without explicit permission."
+                    style={{ display: 'none' }}
+                    aria-hidden="true"
+                />
             </body>
         </html>
     )

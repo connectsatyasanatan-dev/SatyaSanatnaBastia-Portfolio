@@ -128,6 +128,8 @@ def create_app(config_class: type = Config) -> Flask:
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["X-Author"] = "Satya Sanatan Bastia"
+        response.headers["X-Copyright"] = "Copyright (c) Satya Sanatan Bastia. All Rights Reserved."
         # HSTS - only meaningful over HTTPS; safe to set always
         response.headers["Strict-Transport-Security"] = (
             "max-age=31536000; includeSubDomains"
