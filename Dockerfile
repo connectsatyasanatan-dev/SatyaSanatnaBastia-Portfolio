@@ -5,7 +5,7 @@ FROM node:20-slim AS frontend-builder
 WORKDIR /app/frontend
 
 COPY frontend/package*.json ./
-RUN npm ci --legacy-peer-deps
+RUN npm install --legacy-peer-deps
 
 COPY frontend/ ./
 ENV NEXT_PUBLIC_API_URL=/api
