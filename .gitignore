@@ -12,7 +12,9 @@ frontend/build/
 # ─── Testing ─────────────────────────────────────────────────────────────────
 coverage/
 
-# ─── Environment variables (NEVER commit real .env.local!) ───────────────────
+# ─── Environment variables (NEVER commit real .env files!) ───────────────────
+.env
+*.env
 frontend/.env.local
 frontend/.env.development.local
 frontend/.env.test.local
