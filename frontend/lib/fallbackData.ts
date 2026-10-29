@@ -21,7 +21,7 @@ export const FALLBACK_PERSONAL_INFO: PersonalInfo = {
     email: "connectsatyasanatan@gmail.com",
     phone: "+91 98765 43210",
     github: "https://github.com/connectsatyasanatan",
-    linkedin: "https://linkedin.com/in/satya-sanatan",
+    linkedin: "https://www.linkedin.com/in/satya-sanatan-bastia-298644223/",
     twitter: "https://twitter.com/satyasanatan",
     portfolio: "https://satya-sanatan.com",
     resume: "/SATYA SANATAN BASTIA - Resume.pdf",

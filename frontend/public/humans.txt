@@ -1,0 +1,29 @@
+/* humanstxt.org — humans.txt */
+
+/* TEAM */
+  Developer & Designer: Satya Sanatan Bastia
+  Contact: connectsatyasanatan [at] gmail [dot] com
+  Portfolio: https://satyasanatnabastia.onrender.com
+  GitHub: https://github.com/satyasanatan
+  LinkedIn: https://linkedin.com/in/satyasanatan
+  Location: Bhubaneswar, Odisha, India
+
+/* THANKS */
+  Vercel — Next.js framework
+  Render — hosting platform
+  Google Fonts — JetBrains Mono, Space Grotesk, Noto fonts
+  Flask — Python micro web framework
+  PostgreSQL — relational database
+  The open-source community at large
+
+/* SITE */
+  Last update: 2026-10-30
+  Language: English
+  Doctype: HTML5
+  Framework: Next.js 14 (App Router), Flask 3
+  IDE: Visual Studio Code
+  OS (dev): Windows 11
+  Standards: HTML5, CSS3, WCAG 2.1 AA
+  Components: React, TypeScript, Tailwind CSS, Framer Motion
+  Backend: Python, Flask, SQLAlchemy, PostgreSQL, Redis
+  Deployment: Render (backend + frontend), GitHub Actions (CI/CD)

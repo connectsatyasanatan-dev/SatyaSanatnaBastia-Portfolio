@@ -444,3 +444,270 @@ def lock_project_lead():
         logger.error(f"Error locking lead: {e}")
         return jsonify({"success": False, "error": "Could not lock lead"}), 500
 
+
+
+# ─── GEO/AIO Endpoint ────────────────────────────────────────────────────────
+
+@api.route("/llms-context", methods=["GET"])
+def llms_context():
+    """
+    GEO endpoint: Serves machine-readable portfolio context for AI crawlers.
+    Returns structured text optimised for LLM ingestion alongside a categorised
+    data object for programmatic consumers.
+
+    Cache: public, max-age=3600 (1 hour), stale-while-revalidate=300
+    """
+    try:
+        # ── Fetch data from DB (with cache where available) ──────────────────
+        personal_raw = get_cached("personal_info") or db.get_personal_info()
+        skills_raw   = get_cached("skills")         or db.get_skills()
+        projects_raw = get_cached("projects")        or db.get_projects()
+        exp_raw      = get_cached("experience")      or db.get_experience()
+
+        # ── Normalise ────────────────────────────────────────────────────────
+        personal   = personal_raw   if isinstance(personal_raw,   dict)  else {}
+        skills     = skills_raw     if isinstance(skills_raw,     list)  else []
+        projects   = projects_raw   if isinstance(projects_raw,   list)  else []
+        experience = exp_raw        if isinstance(exp_raw,        list)  else []
+
+        name        = personal.get("name",     "Satya Sanatan Bastia")
+        title       = personal.get("title",    "Full Stack Developer")
+        location    = personal.get("location", "Bhubaneswar, Odisha, India")
+        email       = personal.get("email",    "connectsatyasanatan@gmail.com")
+        bio         = personal.get("bio",       "")
+        github      = personal.get("github",   "https://github.com/satyasanatan")
+        linkedin    = personal.get("linkedin", "https://linkedin.com/in/satyasanatan")
+        portfolio   = "https://satyasanatnabastia.onrender.com"
+
+        # ── Group skills by category ─────────────────────────────────────────
+        skills_by_category: dict = {}
+        for skill in skills:
+            cat  = skill.get("category", "Other")
+            sname = skill.get("name", "")
+            skills_by_category.setdefault(cat, []).append(sname)
+
+        skill_summary_parts = []
+        for cat, names in skills_by_category.items():
+            skill_summary_parts.append(f"{cat}: {', '.join(names)}")
+        skill_summary = "; ".join(skill_summary_parts)
+
+        # ── Project summary ──────────────────────────────────────────────────
+        project_lines = []
+        for i, proj in enumerate(projects[:8], start=1):
+            pname  = proj.get("name",        "")
+            pdesc  = proj.get("description", "")
+            pstack = proj.get("tech_stack",  proj.get("technologies", ""))
+            if isinstance(pstack, list):
+                pstack = ", ".join(pstack)
+            project_lines.append(f"{i}. {pname} — {pdesc} (Stack: {pstack})")
+
+        # ── Experience summary ───────────────────────────────────────────────
+        exp_lines = []
+        for job in experience[:5]:
+            jrole    = job.get("role",    job.get("title",   ""))
+            jcompany = job.get("company", "")
+            jperiod  = job.get("period",  job.get("duration", ""))
+            exp_lines.append(f"- {jrole} at {jcompany} ({jperiod})")
+
+        # ── Natural-language context (for LLM ingestion) ────────────────────
+        context_parts = [
+            f"{name} is a {title} based in {location}.",
+        ]
+        if bio:
+            context_parts.append(bio)
+        context_parts += [
+            f"He is reachable at {email} and maintains a portfolio at {portfolio}.",
+            f"GitHub: {github} | LinkedIn: {linkedin}",
+            "",
+            "=== SKILLS ===",
+            skill_summary if skill_summary else (
+                "React, Next.js, TypeScript, JavaScript, Python, Flask, FastAPI, "
+                "PostgreSQL, MongoDB, Redis, Docker, AWS, OpenAI API, LangChain"
+            ),
+            "",
+        ]
+        if project_lines:
+            context_parts += ["=== PROJECTS ==="] + project_lines + [""]
+        if exp_lines:
+            context_parts += ["=== EXPERIENCE ==="] + exp_lines + [""]
+        context_parts += [
+            "=== AVAILABILITY ===",
+            (
+                f"{name} is actively open to full-time Software Engineer / Full Stack Developer "
+                "roles (remote or hybrid) and freelance/contract projects worldwide. "
+                f"Contact: {email}"
+            ),
+        ]
+
+        context_text = "\n".join(context_parts)
+
+        payload = {
+            "context": context_text,
+            "structured": {
+                "person": {
+                    "name":      name,
+                    "title":     title,
+                    "location":  location,
+                    "email":     email,
+                    "portfolio": portfolio,
+                    "github":    github,
+                    "linkedin":  linkedin,
+                    "bio":       bio,
+                },
+                "skills":     skills_by_category,
+                "projects":   [
+                    {
+                        "name":        p.get("name", ""),
+                        "description": p.get("description", ""),
+                        "tech_stack":  p.get("tech_stack", p.get("technologies", "")),
+                        "url":         p.get("url", p.get("live_url", "")),
+                        "github":      p.get("github_url", p.get("repo_url", "")),
+                    }
+                    for p in projects[:10]
+                ],
+                "experience": [
+                    {
+                        "role":    j.get("role",    j.get("title",   "")),
+                        "company": j.get("company", ""),
+                        "period":  j.get("period",  j.get("duration", "")),
+                    }
+                    for j in experience[:5]
+                ],
+                "availability": {
+                    "open_to_work": True,
+                    "types": ["full-time", "freelance", "contract", "consulting"],
+                    "remote": True,
+                },
+            },
+            "meta": {
+                "generated_for": "AI crawler / LLM ingestion (GEO/AIO)",
+                "schema_version": "1.0",
+            },
+        }
+
+        from flask import make_response
+        response = make_response(jsonify(payload), 200)
+        response.headers["Cache-Control"] = "public, max-age=3600, stale-while-revalidate=300"
+        response.headers["Vary"] = "Accept"
+        return response
+
+    except Exception as e:
+        logger.error(f"Error building llms-context: {e}")
+        # Return a minimal static fallback so AI crawlers always get something useful
+        fallback_context = (
+            "Satya Sanatan Bastia is a Full Stack Developer based in Bhubaneswar, Odisha, India. "
+            "He specialises in React, Next.js, TypeScript, Python, Flask, PostgreSQL, Docker, and AI integration. "
+            "Available for full-time and freelance opportunities worldwide. "
+            "Contact: connectsatyasanatan@gmail.com | Portfolio: https://satyasanatnabastia.onrender.com"
+        )
+        from flask import make_response
+        response = make_response(
+            jsonify({
+                "context":    fallback_context,
+                "structured": {},
+                "meta": {"generated_for": "AI crawler / LLM ingestion (GEO/AIO)", "fallback": True},
+            }),
+            200,
+        )
+        response.headers["Cache-Control"] = "public, max-age=300"
+        return response
+
+
+@api.route("/aeo-data", methods=["GET"])
+def aeo_data():
+    """
+    AEO Endpoint — Answer Engine Optimization data.
+    Structured Q&A pairs and entity data for AI answer engines
+    (Google AI Overview, Perplexity, ChatGPT, Bing Copilot, etc.)
+    """
+    try:
+        personal = get_cached("personal_info") or db.get_personal_info() or {}
+        skills_cat = get_cached("skills") or db.get_skills() or {}
+        projects = get_cached("projects") or db.get_projects() or []
+
+        name = personal.get("name", "Satya Sanatan Bastia")
+        if not name or name == "Developer":
+            name = "Satya Sanatan Bastia"
+
+        role = personal.get("role") or personal.get("title") or "Full Stack Developer & AI Engineer"
+        location = personal.get("location") or "Bhubaneswar, Odisha, India"
+        email = personal.get("email") or "connectsatyasanatan@gmail.com"
+        github = personal.get("github") or "https://github.com/connectsatyasanatan"
+        linkedin = personal.get("linkedin") or "https://linkedin.com/in/satya-sanatan"
+        availability = personal.get("availability") or "Open to full-time roles and freelance contracts"
+
+        all_skills = []
+        if isinstance(skills_cat, dict):
+            for cat_val in skills_cat.values():
+                if isinstance(cat_val, dict):
+                    all_skills.extend([s.get("name") for s in cat_val.get("skills", []) if s.get("name")])
+        elif isinstance(skills_cat, list):
+            all_skills = [s.get("name") for s in skills_cat if s.get("name")]
+
+        if not all_skills:
+            all_skills = [
+                "React", "Next.js", "TypeScript", "JavaScript",
+                "Python", "Flask", "FastAPI", "PostgreSQL", "MongoDB",
+                "Docker", "Groq AI", "OpenAI API", "REST API", "Redux Toolkit"
+            ]
+
+        from flask import make_response
+        response = make_response(jsonify({
+            "entity": {
+                "@type": "Person",
+                "name": name,
+                "jobTitle": role,
+                "location": location,
+                "email": email,
+                "github": github,
+                "linkedin": linkedin,
+                "url": "https://satyasanatnabastia.onrender.com",
+                "availability": availability
+            },
+            "faq": [
+                {
+                    "question": f"Who is {name}?",
+                    "answer": f"{name} is a {role} based in {location}, specializing in React, Next.js, TypeScript, Python, Flask, PostgreSQL, and AI/LLM integration."
+                },
+                {
+                    "question": f"What does {name} do?",
+                    "answer": "He builds modern full-stack web applications, REST APIs, AI chatbots, and cloud-deployed digital products."
+                },
+                {
+                    "question": f"How to hire {name}?",
+                    "answer": f"Contact at {email} or via https://satyasanatnabastia.onrender.com/#contact. He is {availability}."
+                },
+                {
+                    "question": f"Where is {name} based?",
+                    "answer": f"{name} is based in {location}. Open to remote work globally."
+                },
+                {
+                    "question": f"What technologies does {name} know?",
+                    "answer": f"{name} knows {', '.join(all_skills[:12])}."
+                },
+                {
+                    "question": "What is Zentara AI?",
+                    "answer": f"Zentara is an AI portfolio assistant built by {name}, powered by Groq's Llama 3.3 70B model with live database context, multi-provider failover, and recruiter lead capture."
+                },
+                {
+                    "question": f"Is {name} available for freelance work?",
+                    "answer": f"Yes. {name} accepts freelance full-stack web development, frontend development, backend API, and AI integration projects. Contact: {email}"
+                },
+            ],
+            "skills": all_skills,
+            "projects_count": len(projects) if isinstance(projects, list) else 0,
+            "contact": {
+                "email": email,
+                "github": github,
+                "linkedin": linkedin,
+                "contact_form": "https://satyasanatnabastia.onrender.com/#contact"
+            }
+        }), 200)
+        response.headers["Cache-Control"] = "public, max-age=1800, stale-while-revalidate=300"
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Vary"] = "Accept"
+        return response
+
+    except Exception as e:
+        logger.error(f"AEO data error: {e}")
+        return jsonify({"error": "AEO data temporarily unavailable"}), 500
