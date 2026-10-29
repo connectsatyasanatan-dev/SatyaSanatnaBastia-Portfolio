@@ -16,9 +16,13 @@ export async function POST(req: NextRequest) {
             'http://127.0.0.1:5000/api'
         ).replace(/\/$/, '');
 
+        const clientIp = req.headers.get('x-forwarded-for') || req.ip || '127.0.0.1';
         const response = await fetch(`${flaskBase}/chat`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Forwarded-For': clientIp,
+            },
             body: JSON.stringify(body),
         });
 

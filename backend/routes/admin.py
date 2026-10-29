@@ -1014,6 +1014,7 @@ def upload_restore():
 
         from backup import TABLES
         from models.database import get_connection
+        from psycopg2 import sql
 
         conn = get_connection()
         cur = conn.cursor()
@@ -1022,15 +1023,24 @@ def upload_restore():
             for table, rows in data["tables"].items():
                 if table not in TABLES:
                     continue
-                cur.execute(f"DELETE FROM {table}")
+                cur.execute(sql.SQL("DELETE FROM {}").format(sql.Identifier(table)))
                 for row in rows:
                     cols = list(row.keys())
+                    if not cols:
+                        continue
                     vals = [row[c] for c in cols]
-                    cols_str = ", ".join(cols)
-                    placeholders = ", ".join(["%s"] * len(cols))
-                    query = f"INSERT INTO {table} ({cols_str}) VALUES ({placeholders})"
+                    query = sql.SQL("INSERT INTO {} ({}) VALUES ({})").format(
+                        sql.Identifier(table),
+                        sql.SQL(", ").join(map(sql.Identifier, cols)),
+                        sql.SQL(", ").join(sql.Placeholder() * len(cols))
+                    )
                     cur.execute(query, tuple(vals))
-                cur.execute(f"SELECT setval(pg_get_serial_sequence('{table}', 'id'), COALESCE(MAX(id), 1)) FROM {table};")
+                cur.execute(
+                    sql.SQL("SELECT setval(pg_get_serial_sequence(%s, 'id'), COALESCE(MAX(id), 1)) FROM {}").format(
+                        sql.Identifier(table)
+                    ),
+                    (table,)
+                )
 
             conn.commit()
             return jsonify({"success": True, "message": "Database restored successfully from backup"})

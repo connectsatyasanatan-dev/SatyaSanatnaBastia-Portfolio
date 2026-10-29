@@ -19,18 +19,27 @@ class Config:
     FLASK_ENV: str = os.environ.get("FLASK_ENV", "development")
     DEBUG: bool = FLASK_ENV == "development"
 
-    # Warn at import time if insecure defaults are detected in production
+    # Validate secrets at startup - enforces environment variables in production and ephemeral random keys in dev
     @classmethod
     def validate_production_secrets(cls):
         import logging as _logging
+        import secrets as _secrets
 
         _log = _logging.getLogger(__name__)
+        is_prod = cls.FLASK_ENV == "production"
+
         if not cls.SECRET_KEY or cls.SECRET_KEY == "dev-secret-key-change-in-production":
-            cls.SECRET_KEY = "satya-portfolio-production-secret-key-32-chars-long"
+            if is_prod:
+                raise RuntimeError("CRITICAL: Production SECRET_KEY must be configured in environment variables.")
+            cls.SECRET_KEY = _secrets.token_hex(32)
+            _log.warning("Generated ephemeral SECRET_KEY for local development.")
         
         jwt_key = os.environ.get("JWT_SECRET_KEY", "")
         if not jwt_key or jwt_key == "dev-jwt-secret-change-in-production" or len(jwt_key) < 32:
-            cls.JWT_SECRET_KEY = "satya-portfolio-jwt-secret-key-32-chars-long"
+            if is_prod:
+                raise RuntimeError("CRITICAL: Production JWT_SECRET_KEY (min 32 chars) must be configured in environment variables.")
+            cls.JWT_SECRET_KEY = _secrets.token_hex(32)
+            _log.warning("Generated ephemeral JWT_SECRET_KEY for local development.")
 
     # ------------------------------------------------------------------ #
     # CORS - comma-separated list of allowed origins

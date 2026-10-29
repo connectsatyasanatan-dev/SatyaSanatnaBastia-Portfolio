@@ -45,10 +45,16 @@ COPY --from=frontend-builder /app/frontend/next.config.js ./frontend/
 COPY start.sh ./
 RUN chmod +x start.sh
 
+# Create non-root application user for defense-in-depth
+RUN groupadd -r appuser && useradd -r -g appuser -u 1001 appuser && \
+    chown -R appuser:appuser /app
+
 # Koyeb default HTTP port
 EXPOSE 8000
 
 ENV PORT=8000
 ENV FLASK_ENV=production
+
+USER appuser
 
 CMD ["./start.sh"]

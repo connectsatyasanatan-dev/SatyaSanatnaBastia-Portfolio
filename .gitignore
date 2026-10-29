@@ -39,6 +39,7 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+.agents/
 
 # ─── Python / Backend ────────────────────────────────────────────────────────
 venv/

@@ -36,6 +36,10 @@ def create_app(config_class: type = Config) -> Flask:
     # Validate secrets in production - raises RuntimeError if misconfigured
     config_class.validate_production_secrets()
 
+    # Trust reverse proxy headers (Next.js / Cloudflare / Nginx) for real client IP extraction
+    from werkzeug.middleware.proxy_fix import ProxyFix
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+
     # ------------------------------------------------------------------
     # Extensions
     # ------------------------------------------------------------------

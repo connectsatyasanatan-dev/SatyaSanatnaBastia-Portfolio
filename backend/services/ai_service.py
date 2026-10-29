@@ -722,7 +722,7 @@ def get_ai_response(user_message: str, history: List[Dict[str, str]], client_hou
     recent_history = history[-8:] if history else []
     for h in recent_history:
         role = "assistant" if h.get("role") == "assistant" else "user"
-        content = (h.get("content") or "").strip()
+        content = (h.get("content") or "").strip()[:500]
         if content:
             messages.append({"role": role, "content": content})
     messages.append({"role": "user", "content": cleaned_message})

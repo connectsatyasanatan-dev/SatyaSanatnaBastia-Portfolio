@@ -23,6 +23,7 @@ import BlogTab from '@/components/admin/BlogTab'
 import MessagesTab from '@/components/admin/MessagesTab'
 import AchievementsTab from '@/components/admin/AchievementsTab'
 import EducationTab from '@/components/admin/EducationTab'
+import CertificationsTab from '@/components/admin/CertificationsTab'
 import dynamic from 'next/dynamic'
 const AnalyticsTab = dynamic(() => import('@/components/admin/AnalyticsTab'), { ssr: false })
 
