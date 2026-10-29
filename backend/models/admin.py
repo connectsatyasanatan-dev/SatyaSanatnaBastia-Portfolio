@@ -24,12 +24,9 @@ JWT_AUDIENCE = "portfolio-admin"
 
 def _build_credentials():
     """Build admin credentials at startup - hashes password with bcrypt via werkzeug."""
-    username = os.getenv("ADMIN_USERNAME")
-    password = os.getenv("ADMIN_PASSWORD")
-    email = os.getenv("ADMIN_EMAIL")
-
-    if not password or not email or not username:
-        raise ValueError("ADMIN_USERNAME, ADMIN_PASSWORD and ADMIN_EMAIL must be set in environment variables")
+    username = os.getenv("ADMIN_USERNAME") or "Admin"
+    password = os.getenv("ADMIN_PASSWORD") or "Admin@123"
+    email = os.getenv("ADMIN_EMAIL") or "admin@portfolio.dev"
 
     if password == "Admin@123":
         logger.warning(
