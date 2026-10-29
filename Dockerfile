@@ -49,7 +49,7 @@ RUN chmod +x start.sh
 RUN groupadd -r appuser && useradd -r -g appuser -u 1001 appuser && \
     chown -R appuser:appuser /app
 
-# Koyeb default HTTP port
+# Default application HTTP port
 EXPOSE 8000
 
 ENV PORT=8000

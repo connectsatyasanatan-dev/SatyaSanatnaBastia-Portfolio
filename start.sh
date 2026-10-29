@@ -1,11 +1,11 @@
 #!/bin/bash
 set -e
 
-# Koyeb default port 8000 hota hai, agar PORT env set ho toh wo use karega
+# Use dynamic port assigned by cloud environment or fallback to 8000
 APP_PORT=${PORT:-8000}
 
 echo "=================================================="
-echo "🚀 Starting Full-Stack Application on Koyeb"
+echo "🚀 Starting Full-Stack Application"
 echo "Public Port: $APP_PORT"
 echo "=================================================="
 
