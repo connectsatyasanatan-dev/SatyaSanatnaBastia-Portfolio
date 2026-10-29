@@ -3,6 +3,37 @@
    Breakpoints: 480px | 640px | 768px | 1024px | 1280px
    ============================================================ */
 
+/* ── Header Right: Collapse buttons into Settings on small screens (<= 768px) ── */
+@media (max-width: 768px) {
+   #portfolio-header .run-build-btn {
+      display: none !important;
+   }
+   #portfolio-header .mobile-search-btn {
+      display: none !important;
+   }
+   #portfolio-header .header-theme-btn {
+      display: none !important;
+   }
+   #portfolio-header .header-bell-btn {
+      display: none !important;
+   }
+   #portfolio-header .header-settings-btn {
+      display: flex !important;
+   }
+   #portfolio-header .header-nav {
+      display: none !important;
+   }
+   #portfolio-header .vscode-search-pill {
+      display: none !important;
+   }
+   #portfolio-header .header-title-container {
+      flex: 1 1 auto !important;
+      width: auto !important;
+      min-width: 0 !important;
+      max-width: none !important;
+   }
+}
+
 /* ── 480px and below (small phones) ─────────────────────── */
 @media (max-width: 480px) {
 

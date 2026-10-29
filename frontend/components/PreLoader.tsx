@@ -140,10 +140,8 @@ const PreLoader: React.FC<PreLoaderProps> = ({ onLoadingComplete }) => {
                 if (typeof document !== 'undefined') {
                     document.body.classList.remove('is-preloading')
                 }
-                setTimeout(() => {
-                    setShowContent(false)
-                    onLoadingComplete()
-                }, 300)
+                setShowContent(false)
+                onLoadingComplete()
             }, 950)
         }
 
@@ -514,17 +512,20 @@ const PreLoader: React.FC<PreLoaderProps> = ({ onLoadingComplete }) => {
                                 animate={{ scale: 1, opacity: 1, y: 0 }}
                                 transition={{ duration: 0.8, ease: 'easeOut' }}
                             >
-                                <div className={`preloader-avatar-aura preloader-fadeable ${isFlying ? 'preloader-fadeable--hidden' : ''}`} />
+                                {!isFlying && (
+                                    <>
+                                        <div className="preloader-avatar-aura" />
+                                        <span className="preloader-reticle reticle-tl" />
+                                        <span className="preloader-reticle reticle-tr" />
+                                        <span className="preloader-reticle reticle-bl" />
+                                        <span className="preloader-reticle reticle-br" />
 
-                                <span className={`preloader-reticle reticle-tl ${isFlying ? 'preloader-reticle--hidden' : ''}`} />
-                                <span className={`preloader-reticle reticle-tr ${isFlying ? 'preloader-reticle--hidden' : ''}`} />
-                                <span className={`preloader-reticle reticle-bl ${isFlying ? 'preloader-reticle--hidden' : ''}`} />
-                                <span className={`preloader-reticle reticle-br ${isFlying ? 'preloader-reticle--hidden' : ''}`} />
-
-                                <svg className={`preloader-orbit-svg ${isFlying ? 'preloader-orbit-svg--hidden' : ''}`} viewBox="0 0 120 120">
-                                    <circle cx="60" cy="60" r="54" className="preloader-orbit-track" />
-                                    <circle cx="60" cy="60" r="54" className="preloader-orbit-runner" />
-                                </svg>
+                                        <svg className="preloader-orbit-svg" viewBox="0 0 120 120">
+                                            <circle cx="60" cy="60" r="54" className="preloader-orbit-track" />
+                                            <circle cx="60" cy="60" r="54" className="preloader-orbit-runner" />
+                                        </svg>
+                                    </>
+                                )}
 
                                 <motion.div
                                     ref={avatarRef}
@@ -565,22 +566,12 @@ const PreLoader: React.FC<PreLoaderProps> = ({ onLoadingComplete }) => {
                                     )}
                                 </motion.div>
 
-                                {phase === 'landed' && flyCoords && (
-                                    <motion.div
-                                        className="preloader-landing-ripple"
-                                        style={{
-                                            transform: `translate(${flyCoords.x}px, ${flyCoords.y}px)`,
-                                        }}
-                                        initial={{ scale: 0.6, opacity: 1 }}
-                                        animate={{ scale: 2.4, opacity: 0 }}
-                                        transition={{ duration: 0.45, ease: 'easeOut' }}
-                                    />
+                                {!isFlying && (
+                                    <div className="preloader-id-pill">
+                                        <span className="id-pill-dot" />
+                                        <span>DEV // SATYA</span>
+                                    </div>
                                 )}
-
-                                <div className={`preloader-id-pill ${isFlying ? 'preloader-id-pill--hidden' : ''}`}>
-                                    <span className="id-pill-dot" />
-                                    <span>DEV // SATYA</span>
-                                </div>
                             </motion.div>
 
                             {/* Title + cursor */}

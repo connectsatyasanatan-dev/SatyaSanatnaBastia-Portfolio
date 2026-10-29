@@ -52,6 +52,20 @@ const HeroSection = () => {
         fetch()
     }, [])
 
+    // Allow header Run Build / mobile menu to trigger execution of this code block
+    useEffect(() => {
+        const handleTriggerExecute = () => {
+            const heroEl = document.getElementById('hero-section') || document.getElementById('hero')
+            if (heroEl) {
+                heroEl.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            }
+            handleExecuteClick()
+        }
+
+        window.addEventListener('trigger-run-build', handleTriggerExecute)
+        return () => window.removeEventListener('trigger-run-build', handleTriggerExecute)
+    }, [personalInfo])
+
     const codeLines = [
         { text: "// Welcome to my digital workspace", type: "comment" },
         { text: "", type: "empty" },

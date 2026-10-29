@@ -4,10 +4,10 @@ import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
     Search, FileCode, FileText, Terminal, Palette,
-    Download, Linkedin, Github, Mail, Sparkles, X, ChevronRight
+    Download, Linkedin, Github, Mail, Sparkles, X, ChevronRight, Check
 } from 'lucide-react'
 import { SECTION_FILES } from './Sidebar'
-import { applyTheme, THEME_OPTIONS, VSCodeTheme } from '@/lib/theme'
+import { applyTheme, getStoredTheme, THEME_OPTIONS, VSCodeTheme } from '@/lib/theme'
 
 interface PaletteItem {
     id: string
@@ -19,24 +19,39 @@ interface PaletteItem {
     action: () => void
 }
 
-export const openCommandPalette = () => {
+export const openCommandPalette = (mode: 'all' | 'theme' = 'all') => {
     if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('open_command_palette'))
+        window.dispatchEvent(new CustomEvent('open_command_palette', { detail: { mode } }))
     }
 }
 
 export default function CommandPalette() {
     const [isOpen, setIsOpen] = useState(false)
+    const [paletteMode, setPaletteMode] = useState<'all' | 'theme'>('all')
     const [query, setQuery] = useState('')
     const [selectedIndex, setSelectedIndex] = useState(0)
+    const [currentTheme, setCurrentTheme] = useState<string>('cyberpunk')
     const inputRef = useRef<HTMLInputElement>(null)
     const listRef = useRef<HTMLDivElement>(null)
 
-    // Listen for global shortcut
+    // Listen for current active theme
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            setCurrentTheme(getStoredTheme())
+            const handleThemeChange = (e: any) => {
+                if (e.detail) setCurrentTheme(e.detail)
+            }
+            window.addEventListener('vscode_theme_change', handleThemeChange)
+            return () => window.removeEventListener('vscode_theme_change', handleThemeChange)
+        }
+    }, [])
+
+    // Listen for global shortcut and custom open events
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === 'p' || e.key.toLowerCase() === 'k')) {
                 e.preventDefault()
+                setPaletteMode('all')
                 setIsOpen(prev => !prev)
             } else if (e.key === 'Escape' && isOpen) {
                 e.preventDefault()
@@ -44,7 +59,9 @@ export default function CommandPalette() {
             }
         }
 
-        const handleCustomOpen = () => {
+        const handleCustomOpen = (e: any) => {
+            const mode = e?.detail?.mode || 'all'
+            setPaletteMode(mode)
             setIsOpen(true)
         }
 
@@ -56,14 +73,27 @@ export default function CommandPalette() {
         }
     }, [isOpen])
 
-    // Focus input on open
+    // Focus input on open and reset state
     useEffect(() => {
         if (isOpen) {
             setQuery('')
             setSelectedIndex(0)
+            if (typeof window !== 'undefined') {
+                setCurrentTheme(getStoredTheme())
+            }
             setTimeout(() => inputRef.current?.focus(), 50)
         }
     }, [isOpen])
+
+    // Keep selected item scrolled into view when navigating with Arrow Up / Arrow Down
+    useEffect(() => {
+        if (!listRef.current) return
+        const container = listRef.current
+        const selectedEl = container.children[selectedIndex] as HTMLElement
+        if (selectedEl && typeof selectedEl.scrollIntoView === 'function') {
+            selectedEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+        }
+    }, [selectedIndex])
 
     const navigateToSection = (sectionId: string) => {
         setIsOpen(false)
@@ -78,98 +108,105 @@ export default function CommandPalette() {
         }
     }
 
-    const items: PaletteItem[] = [
-        // Files
-        ...SECTION_FILES.map(file => ({
-            id: `file-${file.id}`,
-            title: file.filename,
-            subtitle: `Jump to ${file.id} section`,
-            category: 'file' as const,
-            icon: file.filename.endsWith('.tsx') || file.filename.endsWith('.ts') ? FileCode : FileText,
-            color: file.filename.endsWith('.tsx') ? '#06f9f9' : file.filename.endsWith('.ts') ? '#3b82f6' : '#eab308',
-            action: () => navigateToSection(file.sectionId)
-        })),
+    // Themes
+    const themeItems: PaletteItem[] = THEME_OPTIONS.map(theme => ({
+        id: `theme-${theme.id}`,
+        title: theme.name,
+        subtitle: theme.id === currentTheme ? 'Currently active theme' : `Switch editor appearance to ${theme.name}`,
+        category: 'theme' as const,
+        icon: Palette,
+        color: theme.color,
+        action: () => {
+            applyTheme(theme.id)
+            setCurrentTheme(theme.id)
+            setIsOpen(false)
+        }
+    }))
 
-        // Quick Actions
-        {
-            id: 'action-resume',
-            title: 'Download Resume (PDF)',
-            subtitle: 'Get Satya Sanatan\'s full curriculum vitae',
-            category: 'action',
-            icon: Download,
-            color: '#22c55e',
-            action: () => {
-                setIsOpen(false)
-                const link = document.createElement('a')
-                link.href = '/resume.pdf'
-                link.download = "Satya Sanatan's Resume.pdf"
-                link.click()
-            }
-        },
-        {
-            id: 'action-email',
-            title: 'Compose Email',
-            subtitle: 'Direct email to connectsatyasanatan@gmail.com',
-            category: 'action',
-            icon: Mail,
-            color: '#06f9f9',
-            action: () => {
-                setIsOpen(false)
-                window.open('mailto:connectsatyasanatan@gmail.com', '_blank')
-            }
-        },
-        {
-            id: 'action-linkedin',
-            title: 'Open LinkedIn Profile',
-            subtitle: 'View professional recommendations and network',
-            category: 'action',
-            icon: Linkedin,
-            color: '#60a5fa',
-            action: () => {
-                setIsOpen(false)
-                window.open('https://linkedin.com/in/satya-sanatan', '_blank', 'noopener,noreferrer')
-            }
-        },
-        {
-            id: 'action-github',
-            title: 'Open GitHub Profile',
-            subtitle: 'Browse open-source repositories and code history',
-            category: 'action',
-            icon: Github,
-            color: '#ffffff',
-            action: () => {
-                setIsOpen(false)
-                window.open('https://github.com/connectsatyasanatan', '_blank', 'noopener,noreferrer')
-            }
-        },
-        {
-            id: 'action-ai',
-            title: 'Chat with Zentara AI Representative',
-            subtitle: 'Ask questions about experience, projects, or background',
-            category: 'action',
-            icon: Sparkles,
-            color: '#ff00ff',
-            action: () => {
-                setIsOpen(false)
-                const chatFab = document.querySelector('.cb-fab') as HTMLElement
-                chatFab?.click()
-            }
-        },
+    // Full list or theme-only list depending on mode
+    const items: PaletteItem[] = paletteMode === 'theme'
+        ? themeItems
+        : [
+            // Files
+            ...SECTION_FILES.map(file => ({
+                id: `file-${file.id}`,
+                title: file.filename,
+                subtitle: `Jump to ${file.id} section`,
+                category: 'file' as const,
+                icon: file.filename.endsWith('.tsx') || file.filename.endsWith('.ts') ? FileCode : FileText,
+                color: file.filename.endsWith('.tsx') ? '#06f9f9' : file.filename.endsWith('.ts') ? '#3b82f6' : '#eab308',
+                action: () => navigateToSection(file.sectionId)
+            })),
 
-        // Themes
-        ...THEME_OPTIONS.map(theme => ({
-            id: `theme-${theme.id}`,
-            title: `Theme: ${theme.name}`,
-            subtitle: `Switch IDE appearance to ${theme.name}`,
-            category: 'theme' as const,
-            icon: Palette,
-            color: theme.color,
-            action: () => {
-                setIsOpen(false)
-                applyTheme(theme.id)
-            }
-        }))
-    ]
+            // Quick Actions
+            {
+                id: 'action-resume',
+                title: 'Download Resume (PDF)',
+                subtitle: 'Get Satya Sanatan\'s full curriculum vitae',
+                category: 'action',
+                icon: Download,
+                color: '#22c55e',
+                action: () => {
+                    setIsOpen(false)
+                    const link = document.createElement('a')
+                    link.href = '/resume.pdf'
+                    link.download = "Satya Sanatan's Resume.pdf"
+                    link.click()
+                }
+            },
+            {
+                id: 'action-email',
+                title: 'Compose Email',
+                subtitle: 'Direct email to connectsatyasanatan@gmail.com',
+                category: 'action',
+                icon: Mail,
+                color: '#06f9f9',
+                action: () => {
+                    setIsOpen(false)
+                    window.open('mailto:connectsatyasanatan@gmail.com', '_blank')
+                }
+            },
+            {
+                id: 'action-linkedin',
+                title: 'Open LinkedIn Profile',
+                subtitle: 'View professional recommendations and network',
+                category: 'action',
+                icon: Linkedin,
+                color: '#60a5fa',
+                action: () => {
+                    setIsOpen(false)
+                    window.open('https://linkedin.com/in/satya-sanatan', '_blank', 'noopener,noreferrer')
+                }
+            },
+            {
+                id: 'action-github',
+                title: 'Open GitHub Profile',
+                subtitle: 'Browse open-source repositories and code history',
+                category: 'action',
+                icon: Github,
+                color: '#ffffff',
+                action: () => {
+                    setIsOpen(false)
+                    window.open('https://github.com/connectsatyasanatan', '_blank', 'noopener,noreferrer')
+                }
+            },
+            {
+                id: 'action-ai',
+                title: 'Chat with Zentara AI Representative',
+                subtitle: 'Ask questions about experience, projects, or background',
+                category: 'action',
+                icon: Sparkles,
+                color: '#ff00ff',
+                action: () => {
+                    setIsOpen(false)
+                    const chatFab = document.querySelector('.cb-fab') as HTMLElement
+                    chatFab?.click()
+                }
+            },
+
+            // Themes
+            ...themeItems
+        ]
 
     const filteredItems = items.filter(item => {
         if (!query.trim()) return true
@@ -238,7 +275,11 @@ export default function CommandPalette() {
                                 background: 'var(--editor-bg)'
                             }}
                         >
-                            <Search size={18} style={{ color: 'var(--primary)', flexShrink: 0 }} />
+                            {paletteMode === 'theme' ? (
+                                <Palette size={18} style={{ color: 'var(--primary)', flexShrink: 0 }} />
+                            ) : (
+                                <Search size={18} style={{ color: 'var(--primary)', flexShrink: 0 }} />
+                            )}
                             <input
                                 ref={inputRef}
                                 type="text"
@@ -248,7 +289,11 @@ export default function CommandPalette() {
                                     setSelectedIndex(0)
                                 }}
                                 onKeyDown={handleKeyDown}
-                                placeholder="Type a file name, command, or theme (e.g. index, resume, dracula)..."
+                                placeholder={
+                                    paletteMode === 'theme'
+                                        ? "Select Color Theme (up/down arrow to navigate, Enter to apply)..."
+                                        : "Type a file name, command, or theme (e.g. index, resume, dracula)..."
+                                }
                                 style={{
                                     flex: 1,
                                     background: 'transparent',
@@ -287,12 +332,15 @@ export default function CommandPalette() {
                         >
                             {filteredItems.length === 0 ? (
                                 <div style={{ padding: '32px 16px', textAlign: 'center', color: 'var(--text-dim)', fontSize: 'var(--text-sm)' }}>
-                                    No commands or files matching "{query}"
+                                    {paletteMode === 'theme'
+                                        ? `No color themes matching "${query}"`
+                                        : `No commands or files matching "${query}"`}
                                 </div>
                             ) : (
                                 filteredItems.map((item, idx) => {
                                     const isSelected = idx === selectedIndex
                                     const Icon = item.icon
+                                    const isThemeActive = item.category === 'theme' && item.id === `theme-${currentTheme}`
                                     return (
                                         <div
                                             key={item.id}
@@ -336,20 +384,40 @@ export default function CommandPalette() {
                                                 </div>
                                             </div>
 
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-                                                <span
-                                                    style={{
-                                                        fontSize: 'var(--text-2xs)',
-                                                        padding: '2px 6px',
-                                                        borderRadius: '4px',
-                                                        background: 'rgba(255, 255, 255, 0.06)',
-                                                        color: 'var(--text-dim)',
-                                                        textTransform: 'uppercase',
-                                                        fontFamily: 'var(--font-mono)'
-                                                    }}
-                                                >
-                                                    {item.category}
-                                                </span>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                                                {isThemeActive ? (
+                                                    <span
+                                                        style={{
+                                                            fontSize: 'var(--text-2xs)',
+                                                            padding: '2px 8px',
+                                                            borderRadius: '4px',
+                                                            background: 'rgba(34, 197, 94, 0.15)',
+                                                            color: '#22c55e',
+                                                            border: '1px solid rgba(34, 197, 94, 0.3)',
+                                                            display: 'inline-flex',
+                                                            alignItems: 'center',
+                                                            gap: '4px',
+                                                            fontWeight: 600,
+                                                            fontFamily: 'var(--font-mono)'
+                                                        }}
+                                                    >
+                                                        <Check size={11} /> Active
+                                                    </span>
+                                                ) : paletteMode !== 'theme' ? (
+                                                    <span
+                                                        style={{
+                                                            fontSize: 'var(--text-2xs)',
+                                                            padding: '2px 6px',
+                                                            borderRadius: '4px',
+                                                            background: 'rgba(255, 255, 255, 0.06)',
+                                                            color: 'var(--text-dim)',
+                                                            textTransform: 'uppercase',
+                                                            fontFamily: 'var(--font-mono)'
+                                                        }}
+                                                    >
+                                                        {item.category}
+                                                    </span>
+                                                ) : null}
                                                 <ChevronRight size={14} style={{ color: isSelected ? 'var(--primary)' : 'var(--text-dim)' }} />
                                             </div>
                                         </div>
@@ -377,7 +445,9 @@ export default function CommandPalette() {
                                 <span><strong style={{ color: 'white' }}>Enter</strong> Select</span>
                                 <span><strong style={{ color: 'white' }}>Esc</strong> Close</span>
                             </div>
-                            <span style={{ color: 'var(--primary)' }}>VS Code Command Center</span>
+                            <span style={{ color: 'var(--primary)' }}>
+                                {paletteMode === 'theme' ? 'Preferences: Color Theme' : 'VS Code Command Center'}
+                            </span>
                         </div>
                     </motion.div>
                 </div>

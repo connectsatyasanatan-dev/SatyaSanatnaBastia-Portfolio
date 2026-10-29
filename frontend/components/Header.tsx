@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Play, Settings, Bell, Menu, X, Search, Palette } from 'lucide-react'
+import { Play, Settings, Bell, Menu, X, Search, Palette, Shield } from 'lucide-react'
 import { openCommandPalette } from '@/components/CommandPalette'
 
 const languageSequences = [
@@ -145,6 +145,41 @@ const Header = () => {
         return () => document.removeEventListener('click', handleOverlayClick)
     }, [])
 
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+    const settingsRef = useRef<HTMLDivElement>(null)
+
+    // Close settings dropdown on outside click or Escape key
+    useEffect(() => {
+        const handleOutsideClick = (e: MouseEvent) => {
+            if (settingsRef.current && !settingsRef.current.contains(e.target as Node)) {
+                setIsSettingsOpen(false)
+            }
+        }
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                setIsSettingsOpen(false)
+            }
+        }
+        if (isSettingsOpen) {
+            document.addEventListener('click', handleOutsideClick)
+            document.addEventListener('keydown', handleKeyDown)
+        }
+        return () => {
+            document.removeEventListener('click', handleOutsideClick)
+            document.removeEventListener('keydown', handleKeyDown)
+        }
+    }, [isSettingsOpen])
+
+    const handleRunBuild = () => {
+        if (typeof window !== 'undefined') {
+            const heroEl = document.getElementById('hero-section') || document.getElementById('hero')
+            if (heroEl) {
+                heroEl.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            }
+            window.dispatchEvent(new CustomEvent('trigger-run-build'))
+        }
+    }
+
     return (
         <header id="portfolio-header">
             <div className="header-left">
@@ -181,14 +216,14 @@ const Header = () => {
                 </div>
 
                 <div className="header-nav">
-                    <a href="#">File</a>
-                    <a href="#">Edit</a>
-                    <a href="#">View</a>
-                    <a href="#">Run</a>
+                    <a href="#" onClick={(e) => { e.preventDefault(); openCommandPalette(); }}>File</a>
+                    <a href="#" onClick={(e) => { e.preventDefault(); openCommandPalette(); }}>Edit</a>
+                    <a href="#" onClick={(e) => { e.preventDefault(); openCommandPalette(); }}>View</a>
+                    <a href="#" onClick={(e) => { e.preventDefault(); handleRunBuild(); }}>Run</a>
                 </div>
             </div>
 
-            {/* VS Code Command Center Search Pill */}
+            {/* VS Code Command Center Search Pill - Centered in middle */}
             <button
                 type="button"
                 className="vscode-search-pill"
@@ -206,8 +241,8 @@ const Header = () => {
             <div className="header-right">
                 <div
                     className="run-build-btn"
-                    onClick={() => openCommandPalette()}
-                    title="Quick Commands"
+                    onClick={handleRunBuild}
+                    title="Execute Code / Run Build"
                 >
                     <Play className="play-icon" />
                     <span className="btn-text-full">Run Build</span>
@@ -225,25 +260,110 @@ const Header = () => {
                     </button>
                     <button
                         type="button"
-                        className="header-btn"
+                        className="header-btn header-theme-btn"
                         title="Change Theme (Dracula, Tokyo Night, One Dark, Cyberpunk)"
-                        onClick={() => openCommandPalette()}
+                        onClick={() => openCommandPalette('theme')}
                         aria-label="Change Theme"
                     >
                         <Palette />
                     </button>
+
+                    {/* Settings Dropdown Container */}
+                    <div className="header-settings-container" ref={settingsRef}>
+                        <button
+                            type="button"
+                            className={`header-btn header-settings-btn ${isSettingsOpen ? 'header-btn--active' : ''}`}
+                            title="Settings & Quick Menu"
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                setIsSettingsOpen(prev => !prev)
+                            }}
+                            aria-label="Settings & Menu"
+                            aria-expanded={isSettingsOpen}
+                        >
+                            <Settings />
+                        </button>
+
+                        <AnimatePresence>
+                            {isSettingsOpen && (
+                                <motion.div
+                                    className="header-settings-dropdown"
+                                    initial={{ opacity: 0, y: -6, scale: 0.95 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0, y: -6, scale: 0.95 }}
+                                    transition={{ duration: 0.15, ease: 'easeOut' }}
+                                >
+                                    <div className="settings-dropdown-header">Quick Menu</div>
+
+                                    <button
+                                        type="button"
+                                        className="settings-dropdown-item"
+                                        onClick={() => {
+                                            handleRunBuild()
+                                            setIsSettingsOpen(false)
+                                        }}
+                                    >
+                                        <Play className="settings-item-icon text-cyan" />
+                                        <div className="settings-item-text">
+                                            <span className="settings-item-label">Run Build</span>
+                                            <span className="settings-item-hint">Execute code in digital workspace</span>
+                                        </div>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        className="settings-dropdown-item"
+                                        onClick={() => {
+                                            openCommandPalette()
+                                            setIsSettingsOpen(false)
+                                        }}
+                                    >
+                                        <Search className="settings-item-icon" />
+                                        <div className="settings-item-text">
+                                            <span className="settings-item-label">Search & Commands</span>
+                                            <span className="settings-item-hint">Files, symbols & pages</span>
+                                        </div>
+                                        <span className="settings-item-badge">Ctrl+P</span>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        className="settings-dropdown-item"
+                                        onClick={() => {
+                                            openCommandPalette('theme')
+                                            setIsSettingsOpen(false)
+                                        }}
+                                    >
+                                        <Palette className="settings-item-icon" />
+                                        <div className="settings-item-text">
+                                            <span className="settings-item-label">Change Theme</span>
+                                            <span className="settings-item-hint">Dracula, Cyberpunk, Tokyo</span>
+                                        </div>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        className="settings-dropdown-item"
+                                        onClick={() => {
+                                            setIsSettingsOpen(false)
+                                        }}
+                                    >
+                                        <Bell className="settings-item-icon" />
+                                        <div className="settings-item-text">
+                                            <span className="settings-item-label">Notifications</span>
+                                            <span className="settings-item-hint">System is up-to-date</span>
+                                        </div>
+                                    </button>
+
+                                    
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+
                     <button
                         type="button"
-                        className="header-btn"
-                        title="Settings & Palette"
-                        onClick={() => openCommandPalette()}
-                        aria-label="Settings"
-                    >
-                        <Settings />
-                    </button>
-                    <button
-                        type="button"
-                        className="header-btn"
+                        className="header-btn header-bell-btn"
                         title="Notifications"
                         aria-label="Notifications"
                     >
