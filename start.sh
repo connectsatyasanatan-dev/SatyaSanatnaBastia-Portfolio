@@ -14,10 +14,17 @@ echo "Starting Flask Backend on http://127.0.0.1:5000..."
 cd /app/backend
 python -m gunicorn wsgi:app --bind 127.0.0.1:5000 --workers 2 --timeout 120 --access-logfile - --error-logfile - &
 
-# 2. Wait 3 seconds for backend to start
-sleep 3
+# 2. Wait for Flask Backend to be ready
+echo "Waiting for Flask Backend to become available on 127.0.0.1:5000..."
+for i in $(seq 1 15); do
+  if curl -s http://127.0.0.1:5000/ > /dev/null 2>&1; then
+    echo "✅ Flask Backend is listening and responsive!"
+    break
+  fi
+  sleep 1
+done
 
-# 3. Start Next.js Frontend on the public port (8000)
+# 3. Start Next.js Frontend on the public port ($APP_PORT)
 echo "Starting Next.js Frontend on port $APP_PORT..."
 cd /app/frontend
 export PORT=$APP_PORT

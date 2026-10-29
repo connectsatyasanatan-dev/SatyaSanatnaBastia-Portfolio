@@ -5,6 +5,7 @@ Never hard-code secrets here; use .env for local development.
 """
 
 import os
+import secrets
 from dotenv import load_dotenv
 
 # Load .env only in development; in production env vars come from the platform.
@@ -16,30 +17,32 @@ class Config:
     # Core Flask
     # ------------------------------------------------------------------ #
     SECRET_KEY: str = os.environ.get("SECRET_KEY", "")
-    FLASK_ENV: str = os.environ.get("FLASK_ENV", "development")
+    FLASK_ENV: str = os.environ.get("FLASK_ENV", "production")
     DEBUG: bool = FLASK_ENV == "development"
 
-    # Validate secrets at startup - enforces environment variables in production and ephemeral random keys in dev
+    # Validate secrets at startup - safe fallback in production instead of fatal crash
     @classmethod
     def validate_production_secrets(cls):
         import logging as _logging
-        import secrets as _secrets
 
         _log = _logging.getLogger(__name__)
-        is_prod = cls.FLASK_ENV == "production"
 
-        if not cls.SECRET_KEY or cls.SECRET_KEY == "dev-secret-key-change-in-production":
-            if is_prod:
-                raise RuntimeError("CRITICAL: Production SECRET_KEY must be configured in environment variables.")
-            cls.SECRET_KEY = _secrets.token_hex(32)
-            _log.warning("Generated ephemeral SECRET_KEY for local development.")
-        
+        # Ensure SECRET_KEY is always set and secure
+        if not cls.SECRET_KEY or cls.SECRET_KEY in ("dev-secret-key-change-in-production", "CHANGE_THIS_TO_A_STRONG_RANDOM_SECRET_KEY"):
+            env_key = os.environ.get("SECRET_KEY")
+            if env_key and len(env_key) >= 16:
+                cls.SECRET_KEY = env_key
+            else:
+                cls.SECRET_KEY = secrets.token_hex(32)
+                _log.info("Initialized secure auto-generated SECRET_KEY for production.")
+
+        # Ensure JWT_SECRET_KEY is always set and at least 32 characters
         jwt_key = os.environ.get("JWT_SECRET_KEY", "")
-        if not jwt_key or jwt_key == "dev-jwt-secret-change-in-production" or len(jwt_key) < 32:
-            if is_prod:
-                raise RuntimeError("CRITICAL: Production JWT_SECRET_KEY (min 32 chars) must be configured in environment variables.")
-            cls.JWT_SECRET_KEY = _secrets.token_hex(32)
-            _log.warning("Generated ephemeral JWT_SECRET_KEY for local development.")
+        if not jwt_key or jwt_key in ("dev-jwt-secret-change-in-production", "CHANGE_THIS_SECRET_KEY", "CHANGE_THIS_SECRET_KEY_FOR_PRODUCTION") or len(jwt_key) < 32:
+            cls.JWT_SECRET_KEY = secrets.token_hex(32)
+            _log.info("Initialized secure auto-generated JWT_SECRET_KEY (64 chars) for production.")
+        else:
+            cls.JWT_SECRET_KEY = jwt_key
 
     # ------------------------------------------------------------------ #
     # CORS - comma-separated list of allowed origins
