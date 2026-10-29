@@ -82,7 +82,7 @@ export const metadata: Metadata = {
         languages: { 'en-US': SITE_URL },
     },
     verification: {
-        google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION || "google-site-verification-placeholder",
+        google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION || "ZR9hCcJH3bQqK0fLHe8N7Hz7GI2tbiaQKmnt9Mut410",
     },
     category: "technology",
     icons: {
@@ -311,6 +311,12 @@ export default function RootLayout({
                 {/* ── AI Discovery links (GEO) ── */}
                 <link rel="alternate" type="text/plain" href={`${SITE_URL}/llms.txt`} title="LLMs.txt - AI-readable site overview" />
                 <link rel="alternate" type="text/plain" href={`${SITE_URL}/humans.txt`} title="Humans.txt - Site credits" />
+
+                {/* ── Google Search Console Verification ── */}
+                <meta
+                    name="google-site-verification"
+                    content={process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION || "ZR9hCcJH3bQqK0fLHe8N7Hz7GI2tbiaQKmnt9Mut410"}
+                />
 
                 {/* ── Theme color for mobile browsers ── */}
                 <meta name="theme-color" content="#0f172a" />
