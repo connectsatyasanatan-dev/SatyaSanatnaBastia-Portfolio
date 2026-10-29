@@ -19,7 +19,6 @@ const nextConfig = {
     optimizePackageImports: [
       'lucide-react',
       'framer-motion',
-      'recharts',
       '@tanstack/react-query',
     ],
   },
