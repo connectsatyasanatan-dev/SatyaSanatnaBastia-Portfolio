@@ -1394,3 +1394,293 @@ body.resizing * {
   100% { opacity: 0; transform: translateY(-300px) rotate(var(--rot, 20deg)) scale(1.1); }
 }
 
+
+
+/* ==========================================================================
+   Modern Resume Modal Enhancements - View Switcher & Interactive CV
+   ========================================================================== */
+.resume-view-toggle {
+  display: flex;
+  align-items: center;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 4px;
+}
+
+.resume-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.resume-toggle-btn:hover {
+  color: #f1f5f9;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.resume-toggle-btn.active {
+  background: var(--primary);
+  color: #000000;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(6, 249, 249, 0.3);
+}
+
+.resume-help-banner {
+  background: rgba(15, 23, 42, 0.95);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 8px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 12px;
+  color: #94a3b8;
+  flex-wrap: wrap;
+}
+
+.resume-help-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(6, 249, 249, 0.12);
+  border: 1px solid rgba(6, 249, 249, 0.3);
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.resume-help-btn:hover {
+  background: var(--primary);
+  color: #000;
+}
+
+.resume-help-link {
+  color: #60a5fa;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.resume-help-link:hover {
+  color: #93c5fd;
+}
+
+/* Interactive CV Document Styling */
+.resume-interactive-doc {
+  width: 100%;
+  max-width: 850px;
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 36px 40px;
+  color: #f1f5f9;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  margin-bottom: 30px;
+}
+
+.resume-doc-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 24px;
+  margin-bottom: 24px;
+}
+
+.resume-doc-name {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #ffffff;
+  margin: 0 0 6px;
+  background: linear-gradient(135deg, #ffffff 0%, #06f9f9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.resume-doc-tagline {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary);
+  margin: 0 0 16px;
+}
+
+.resume-doc-contacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
+.contact-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.resume-doc-section {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 24px;
+  margin-bottom: 24px;
+}
+
+.resume-doc-sec-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #f8fafc;
+  margin-bottom: 14px;
+}
+
+.resume-doc-sec-title .sec-icon {
+  color: var(--primary);
+}
+
+.resume-doc-summary-text {
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: #cbd5e1;
+  margin: 0;
+}
+
+.resume-doc-exp-item {
+  margin-bottom: 20px;
+}
+
+.resume-doc-exp-item:last-child {
+  margin-bottom: 0;
+}
+
+.exp-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.exp-role {
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.exp-company {
+  font-size: 13px;
+  color: var(--primary);
+  margin: 2px 0 0;
+}
+
+.exp-duration {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.exp-bullets {
+  margin: 0;
+  padding-left: 18px;
+  color: #cbd5e1;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.exp-bullets li {
+  margin-bottom: 6px;
+}
+
+.resume-doc-skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.skill-cat-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.skill-cat-title {
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0 0 10px;
+}
+
+.skill-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.resume-skill-pill {
+  font-size: 11px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #e2e8f0;
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.resume-cert-item {
+  background: rgba(255, 255, 255, 0.03);
+  border-left: 3px solid var(--primary);
+  padding: 10px 14px;
+  border-radius: 0 8px 8px 0;
+}
+
+.cert-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0 0 3px;
+}
+
+.cert-issuer {
+  font-size: 12px;
+  color: #94a3b8;
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .resume-interactive-doc {
+    padding: 20px 16px;
+  }
+  .resume-doc-name {
+    font-size: 22px;
+  }
+  .exp-item-header {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .resume-view-toggle span {
+    display: none;
+  }
+}
