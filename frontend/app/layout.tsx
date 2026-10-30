@@ -83,6 +83,22 @@ export const metadata: Metadata = {
     },
     verification: {
         google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION || "ZR9hCcJH3bQqK0fLHe8N7Hz7GI2tbiaQKmnt9Mut410",
+        yandex: process.env.NEXT_PUBLIC_YANDEX_VERIFICATION,
+        yahoo: process.env.NEXT_PUBLIC_YAHOO_VERIFICATION,
+        other: {
+            'msvalidate.01': [process.env.NEXT_PUBLIC_BING_VERIFICATION || '15AF42CF76F4FB6E6E5531D2F4A92CF6'],
+        },
+    },
+    appleWebApp: {
+        capable: true,
+        statusBarStyle: 'black-translucent',
+        title: 'Satya Sanatan Bastia',
+    },
+    formatDetection: {
+        telephone: false,
+        date: false,
+        address: false,
+        email: false,
     },
     category: "technology",
     icons: {
@@ -312,15 +328,28 @@ export default function RootLayout({
                 <link rel="alternate" type="text/plain" href={`${SITE_URL}/llms.txt`} title="LLMs.txt - AI-readable site overview" />
                 <link rel="alternate" type="text/plain" href={`${SITE_URL}/humans.txt`} title="Humans.txt - Site credits" />
 
-                {/* ── Google Search Console Verification ── */}
+                {/* ── Search Engine Verifications (Google, Bing, Yandex) ── */}
                 <meta
                     name="google-site-verification"
                     content={process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION || "ZR9hCcJH3bQqK0fLHe8N7Hz7GI2tbiaQKmnt9Mut410"}
                 />
+                <meta
+                    name="msvalidate.01"
+                    content={process.env.NEXT_PUBLIC_BING_VERIFICATION || "15AF42CF76F4FB6E6E5531D2F4A92CF6"}
+                />
+                {process.env.NEXT_PUBLIC_YANDEX_VERIFICATION && (
+                    <meta name="yandex-verification" content={process.env.NEXT_PUBLIC_YANDEX_VERIFICATION} />
+                )}
 
-                {/* ── Theme color for mobile browsers ── */}
+                {/* ── Cross-Browser & Mobile Compatibility (Safari, Edge, Firefox, Chrome) ── */}
+                <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
+                <meta name="apple-mobile-web-app-capable" content="yes" />
+                <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+                <meta name="apple-mobile-web-app-title" content="Satya Sanatan Bastia" />
+                <meta name="mobile-web-app-capable" content="yes" />
                 <meta name="theme-color" content="#0f172a" />
                 <meta name="msapplication-TileColor" content="#0f172a" />
+                <meta name="msapplication-navbutton-color" content="#0f172a" />
 
                 {/* ── JSON-LD Structured Data (AIO / GEO / AEO) ── */}
                 <script

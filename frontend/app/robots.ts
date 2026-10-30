@@ -10,7 +10,54 @@ export default function robots(): MetadataRoute.Robots {
                 allow: '/',
                 disallow: ['/api/admin/', '/admin/'],
             },
-            // Allow all AI/LLM crawlers (GEO Optimization)
+            // ── Global Search Engine Crawlers ──────────────────────────────
+            {
+                userAgent: 'Googlebot',
+                allow: '/',
+                disallow: ['/api/admin/', '/admin/'],
+            },
+            {
+                userAgent: 'Bingbot',
+                allow: '/',
+                disallow: ['/api/admin/', '/admin/'],
+            },
+            {
+                userAgent: 'DuckDuckBot',
+                allow: '/',
+                disallow: ['/api/admin/', '/admin/'],
+            },
+            {
+                userAgent: 'Slurp', // Yahoo
+                allow: '/',
+                disallow: ['/api/admin/', '/admin/'],
+            },
+            {
+                userAgent: 'Bravebot', // Brave Search
+                allow: '/',
+                disallow: ['/api/admin/', '/admin/'],
+            },
+            {
+                userAgent: 'YandexBot', // Yandex
+                allow: '/',
+                disallow: ['/api/admin/', '/admin/'],
+            },
+            {
+                userAgent: 'Baiduspider', // Baidu
+                allow: '/',
+                disallow: ['/api/admin/', '/admin/'],
+            },
+            // ── Apple Siri / Spotlight / Safari Crawler ───────────────────
+            {
+                userAgent: 'Applebot',
+                allow: '/',
+                disallow: ['/api/admin/', '/admin/'],
+            },
+            {
+                userAgent: 'Applebot-Extended',
+                allow: '/',
+                disallow: ['/api/admin/', '/admin/'],
+            },
+            // ── AI & LLM Search Crawlers (GEO / AEO) ───────────────────────
             {
                 userAgent: 'GPTBot',
                 allow: '/',
@@ -22,7 +69,12 @@ export default function robots(): MetadataRoute.Robots {
                 disallow: ['/api/admin/', '/admin/'],
             },
             {
-                userAgent: 'CCBot',
+                userAgent: 'OAI-SearchBot', // OpenAI SearchGPT
+                allow: '/',
+                disallow: ['/api/admin/', '/admin/'],
+            },
+            {
+                userAgent: 'PerplexityBot',
                 allow: '/',
                 disallow: ['/api/admin/', '/admin/'],
             },
@@ -37,17 +89,17 @@ export default function robots(): MetadataRoute.Robots {
                 disallow: ['/api/admin/', '/admin/'],
             },
             {
-                userAgent: 'PerplexityBot',
+                userAgent: 'CCBot',
                 allow: '/',
                 disallow: ['/api/admin/', '/admin/'],
             },
             {
-                userAgent: 'Googlebot',
+                userAgent: 'cohere-ai',
                 allow: '/',
                 disallow: ['/api/admin/', '/admin/'],
             },
             {
-                userAgent: 'Bingbot',
+                userAgent: 'Meta-ExternalAgent', // Meta AI
                 allow: '/',
                 disallow: ['/api/admin/', '/admin/'],
             },
