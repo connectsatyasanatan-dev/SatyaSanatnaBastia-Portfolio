@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
     User, Settings, FileText, Briefcase,
-    MessageSquare, Star, BarChart3, LogOut, Eye, EyeOff, Mail, Award, BookOpen, GraduationCap
+    MessageSquare, Star, BarChart3, LogOut, Eye, EyeOff, Mail, Award, BookOpen, GraduationCap,
+    Menu, X, ChevronLeft, ChevronRight, Activity, Sparkles
 } from 'lucide-react'
 import adminApiClient from '@/lib/admin-api'
 import type { AdminData, PersonalInfo, SkillCategory, Project, Experience, Testimonial, BlogPost, Education, Certification } from '@/lib/admin-types'
@@ -36,6 +37,8 @@ const AdminPanel = () => {
     const [loginForm, setLoginForm] = useState({ username: '', password: '' })
     const [loginError, setLoginError] = useState<string | null>(null)
     const [showPassword, setShowPassword] = useState(false)
+    const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
 
     useEffect(() => {
         const savedToken = localStorage.getItem('admin_token')
@@ -563,55 +566,68 @@ const AdminPanel = () => {
         )
     }
 
-    const tabs = [
-        { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
-        { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-        { id: 'personal', label: 'Personal Info', icon: User },
-        { id: 'skills', label: 'Skills', icon: Settings },
-        { id: 'projects', label: 'Projects', icon: FileText },
-        { id: 'experience', label: 'Experience', icon: Briefcase },
-        { id: 'education', label: 'Education', icon: GraduationCap },
-        { id: 'certifications', label: 'Certifications', icon: Award },
-        { id: 'testimonials', label: 'Testimonials', icon: MessageSquare },
-        { id: 'messages', label: 'Messages & AI Leads', icon: Mail },
-        { id: 'blog', label: 'Blog Posts', icon: Star },
-        { id: 'achievements', label: 'Achievements & Stats', icon: Award }
+    const navGroups = [
+        {
+            title: 'Overview',
+            tabs: [
+                { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
+                { id: 'analytics', label: 'Analytics', icon: Activity },
+            ]
+        },
+        {
+            title: 'Portfolio Content',
+            tabs: [
+                { id: 'projects', label: 'Projects', icon: FileText },
+                { id: 'skills', label: 'Skills & Tech', icon: Settings },
+                { id: 'experience', label: 'Experience', icon: Briefcase },
+                { id: 'education', label: 'Education', icon: GraduationCap },
+                { id: 'certifications', label: 'Certifications', icon: Award },
+            ]
+        },
+        {
+            title: 'Engagement & Profile',
+            tabs: [
+                { id: 'personal', label: 'Personal Info', icon: User },
+                { id: 'messages', label: 'Messages & AI Leads', icon: Mail },
+                { id: 'blog', label: 'Blog Posts', icon: Star },
+                { id: 'testimonials', label: 'Testimonials', icon: MessageSquare },
+                { id: 'achievements', label: 'Achievements', icon: Award }
+            ]
+        }
     ]
 
     return (
         <div className="admin-container">
             <ToastContainer />
 
+            {/* Top Navigation Bar */}
             <header className="admin-header">
                 <div className="admin-header-content">
                     <div className="admin-header-left">
+                        {/* Mobile Drawer Toggle */}
+                        <button
+                            type="button"
+                            onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
+                            className="admin-mobile-toggle"
+                            aria-label="Toggle navigation drawer"
+                            title="Toggle menu"
+                        >
+                            {isMobileSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+                        </button>
+
                         <div className="admin-logo">
-                            <BarChart3 />
+                            <BarChart3 size={20} />
                         </div>
                         <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-                                <h1 className="admin-header-title">Portfolio Admin Panel</h1>
-                                <span style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '0.35rem',
-                                    padding: '0.2rem 0.65rem',
-                                    borderRadius: '9999px',
-                                    fontSize: '0.72rem',
-                                    fontWeight: 700,
-                                    letterSpacing: '0.04em',
-                                    textTransform: 'uppercase',
-                                    background: 'linear-gradient(135deg, rgba(234, 179, 8, 0.18), rgba(245, 158, 11, 0.28))',
-                                    border: '1px solid rgba(245, 158, 11, 0.55)',
-                                    color: '#fbbf24',
-                                    boxShadow: '0 0 10px rgba(245, 158, 11, 0.2)'
-                                }}>
+                            <div className="admin-header-title-row">
+                                <h1 className="admin-header-title">Portfolio Admin</h1>
+                                <span className="admin-super-badge">
                                     👑 Super Admin
                                 </span>
                             </div>
                             {currentUser?.username && (
-                                <p style={{ margin: '0.15rem 0 0 0', fontSize: '0.8rem', color: '#9ca3af' }}>
-                                    Logged in as <strong style={{ color: '#e5e7eb' }}>{currentUser.username}</strong>
+                                <p className="admin-user-subtitle">
+                                    Logged in as <strong>{currentUser.username}</strong>
                                 </p>
                             )}
                         </div>
@@ -622,55 +638,100 @@ const AdminPanel = () => {
                             target="_blank"
                             rel="noopener noreferrer"
                             className="admin-btn-view-site"
+                            title="Open main portfolio website in new tab"
                         >
-                            <Eye />
-                            View Site
+                            <Eye size={16} />
+                            <span className="btn-text">View Site</span>
                         </a>
                         <button
                             onClick={handleLogout}
                             className="admin-btn-logout"
+                            title="Log out of Admin Panel"
                         >
-                            <LogOut />
-                            Logout
+                            <LogOut size={16} />
+                            <span className="btn-text">Logout</span>
                         </button>
                     </div>
                 </div>
             </header>
 
+            {/* Mobile Backdrop Overlay */}
+            {isMobileSidebarOpen && (
+                <div
+                    className="admin-sidebar-overlay"
+                    onClick={() => setIsMobileSidebarOpen(false)}
+                    aria-hidden="true"
+                />
+            )}
+
             <div className="admin-layout-main">
-                <nav className="admin-sidebar">
+                <nav className={`admin-sidebar ${isMobileSidebarOpen ? 'mobile-open' : ''} ${isSidebarCollapsed ? 'collapsed' : ''}`}>
+                    {/* Mobile Drawer Top Header */}
+                    <div className="admin-sidebar-mobile-header">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <div className="admin-logo" style={{ width: '32px', height: '32px' }}>
+                                <BarChart3 size={18} />
+                            </div>
+                            <span style={{ fontWeight: 700, fontSize: '15px', color: '#fff' }}>Navigation</span>
+                        </div>
+                        <button
+                            onClick={() => setIsMobileSidebarOpen(false)}
+                            className="admin-sidebar-close-btn"
+                            aria-label="Close navigation"
+                        >
+                            <X size={18} />
+                        </button>
+                    </div>
+
+                    {/* Desktop Collapse Toggle */}
+                    <div className="admin-sidebar-collapse-wrap">
+                        <button
+                            type="button"
+                            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                            className="admin-sidebar-collapse-btn"
+                            title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                        >
+                            {isSidebarCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+                            <span className="collapse-label">{isSidebarCollapsed ? 'Expand' : 'Collapse'}</span>
+                        </button>
+                    </div>
+
                     {loading && !adminData ? (
                         <AdminSidebarSkeleton />
                     ) : (
-                        <ul className="admin-nav-list">
-                            {tabs.map((tab) => {
-                                const IconComponent = tab.icon
-                                return (
-                                    <li key={tab.id}>
-                                        <button
-                                            onClick={() => setActiveTab(tab.id)}
-                                            className={`admin-nav-item ${activeTab === tab.id ? 'active' : ''}`}
-                                        >
-                                            <IconComponent />
-                                            <span>{tab.label}</span>
-                                            {tab.id === 'messages' && (adminData?.aiLeads?.length || 0) > 0 && (
-                                                <span style={{
-                                                    marginLeft: 'auto',
-                                                    background: 'linear-gradient(135deg, #a855f7, #ec4899)',
-                                                    color: '#fff',
-                                                    fontSize: '11px',
-                                                    fontWeight: 700,
-                                                    padding: '2px 7px',
-                                                    borderRadius: '10px'
-                                                }}>
-                                                    {adminData?.aiLeads?.length}
-                                                </span>
-                                            )}
-                                        </button>
-                                    </li>
-                                )
-                            })}
-                        </ul>
+                        <div className="admin-nav-groups">
+                            {navGroups.map((group, gIdx) => (
+                                <div key={gIdx} className="admin-nav-group">
+                                    <div className="admin-nav-group-title">{group.title}</div>
+                                    <ul className="admin-nav-list">
+                                        {group.tabs.map((tab) => {
+                                            const IconComponent = tab.icon
+                                            const isActive = activeTab === tab.id
+                                            return (
+                                                <li key={tab.id}>
+                                                    <button
+                                                        onClick={() => {
+                                                            setActiveTab(tab.id)
+                                                            setIsMobileSidebarOpen(false)
+                                                        }}
+                                                        className={`admin-nav-item ${isActive ? 'active' : ''}`}
+                                                        title={tab.label}
+                                                    >
+                                                        <IconComponent size={18} className="admin-nav-icon" />
+                                                        <span className="admin-nav-label">{tab.label}</span>
+                                                        {tab.id === 'messages' && (adminData?.aiLeads?.length || 0) > 0 && (
+                                                            <span className="admin-nav-badge">
+                                                                {adminData?.aiLeads?.length}
+                                                            </span>
+                                                        )}
+                                                    </button>
+                                                </li>
+                                            )
+                                        })}
+                                    </ul>
+                                </div>
+                            ))}
+                        </div>
                     )}
                 </nav>
 
@@ -680,7 +741,10 @@ const AdminPanel = () => {
                     ) : adminData ? (
                         <>
                             {activeTab === 'dashboard' && (
-                                <DashboardTab stats={adminData.stats} />
+                                <DashboardTab
+                                    stats={adminData.stats}
+                                    onNavigateTab={(tab) => setActiveTab(tab)}
+                                />
                             )}
 
                             {activeTab === 'analytics' && (
