@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { Edit, Save, X, User, Mail, MapPin, Globe, Github, Linkedin, Twitter, Phone, Clock, Languages, Briefcase, FileText, FileUp, Loader2, CheckCircle2, Trash2, Eye } from 'lucide-react'
 import { adminApiClient } from '@/lib/admin-api'
 import ResumeModal from '../ResumeModal'
+import ConfirmDialog from './ConfirmDialog'
 
 interface PersonalInfoTabProps {
     data: Record<string, any>
@@ -17,6 +18,7 @@ const PersonalInfoTab = ({ data, onUpdate }: PersonalInfoTabProps) => {
     const [loading, setLoading] = useState(false)
     const [uploadingResume, setUploadingResume] = useState(false)
     const [isPreviewOpen, setIsPreviewOpen] = useState(false)
+    const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
 
     const handleSave = async () => {
         setLoading(true)
@@ -54,12 +56,15 @@ const PersonalInfoTab = ({ data, onUpdate }: PersonalInfoTabProps) => {
     }
 
     const handleDeleteResume = () => {
-        if (confirm('Are you sure you want to delete the CV?')) {
-            setEditData({
-                ...editData,
-                resume: ''
-            })
-        }
+        setIsDeleteConfirmOpen(true)
+    }
+
+    const confirmDeleteResume = () => {
+        setEditData({
+            ...editData,
+            resume: ''
+        })
+        setIsDeleteConfirmOpen(false)
     }
 
     const handleCancel = () => {
@@ -311,6 +316,17 @@ const PersonalInfoTab = ({ data, onUpdate }: PersonalInfoTabProps) => {
                     </div>
                 ))}
             </motion.div>
+            {/* Delete CV Confirmation Modal */}
+            <ConfirmDialog
+                isOpen={isDeleteConfirmOpen}
+                onClose={() => setIsDeleteConfirmOpen(false)}
+                title="Delete Curriculum Vitae"
+                message="Are you sure you want to delete the CV? This will remove the uploaded resume from your portfolio."
+                confirmText="Delete CV"
+                cancelText="Cancel"
+                onConfirm={confirmDeleteResume}
+                type="delete"
+            />
         </div>
     )
 }

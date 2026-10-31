@@ -5,7 +5,8 @@ All HTML is served by the Next.js / Vite frontend.
 """
 
 import logging
-from flask import Flask, jsonify
+import os
+from flask import Flask, jsonify, send_from_directory, request
 from flask_cors import CORS
 from flask_mail import Mail
 
@@ -86,6 +87,45 @@ def create_app(config_class: type = Config) -> Flask:
                 },
             }
         )
+
+    # ------------------------------------------------------------------
+    # Static Uploads & Resume Serving
+    # ------------------------------------------------------------------
+    @app.route("/api/static/uploads/<path:filename>")
+    @app.route("/static/uploads/<path:filename>")
+    def serve_uploaded_file(filename):
+        upload_folder = app.config.get(
+            "UPLOAD_FOLDER", os.path.join(app.root_path, "static", "uploads")
+        )
+        filepath = os.path.join(upload_folder, filename)
+        if not os.path.exists(filepath):
+            if filename.lower().endswith(".pdf"):
+                fallback_dir = os.path.join(app.root_path, "static")
+                if os.path.exists(os.path.join(fallback_dir, "resume.pdf")):
+                    resp = send_from_directory(fallback_dir, "resume.pdf")
+                    resp.headers["Content-Type"] = "application/pdf"
+                    resp.headers["Content-Disposition"] = "inline"
+                    resp.headers["X-Frame-Options"] = "SAMEORIGIN"
+                    return resp
+            return jsonify({"error": "File not found"}), 404
+
+        resp = send_from_directory(upload_folder, filename)
+        if filename.lower().endswith(".pdf"):
+            resp.headers["Content-Type"] = "application/pdf"
+            resp.headers["Content-Disposition"] = "inline"
+            resp.headers["X-Frame-Options"] = "SAMEORIGIN"
+        return resp
+
+    @app.route("/api/resume")
+    @app.route("/api/resume.pdf")
+    @app.route("/resume.pdf")
+    def serve_default_resume():
+        static_dir = os.path.join(app.root_path, "static")
+        resp = send_from_directory(static_dir, "resume.pdf")
+        resp.headers["Content-Type"] = "application/pdf"
+        resp.headers["Content-Disposition"] = "inline"
+        resp.headers["X-Frame-Options"] = "SAMEORIGIN"
+        return resp
 
     # ------------------------------------------------------------------
     # Error handlers - always return JSON

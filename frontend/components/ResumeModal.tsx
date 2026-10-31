@@ -15,17 +15,49 @@ const LOCAL_RESUME = '/resume.pdf'
 
 const ResumeModal = ({ isOpen, onClose, resumeUrl, name }: ResumeModalProps) => {
     const [loading, setLoading] = useState(true)
+    const [activePdfUrl, setActivePdfUrl] = useState(LOCAL_RESUME)
     const iframeRef = useRef<HTMLIFrameElement>(null)
 
-    const activePdfUrl = resumeUrl || LOCAL_RESUME
-
     useEffect(() => {
-        if (isOpen) {
-            setLoading(true)
-            const timer = setTimeout(() => {
-                setLoading(false)
-            }, 1000)
+        if (!isOpen) return
+
+        setLoading(true)
+        const target = resumeUrl?.trim() || LOCAL_RESUME
+
+        // If target is already local resume, set and finish loading
+        if (target === LOCAL_RESUME) {
+            setActivePdfUrl(LOCAL_RESUME)
+            const timer = setTimeout(() => setLoading(false), 500)
             return () => clearTimeout(timer)
+        }
+
+        let cancelled = false
+        setActivePdfUrl(target)
+
+        // Validate target URL: ensure it doesn't return 404 or JSON error like {"error":"Endpoint not found"}
+        fetch(target, { method: 'GET' })
+            .then(res => {
+                if (cancelled) return
+                const contentType = res.headers.get('content-type') || ''
+                // If response is not ok or returns JSON error instead of PDF:
+                if (!res.ok || contentType.includes('application/json')) {
+                    console.warn(`Resume endpoint returned ${res.status} ${contentType}. Falling back to ${LOCAL_RESUME}`)
+                    setActivePdfUrl(LOCAL_RESUME)
+                }
+            })
+            .catch(() => {
+                if (!cancelled) {
+                    setActivePdfUrl(LOCAL_RESUME)
+                }
+            })
+            .finally(() => {
+                if (!cancelled) {
+                    setLoading(false)
+                }
+            })
+
+        return () => {
+            cancelled = true
         }
     }, [isOpen, resumeUrl])
 
@@ -45,7 +77,7 @@ const ResumeModal = ({ isOpen, onClose, resumeUrl, name }: ResumeModalProps) => 
             window.URL.revokeObjectURL(blobUrl)
         } catch {
             const link = document.createElement('a')
-            link.href = activePdfUrl
+            link.href = LOCAL_RESUME
             link.target = '_blank'
             link.download = 'Satya Sanatan Bastia - Resume.pdf'
             link.click()
@@ -118,12 +150,18 @@ const ResumeModal = ({ isOpen, onClose, resumeUrl, name }: ResumeModalProps) => 
                         )}
 
                         <iframe
+                            key={activePdfUrl}
                             ref={iframeRef}
                             id="resume-pdf-frame"
                             src={`${activePdfUrl}#view=FitH`}
                             className="resume-iframe"
                             title="Satya Sanatan Bastia - Curriculum Vitae"
                             onLoad={() => setLoading(false)}
+                            onError={() => {
+                                if (activePdfUrl !== LOCAL_RESUME) {
+                                    setActivePdfUrl(LOCAL_RESUME)
+                                }
+                            }}
                         />
                     </div>
 
