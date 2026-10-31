@@ -296,6 +296,7 @@ const AnalyticsTab = () => {
                 borderRadius: '10px',
                 display: 'flex',
                 alignItems: 'center',
+                flexWrap: 'wrap',
                 gap: '12px',
                 fontSize: '14px',
                 color: '#93c5fd'
@@ -430,7 +431,7 @@ const AnalyticsTab = () => {
             </motion.div>
 
             {/* Two Column Layout for Device & Visitor Type */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px', marginBottom: '24px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '24px', marginBottom: '24px' }}>
                 {/* Device Breakdown */}
                 <motion.div
                     initial={{ opacity: 0, x: -20 }}
@@ -611,8 +612,8 @@ const AnalyticsTab = () => {
                         <p style={{ margin: '12px 0 0', fontSize: '14px' }}>No page views recorded yet</p>
                     </div>
                 ) : (
-                    <div style={{ overflowX: 'auto' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                        <table style={{ width: '100%', minWidth: '480px', borderCollapse: 'collapse' }}>
                             <thead>
                                 <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
                                     <th style={{ padding: '12px', textAlign: 'left', fontSize: '11px', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em', width: '40px' }}>
@@ -728,8 +729,8 @@ const AnalyticsTab = () => {
                         <p style={{ margin: '12px 0 0', fontSize: '14px' }}>No country data yet</p>
                     </div>
                 ) : (
-                    <div style={{ overflowX: 'auto' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                        <table style={{ width: '100%', minWidth: '480px', borderCollapse: 'collapse' }}>
                             <thead>
                                 <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
                                     <th style={{ padding: '12px', textAlign: 'left', fontSize: '11px', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em', width: '40px' }}>

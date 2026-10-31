@@ -92,7 +92,7 @@ export const DashboardSkeleton = () => {
             </div>
 
             {/* 2-Column Overview Widgets */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '24px' }}>
                 <div className="admin-card" style={{ padding: '24px', borderRadius: '14px' }}>
                     <Skeleton variant="title" width="40%" height={20} style={{ marginBottom: '20px' }} />
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
