@@ -511,7 +511,7 @@ const AdminPanel = () => {
                             <label className="admin-form-label">
                                 Password
                             </label>
-                            <div style={{ position: 'relative' }}>
+                            <div className="admin-login-input-wrap">
                                 <input
                                     type={showPassword ? "text" : "password"}
                                     value={loginForm.password}
@@ -525,22 +525,10 @@ const AdminPanel = () => {
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    style={{
-                                        position: 'absolute',
-                                        right: '0.75rem',
-                                        top: '50%',
-                                        transform: 'translateY(-50%)',
-                                        background: 'transparent',
-                                        border: 'none',
-                                        color: '#9ca3af',
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        padding: 0
-                                    }}
+                                    className="admin-login-password-toggle"
+                                    aria-label={showPassword ? "Hide password" : "Show password"}
                                 >
-                                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                 </button>
                             </div>
                         </div>
@@ -668,11 +656,11 @@ const AdminPanel = () => {
                 <nav className={`admin-sidebar ${isMobileSidebarOpen ? 'mobile-open' : ''} ${isSidebarCollapsed ? 'collapsed' : ''}`}>
                     {/* Mobile Drawer Top Header */}
                     <div className="admin-sidebar-mobile-header">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <div className="admin-logo" style={{ width: '32px', height: '32px' }}>
+                        <div className="admin-sidebar-mobile-title-wrap">
+                            <div className="admin-logo admin-sidebar-mobile-logo">
                                 <BarChart3 size={18} />
                             </div>
-                            <span style={{ fontWeight: 700, fontSize: '15px', color: '#fff' }}>Navigation</span>
+                            <span className="admin-sidebar-mobile-title">Navigation</span>
                         </div>
                         <button
                             onClick={() => setIsMobileSidebarOpen(false)}

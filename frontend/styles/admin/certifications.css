@@ -1,0 +1,66 @@
+/* ==========================================================================
+   Admin CertificationsTab Styles (Credential Cards, Verification Badges)
+   ========================================================================== */
+
+.admin-cert-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-cert-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.admin-cert-badge-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fbbf24;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.admin-cert-badge-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.admin-cert-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.admin-cert-status-pill.active {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #34d399;
+}
+
+.admin-cert-status-pill.expired {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #f87171;
+}
+
+.admin-cert-credential-id {
+  font-family: monospace;
+  font-size: 11px;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+

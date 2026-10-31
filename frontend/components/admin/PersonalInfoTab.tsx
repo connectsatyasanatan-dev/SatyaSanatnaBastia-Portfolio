@@ -214,7 +214,7 @@ const PersonalInfoTab = ({ data, onUpdate }: PersonalInfoTabProps) => {
             </AnimatePresence>
 
             {/* Two-Column Groups Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))', gap: '24px' }}>
+            <div className="admin-personal-grid">
                 {fieldGroups.map((group) => {
                     const GroupIcon = group.icon
                     return (

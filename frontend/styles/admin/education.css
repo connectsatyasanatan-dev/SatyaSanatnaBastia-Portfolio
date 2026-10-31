@@ -1,0 +1,58 @@
+/* ==========================================================================
+   Admin EducationTab Styles (Degrees, Institutions, Coursework & Honors)
+   ========================================================================== */
+
+.admin-edu-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-edu-degree-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.admin-edu-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(59, 130, 246, 0.1));
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #a78bfa;
+  flex-shrink: 0;
+}
+
+.admin-edu-gpa-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #34d399;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.admin-edu-courses-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.admin-edu-course-pill {
+  padding: 3px 8px;
+  background: rgba(139, 92, 246, 0.12);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  border-radius: 6px;
+  font-size: 11px;
+  color: #c4b5fd;
+  font-weight: 500;
+}
+

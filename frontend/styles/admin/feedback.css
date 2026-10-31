@@ -1,0 +1,300 @@
+/* ==========================================================================
+   Admin Feedback, Ultra-Premium Toast Notifications, Alerts, Spinners & Skeletons
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Modern Obsidian Glass Toast Notification System
+   -------------------------------------------------------------------------- */
+.admin-toast-container {
+  position: fixed;
+  top: 84px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+  max-width: 420px;
+  width: calc(100vw - 48px);
+}
+
+@media (max-width: 480px) {
+  .admin-toast-container {
+    top: 68px;
+    left: 12px;
+    right: 12px;
+    width: auto;
+    max-width: 100%;
+  }
+}
+
+.admin-toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: rgba(13, 19, 33, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 16px 40px -6px rgba(0, 0, 0, 0.7);
+  pointer-events: auto;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+}
+
+.admin-toast:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 48px -6px rgba(0, 0, 0, 0.8);
+}
+
+.admin-toast::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3.5px;
+}
+
+/* Toast Color Schemes */
+.admin-toast.success {
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  box-shadow: 0 16px 40px -6px rgba(0, 0, 0, 0.7), 0 0 20px rgba(16, 185, 129, 0.12);
+}
+.admin-toast.success::before {
+  background: #10b981;
+  box-shadow: 0 0 10px #10b981;
+}
+
+.admin-toast.error {
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  box-shadow: 0 16px 40px -6px rgba(0, 0, 0, 0.7), 0 0 20px rgba(239, 68, 68, 0.12);
+}
+.admin-toast.error::before {
+  background: #ef4444;
+  box-shadow: 0 0 10px #ef4444;
+}
+
+.admin-toast.warning {
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  box-shadow: 0 16px 40px -6px rgba(0, 0, 0, 0.7), 0 0 20px rgba(245, 158, 11, 0.12);
+}
+.admin-toast.warning::before {
+  background: #f59e0b;
+  box-shadow: 0 0 10px #f59e0b;
+}
+
+.admin-toast.info {
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  box-shadow: 0 16px 40px -6px rgba(0, 0, 0, 0.7), 0 0 20px rgba(59, 130, 246, 0.12);
+}
+.admin-toast.info::before {
+  background: #3b82f6;
+  box-shadow: 0 0 10px #3b82f6;
+}
+
+/* Toast Icon Wrapper */
+.admin-toast-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.admin-toast.success .admin-toast-icon {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+}
+
+.admin-toast.error .admin-toast-icon {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+.admin-toast.warning .admin-toast-icon {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+}
+
+.admin-toast.info .admin-toast-icon {
+  background: rgba(59, 130, 246, 0.15);
+  color: #38bdf8;
+}
+
+/* Toast Content & Typography */
+.admin-toast-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-toast-text {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #f8fafc;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+/* Dismiss Close Button */
+.admin-toast-close {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.admin-toast-close:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+/* --------------------------------------------------------------------------
+   Inline Message & Error Alerts
+   -------------------------------------------------------------------------- */
+.admin-message-error,
+.admin-message-warning,
+.admin-message-success,
+.admin-message-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.admin-message-error {
+  background: rgba(220, 38, 38, 0.15);
+  border: 1px solid rgba(220, 38, 38, 0.35);
+  color: #fca5a5;
+}
+
+.admin-message-warning {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #fcd34d;
+}
+
+.admin-message-success {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #6ee7b7;
+}
+
+.admin-message-info {
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  color: #93c5fd;
+}
+
+.admin-message-content {
+  flex: 1;
+}
+
+.admin-message-text {
+  margin: 0;
+  font-size: 14px;
+}
+
+.admin-icon-error { color: #fca5a5; }
+.admin-icon-warning { color: #fcd34d; }
+.admin-icon-success { color: #6ee7b7; }
+.admin-icon-info { color: #93c5fd; }
+
+/* --------------------------------------------------------------------------
+   Spinners & Loading Overlays
+   -------------------------------------------------------------------------- */
+.admin-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #ffffff;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+.admin-loading-spinner {
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.admin-loading-spinner.sm {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top-color: #ffffff;
+}
+
+.admin-loading-spinner.md {
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-top-color: #38bdf8;
+}
+
+.admin-loading-spinner.lg {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-top-color: #06f9f9;
+}
+
+.admin-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+/* --------------------------------------------------------------------------
+   Skeleton Loading Animation
+   -------------------------------------------------------------------------- */
+.admin-skeleton-pulse {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.04) 25%, rgba(255, 255, 255, 0.08) 37%, rgba(255, 255, 255, 0.04) 63%);
+  background-size: 400% 100%;
+  animation: skeletonPulse 1.4s ease infinite;
+}
+
+@keyframes skeletonPulse {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}

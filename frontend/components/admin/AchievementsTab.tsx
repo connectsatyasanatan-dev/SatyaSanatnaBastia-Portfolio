@@ -122,14 +122,7 @@ const AchievementsTab = ({ data, onUpdate }: AchievementsTabProps) => {
             </div>
 
             {/* Metrics Grid */}
-            <div
-                style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-                    gap: '20px',
-                    marginBottom: '48px'
-                }}
-            >
+            <div className="admin-achievements-stat-grid">
                 {statFields.map((field, index) => {
                     const Icon = field.icon
                     const val = stats[field.key as keyof typeof stats] ?? 0

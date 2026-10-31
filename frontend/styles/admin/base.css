@@ -1,0 +1,119 @@
+/* ==========================================================================
+   Admin Base & Global Layout
+   ========================================================================== */
+
+/* Universal Reset & Container */
+.admin-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1f2e 0%, #0f1419 100%);
+  color: var(--admin-text-primary, #e4e7eb);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Master Two-Column Flex Layout */
+.admin-layout-main {
+  display: flex;
+  height: calc(100vh - 70px);
+  max-height: calc(100vh - 70px);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Scrollable Admin Content Canvas */
+.admin-content {
+  flex: 1;
+  padding: 32px 36px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Custom Scrollbars */
+.admin-content::-webkit-scrollbar,
+.admin-sidebar::-webkit-scrollbar,
+.admin-modal-body::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.admin-content::-webkit-scrollbar-track,
+.admin-sidebar::-webkit-scrollbar-track,
+.admin-modal-body::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.admin-content::-webkit-scrollbar-thumb,
+.admin-sidebar::-webkit-scrollbar-thumb,
+.admin-modal-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+}
+
+.admin-content::-webkit-scrollbar-thumb:hover,
+.admin-sidebar::-webkit-scrollbar-thumb:hover,
+.admin-modal-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Universal Touch & Focus Standards */
+.admin-btn,
+.admin-nav-item,
+.admin-form-input,
+.admin-textarea,
+.admin-select {
+  min-height: 42px;
+}
+
+.admin-btn:focus-visible,
+.admin-btn-icon:focus-visible,
+.admin-form-input:focus-visible,
+.admin-textarea:focus-visible,
+.admin-select:focus-visible {
+  outline: 2px solid var(--admin-accent-blue, #3b82f6);
+  outline-offset: 2px;
+}
+
+/* Universal Responsive Table Container */
+.admin-table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-table-responsive table {
+  min-width: 480px;
+  width: 100%;
+}
+
+.admin-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1f2e 0%, #0f1419 100%);
+  color: #e4e7eb;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+@keyframes adminOverlayFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.admin-content {
+  flex: 1;
+  padding: 32px 36px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100%;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.admin-container {
+  overflow-x: hidden;
+  max-width: 100vw;
+}

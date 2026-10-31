@@ -1,0 +1,81 @@
+/* ==========================================================================
+   Admin TestimonialsTab Styles (Client Reviews, Star Ratings, Avatars)
+   ========================================================================== */
+
+.admin-testimonial-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.admin-testimonial-client-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-testimonial-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 15px;
+  color: #ffffff;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.admin-testimonial-stars {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin: 12px 0;
+  color: #fbbf24;
+}
+
+.admin-testimonial-quote {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #cbd5e1;
+  font-style: italic;
+  position: relative;
+  padding-left: 12px;
+  border-left: 2px solid rgba(251, 191, 36, 0.4);
+  margin: 10px 0 16px 0;
+}
+
+.admin-testimonial-role {
+  color: #93c5fd;
+  font-size: 14px;
+  margin: 4px 0;
+}
+
+.admin-testimonial-company {
+  color: #9ca3af;
+  font-size: 13px;
+  margin: 0;
+}
+
+.admin-testimonial-stars {
+  display: flex;
+  gap: 4px;
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+.admin-testimonial-quote {
+  color: #d1d5db;
+  font-style: italic;
+  margin-bottom: 16px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.admin-testimonial-date {
+  font-size: 12px;
+  color: #6b7280;
+}

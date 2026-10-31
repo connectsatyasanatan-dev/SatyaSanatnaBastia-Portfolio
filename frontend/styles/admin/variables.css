@@ -1,0 +1,63 @@
+/* ==========================================================================
+   Admin Design System Tokens & Variables
+   ========================================================================== */
+
+:root {
+  /* Surface & Background */
+  --admin-bg-deep: #0b0f1a;
+  --admin-bg-base: #0f172a;
+  --admin-bg-surface: #1e293b;
+  --admin-bg-elevated: rgba(15, 23, 42, 0.75);
+  --admin-bg-glass: rgba(15, 23, 42, 0.65);
+  --admin-bg-glass-heavy: rgba(11, 15, 26, 0.95);
+  --admin-bg-input: rgba(30, 41, 59, 0.65);
+  --admin-bg-input-focus: rgba(30, 41, 59, 0.95);
+
+  /* Borders & Dividers */
+  --admin-border-subtle: rgba(255, 255, 255, 0.08);
+  --admin-border-medium: rgba(255, 255, 255, 0.14);
+  --admin-border-bright: rgba(255, 255, 255, 0.22);
+  --admin-border-glow: rgba(6, 249, 249, 0.35);
+
+  /* Primary Accent & Brand */
+  --admin-accent-cyan: #06f9f9;
+  --admin-accent-cyan-dim: rgba(6, 249, 249, 0.15);
+  --admin-accent-blue: #3b82f6;
+  --admin-accent-blue-hover: #2563eb;
+  --admin-accent-emerald: #10b981;
+  --admin-accent-emerald-hover: #059669;
+  --admin-accent-amber: #f59e0b;
+  --admin-accent-amber-hover: #d97706;
+  --admin-accent-rose: #ef4444;
+  --admin-accent-rose-hover: #dc2626;
+  --admin-accent-purple: #8b5cf6;
+  --admin-accent-purple-hover: #7c3aed;
+
+  /* Typography Colors */
+  --admin-text-primary: #f8fafc;
+  --admin-text-secondary: #94a3b8;
+  --admin-text-muted: #64748b;
+  --admin-text-inverted: #0f172a;
+
+  /* Radii */
+  --admin-radius-sm: 6px;
+  --admin-radius-md: 10px;
+  --admin-radius-lg: 14px;
+  --admin-radius-xl: 18px;
+  --admin-radius-2xl: 24px;
+  --admin-radius-full: 9999px;
+
+  /* Elevation & Shadows */
+  --admin-shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.3);
+  --admin-shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+  --admin-shadow-lg: 0 20px 50px -10px rgba(0, 0, 0, 0.7);
+  --admin-shadow-glow-cyan: 0 0 24px rgba(6, 249, 249, 0.25);
+  --admin-shadow-glow-blue: 0 0 24px rgba(59, 130, 246, 0.25);
+  --admin-shadow-glow-emerald: 0 0 24px rgba(16, 185, 129, 0.25);
+
+  /* Transitions */
+  --admin-transition-fast: 0.15s ease;
+  --admin-transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --admin-transition-slow: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+

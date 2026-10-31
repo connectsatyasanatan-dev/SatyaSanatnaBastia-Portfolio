@@ -1,0 +1,172 @@
+/* ==========================================================================
+   Admin ProjectsTab Styles (Project Cards, Tech Badges, Link Buttons)
+   ========================================================================== */
+
+.admin-project-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.admin-project-featured-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #fbbf24;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.admin-project-tech-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 14px 0;
+}
+
+.admin-project-tech-pill {
+  padding: 3px 8px;
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #93c5fd;
+}
+
+.admin-project-footer-links {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.admin-project-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #38bdf8;
+  text-decoration: none;
+  transition: color var(--admin-transition-fast, 0.15s ease);
+}
+
+.admin-project-link-btn:hover {
+  color: #06f9f9;
+  text-decoration: underline;
+}
+
+.admin-project-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-project-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+.admin-project-links {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.admin-project-link {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #93c5fd;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.admin-project-link.github {
+  color: #9ca3af;
+}
+
+.admin-project-stats {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+.admin-project-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-project-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+.admin-project-content {
+  margin-bottom: 16px;
+}
+
+.admin-project-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+
+.admin-project-links-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.admin-project-link-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #93c5fd;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.admin-project-link-row.github {
+  color: #9ca3af;
+}
+
+.admin-project-stats-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+.admin-project-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-project-edit-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}

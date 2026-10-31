@@ -288,19 +288,7 @@ const AnalyticsTab = () => {
             </div>
 
             {/* Last Updated Info */}
-            <div style={{
-                marginBottom: '24px',
-                padding: '12px 16px',
-                background: 'rgba(59, 130, 246, 0.08)',
-                border: '1px solid rgba(59, 130, 246, 0.2)',
-                borderRadius: '10px',
-                display: 'flex',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                gap: '12px',
-                fontSize: '14px',
-                color: '#93c5fd'
-            }}>
+            <div className="admin-analytics-banner">
                 <Clock size={16} />
                 <span>Last updated {formatRelativeTime(lastUpdated)} • Auto-refreshes every 60 seconds</span>
                 {data.activeUsers > 0 && (
@@ -431,7 +419,7 @@ const AnalyticsTab = () => {
             </motion.div>
 
             {/* Two Column Layout for Device & Visitor Type */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '24px', marginBottom: '24px' }}>
+            <div className="admin-analytics-two-col">
                 {/* Device Breakdown */}
                 <motion.div
                     initial={{ opacity: 0, x: -20 }}
@@ -612,8 +600,8 @@ const AnalyticsTab = () => {
                         <p style={{ margin: '12px 0 0', fontSize: '14px' }}>No page views recorded yet</p>
                     </div>
                 ) : (
-                    <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-                        <table style={{ width: '100%', minWidth: '480px', borderCollapse: 'collapse' }}>
+                    <div className="admin-analytics-table-wrap">
+                        <table className="admin-analytics-table">
                             <thead>
                                 <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
                                     <th style={{ padding: '12px', textAlign: 'left', fontSize: '11px', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em', width: '40px' }}>
@@ -729,8 +717,8 @@ const AnalyticsTab = () => {
                         <p style={{ margin: '12px 0 0', fontSize: '14px' }}>No country data yet</p>
                     </div>
                 ) : (
-                    <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-                        <table style={{ width: '100%', minWidth: '480px', borderCollapse: 'collapse' }}>
+                    <div className="admin-analytics-table-wrap">
+                        <table className="admin-analytics-table">
                             <thead>
                                 <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
                                     <th style={{ padding: '12px', textAlign: 'left', fontSize: '11px', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em', width: '40px' }}>
