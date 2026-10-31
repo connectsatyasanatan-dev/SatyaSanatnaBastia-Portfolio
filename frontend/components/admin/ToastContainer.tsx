@@ -23,14 +23,14 @@ const ToastContainer = () => {
     const getIcon = (type: string) => {
         switch (type) {
             case 'success':
-                return <CheckCircle2 size={18} />
+                return <CheckCircle2 size={16} />
             case 'error':
-                return <AlertCircle size={18} />
+                return <AlertCircle size={16} />
             case 'warning':
-                return <AlertTriangle size={18} />
+                return <AlertTriangle size={16} />
             case 'info':
             default:
-                return <Info size={18} />
+                return <Info size={16} />
         }
     }
 
@@ -41,10 +41,10 @@ const ToastContainer = () => {
                     <motion.div
                         key={t.id}
                         layout
-                        initial={{ opacity: 0, y: -16, scale: 0.94 }}
+                        initial={{ opacity: 0, y: -12, scale: 0.96 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -10, scale: 0.92, transition: { duration: 0.18 } }}
-                        transition={{ type: 'spring', damping: 25, stiffness: 350 }}
+                        exit={{ opacity: 0, y: -8, scale: 0.96, transition: { duration: 0.15 } }}
+                        transition={{ type: 'spring', damping: 28, stiffness: 380 }}
                         className={`admin-toast ${t.type}`}
                         role="status"
                     >
@@ -60,7 +60,7 @@ const ToastContainer = () => {
                             className="admin-toast-close"
                             aria-label="Dismiss notification"
                         >
-                            <X size={15} />
+                            <X size={14} />
                         </button>
                     </motion.div>
                 ))}
