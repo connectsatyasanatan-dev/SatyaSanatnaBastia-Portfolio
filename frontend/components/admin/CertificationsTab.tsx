@@ -1,8 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { Edit, Save, X, Plus, Trash2, Calendar, Award, Upload, Loader2, Image as ImageIcon } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import {
+    Edit, Save, X, Plus, Trash2, Calendar, Award, Upload,
+    Loader2, ExternalLink, ShieldCheck, CheckCircle2
+} from 'lucide-react'
 import type { Certification } from '@/lib/admin-types'
 import { adminApiClient } from '@/lib/admin-api'
 import ErrorAlert from './ErrorAlert'
@@ -15,7 +18,12 @@ interface CertificationsTabProps {
     onDeleteCertification: (id: number) => Promise<void>
 }
 
-const CertificationsTab = ({ certifications, onAddCertification, onUpdateCertification, onDeleteCertification }: CertificationsTabProps) => {
+const CertificationsTab = ({
+    certifications,
+    onAddCertification,
+    onUpdateCertification,
+    onDeleteCertification
+}: CertificationsTabProps) => {
     const [editingId, setEditingId] = useState<number | null>(null)
     const [editData, setEditData] = useState<Partial<Certification> | null>(null)
     const [showAddForm, setShowAddForm] = useState(false)
@@ -34,7 +42,7 @@ const CertificationsTab = ({ certifications, onAddCertification, onUpdateCertifi
         isOpen: false,
         id: null
     })
-    const [uploading, setUploading] = useState<string | null>(null) // 'new' or cert.id
+    const [uploading, setUploading] = useState<string | null>(null)
 
     const handleEdit = (cert: Certification) => {
         setEditingId(cert.id ?? null)
@@ -45,14 +53,10 @@ const CertificationsTab = ({ certifications, onAddCertification, onUpdateCertifi
         const file = e.target.files?.[0]
         if (!file) return
 
-        // Basic validation
         if (!file.type.startsWith('image/')) {
-            setError('Please upload an image file')
+            setError('Please upload an image file (PNG, JPG, or SVG)')
             return
         }
-
-        const formData = new FormData()
-        formData.append('file', file)
 
         setUploading(isEdit ? 'edit' : 'new')
         setError(null)
@@ -69,7 +73,7 @@ const CertificationsTab = ({ certifications, onAddCertification, onUpdateCertifi
                 throw new Error('Upload failed')
             }
         } catch (err: unknown) {
-            setError((err as Error).message || 'Failed to upload image')
+            setError((err as Error).message || 'Failed to upload badge image')
         } finally {
             setUploading(null)
         }
@@ -83,7 +87,7 @@ const CertificationsTab = ({ certifications, onAddCertification, onUpdateCertifi
         }
 
         if (!editData.name?.trim() || !editData.issuer?.trim()) {
-            setError('Name and issuer are required')
+            setError('Certification name and issuing organization are required')
             return
         }
 
@@ -116,8 +120,8 @@ const CertificationsTab = ({ certifications, onAddCertification, onUpdateCertifi
     }
 
     const handleAdd = async () => {
-        if (!newCertification.name || !newCertification.issuer) {
-            setError('Name and issuer are required')
+        if (!newCertification.name.trim() || !newCertification.issuer.trim()) {
+            setError('Certification name and issuing organization are required')
             return
         }
 
@@ -161,18 +165,33 @@ const CertificationsTab = ({ certifications, onAddCertification, onUpdateCertifi
     }
 
     return (
-        <div>
+        <div className="admin-certifications-container">
+            {/* Header */}
             <div className="admin-section-header">
                 <div className="admin-section-title-wrapper">
-                    <Award />
-                    <h2 className="admin-section-title">Certifications Management</h2>
+                    <div
+                        className="admin-section-icon-badge"
+                        style={{
+                            background: 'linear-gradient(135deg, rgba(6, 249, 249, 0.2), rgba(20, 184, 166, 0.15))',
+                            color: '#06f9f9',
+                            border: '1px solid rgba(6, 249, 249, 0.3)'
+                        }}
+                    >
+                        <Award size={22} />
+                    </div>
+                    <div>
+                        <h2 className="admin-section-title">Certifications &amp; Licenses</h2>
+                        <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#94a3b8' }}>
+                            Industry credentials, professional badges, and verified technical licenses ({certifications.length}).
+                        </p>
+                    </div>
                 </div>
+
                 <button
                     onClick={() => setShowAddForm(true)}
                     className="admin-btn admin-btn-green"
                 >
-                    <Plus />
-                    Add Certification
+                    <Plus size={16} /> Add Certification
                 </button>
             </div>
 
@@ -185,334 +204,417 @@ const CertificationsTab = ({ certifications, onAddCertification, onUpdateCertifi
             )}
 
             {/* Add Certification Form */}
-            {showAddForm && (
-                <motion.div
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="admin-card"
-                    style={{ marginBottom: '24px' }}
-                >
-                    <h3 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '16px' }}>Add New Certification</h3>
-                    <div className="admin-form-grid">
-                        <div className="admin-form-group">
-                            <label className="admin-form-label">Name *</label>
-                            <input
-                                type="text"
-                                value={newCertification.name}
-                                onChange={(e) => setNewCertification({ ...newCertification, name: e.target.value })}
-                                className="admin-form-input"
-                                placeholder="AWS Certified Solutions Architect"
-                            />
+            <AnimatePresence>
+                {showAddForm && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -15 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -15 }}
+                        className="admin-card"
+                        style={{
+                            marginBottom: '28px',
+                            borderLeft: '4px solid #06f9f9',
+                            background: 'rgba(15, 23, 42, 0.95)'
+                        }}
+                    >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+                            <h3 className="admin-card-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <ShieldCheck size={18} style={{ color: '#06f9f9' }} /> Add Professional Certification
+                            </h3>
+                            <button
+                                onClick={() => setShowAddForm(false)}
+                                className="admin-btn-icon delete"
+                                title="Close"
+                            >
+                                <X size={15} />
+                            </button>
                         </div>
-                        <div className="admin-form-group">
-                            <label className="admin-form-label">Issuer *</label>
-                            <input
-                                type="text"
-                                value={newCertification.issuer}
-                                onChange={(e) => setNewCertification({ ...newCertification, issuer: e.target.value })}
-                                className="admin-form-input"
-                                placeholder="Amazon Web Services"
-                            />
-                        </div>
-                        <div className="admin-form-group">
-                            <label className="admin-form-label">Date</label>
-                            <input
-                                type="text"
-                                value={newCertification.date}
-                                onChange={(e) => setNewCertification({ ...newCertification, date: e.target.value })}
-                                className="admin-form-input"
-                                placeholder="August 2023"
-                            />
-                        </div>
-                        <div className="admin-form-group">
-                            <label className="admin-form-label">Credential ID</label>
-                            <input
-                                type="text"
-                                value={newCertification.credential}
-                                onChange={(e) => setNewCertification({ ...newCertification, credential: e.target.value })}
-                                className="admin-form-input"
-                                placeholder="A1B2C3D4E5"
-                            />
-                        </div>
-                        <div className="admin-form-group">
-                            <label className="admin-form-label">Validity (e.g., Valid until 2026)</label>
-                            <input
-                                type="text"
-                                value={newCertification.validity}
-                                onChange={(e) => setNewCertification({ ...newCertification, validity: e.target.value })}
-                                className="admin-form-input"
-                                placeholder="Valid until Jan 2026"
-                            />
-                        </div>
-                        <div className="admin-form-group">
-                            <label className="admin-form-label">Badge Image</label>
-                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                <div style={{ flex: 1, position: 'relative' }}>
+
+                        <div className="admin-form-grid" style={{ marginBottom: '16px' }}>
+                            <div className="admin-form-group">
+                                <label className="admin-form-label">Certification Name *</label>
+                                <input
+                                    type="text"
+                                    value={newCertification.name}
+                                    onChange={(e) => setNewCertification({ ...newCertification, name: e.target.value })}
+                                    className="admin-form-input"
+                                    placeholder="e.g. Oracle Certified Associate (OCA)"
+                                    required
+                                    autoFocus
+                                />
+                            </div>
+
+                            <div className="admin-form-group">
+                                <label className="admin-form-label">Issuing Body / Organization *</label>
+                                <input
+                                    type="text"
+                                    value={newCertification.issuer}
+                                    onChange={(e) => setNewCertification({ ...newCertification, issuer: e.target.value })}
+                                    className="admin-form-input"
+                                    placeholder="e.g. Oracle, AWS, Google Cloud, Meta"
+                                    required
+                                />
+                            </div>
+
+                            <div className="admin-form-group">
+                                <label className="admin-form-label">Date Issued</label>
+                                <input
+                                    type="text"
+                                    value={newCertification.date}
+                                    onChange={(e) => setNewCertification({ ...newCertification, date: e.target.value })}
+                                    className="admin-form-input"
+                                    placeholder="e.g. October 2024"
+                                />
+                            </div>
+
+                            <div className="admin-form-group">
+                                <label className="admin-form-label">Credential ID / Number</label>
+                                <input
+                                    type="text"
+                                    value={newCertification.credential}
+                                    onChange={(e) => setNewCertification({ ...newCertification, credential: e.target.value })}
+                                    className="admin-form-input"
+                                    placeholder="e.g. OCI-2024-89104"
+                                />
+                            </div>
+
+                            <div className="admin-form-group">
+                                <label className="admin-form-label">Validity / Expiry</label>
+                                <input
+                                    type="text"
+                                    value={newCertification.validity}
+                                    onChange={(e) => setNewCertification({ ...newCertification, validity: e.target.value })}
+                                    className="admin-form-input"
+                                    placeholder="e.g. Lifetime or Valid until 2027"
+                                />
+                            </div>
+
+                            <div className="admin-form-group">
+                                <label className="admin-form-label">Verification / Credential URL</label>
+                                <input
+                                    type="text"
+                                    value={newCertification.verify_url}
+                                    onChange={(e) => setNewCertification({ ...newCertification, verify_url: e.target.value })}
+                                    className="admin-form-input"
+                                    placeholder="https://www.credly.com/badges/..."
+                                />
+                            </div>
+
+                            {/* Badge Image Upload */}
+                            <div className="admin-form-group admin-form-group-full">
+                                <label className="admin-form-label">Badge Logo Image</label>
+                                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
                                     <input
                                         type="text"
                                         value={newCertification.badge}
                                         onChange={(e) => setNewCertification({ ...newCertification, badge: e.target.value })}
                                         className="admin-form-input"
-                                        placeholder="/images/badge.png or upload..."
+                                        style={{ flex: '1 1 240px' }}
+                                        placeholder="Image path or upload image below..."
                                     />
+                                    <label
+                                        className="admin-btn admin-btn-blue"
+                                        style={{ margin: 0, padding: '9px 16px', cursor: 'pointer' }}
+                                    >
+                                        {uploading === 'new' ? <Loader2 className="animate-spin" size={16} /> : <Upload size={16} />}
+                                        Upload Logo
+                                        <input
+                                            type="file"
+                                            hidden
+                                            accept="image/*"
+                                            onChange={(e) => handleFileUpload(e, false)}
+                                            disabled={!!uploading}
+                                        />
+                                    </label>
                                     {newCertification.badge && (
-                                        <div style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center' }}>
-                                            <img src={newCertification.badge} alt="Preview" style={{ height: '20px', borderRadius: '2px' }} />
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.05)', padding: '4px 10px', borderRadius: '8px' }}>
+                                            <img src={newCertification.badge} alt="Preview" style={{ height: '24px', maxWidth: '36px', objectFit: 'contain' }} />
+                                            <span style={{ fontSize: '11px', color: '#10b981' }}>Logo loaded</span>
                                         </div>
                                     )}
                                 </div>
-                                <label className="admin-btn admin-btn-gray" style={{ margin: 0, padding: '8px 12px', cursor: 'pointer' }}>
-                                    {uploading === 'new' ? <Loader2 className="animate-spin" size={18} /> : <Upload size={18} />}
-                                    <input
-                                        type="file"
-                                        hidden
-                                        accept="image/*"
-                                        onChange={(e) => handleFileUpload(e, false)}
-                                        disabled={!!uploading}
-                                    />
-                                </label>
                             </div>
-                            <p style={{ fontSize: '11px', color: '#6b7280', marginTop: '4px' }}>PNG, JPG or SVG formats accepted</p>
                         </div>
-                        <div className="admin-form-group">
-                            <label className="admin-form-label">Verify URL</label>
-                            <input
-                                type="text"
-                                value={newCertification.verify_url}
-                                onChange={(e) => setNewCertification({ ...newCertification, verify_url: e.target.value })}
-                                className="admin-form-input"
-                                placeholder="https://..."
-                            />
+
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <button
+                                onClick={handleAdd}
+                                disabled={loading || !newCertification.name.trim() || !newCertification.issuer.trim()}
+                                className="admin-btn admin-btn-green"
+                            >
+                                {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
+                                Save Certification
+                            </button>
+                            <button
+                                onClick={() => setShowAddForm(false)}
+                                className="admin-btn admin-btn-gray"
+                            >
+                                Cancel
+                            </button>
                         </div>
-                    </div>
-                    <div style={{ marginTop: '24px', display: 'flex', gap: '12px' }}>
-                        <button
-                            onClick={handleAdd}
-                            disabled={loading}
-                            className="admin-btn admin-btn-green"
-                        >
-                            <Save />
-                            {loading ? 'Adding...' : 'Add Certification'}
-                        </button>
-                        <button
-                            onClick={() => setShowAddForm(false)}
-                            className="admin-btn admin-btn-gray"
-                        >
-                            <X />
-                            Cancel
-                        </button>
-                    </div>
-                </motion.div>
-            )}
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Certifications List */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                {certifications.map((cert, index) => (
-                    <motion.div
-                        key={cert.id ?? index}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="admin-card"
-                    >
-                        <div className="admin-item-header">
-                            <div>
-                                <h3 className="admin-item-title">{cert.name}</h3>
-                                <div className="admin-experience-meta-row">
-                                    <span className="admin-experience-meta-item">
-                                        <Award className="admin-experience-meta-icon" />
-                                        {cert.issuer}
-                                    </span>
-                                    {cert.date ? (
-                                        <span className="admin-experience-meta-item">
-                                            <Calendar className="admin-experience-meta-icon" />
-                                            {cert.date}
-                                        </span>
-                                    ) : null}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                {certifications.map((cert, index) => {
+                    const isEditing = editingId === cert.id
+
+                    return (
+                        <motion.div
+                            key={cert.id ?? index}
+                            initial={{ opacity: 0, y: 15 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.04 }}
+                            className="admin-card"
+                            style={{
+                                borderLeft: '4px solid #06f9f9',
+                                position: 'relative'
+                            }}
+                        >
+                            {/* Card Header Row */}
+                            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: '240px' }}>
+                                    <div
+                                        style={{
+                                            width: '46px',
+                                            height: '46px',
+                                            borderRadius: '12px',
+                                            background: 'rgba(6, 249, 249, 0.1)',
+                                            border: '1px solid rgba(6, 249, 249, 0.25)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            color: '#06f9f9',
+                                            flexShrink: 0,
+                                            overflow: 'hidden'
+                                        }}
+                                    >
+                                        {cert.badge ? (
+                                            <img src={cert.badge} alt={cert.issuer} style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
+                                        ) : (
+                                            <Award size={22} />
+                                        )}
+                                    </div>
+
+                                    <div>
+                                        <h3 style={{ fontSize: '16.5px', fontWeight: 700, color: '#f8fafc', margin: 0 }}>
+                                            {cert.name}
+                                        </h3>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginTop: '4px' }}>
+                                            <span style={{ fontSize: '13px', color: '#38bdf8', fontWeight: 500 }}>
+                                                {cert.issuer}
+                                            </span>
+                                            {cert.date && (
+                                                <span style={{ fontSize: '11.5px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                    <Calendar size={12} /> {cert.date}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    {cert.verify_url && (
+                                        <a
+                                            href={cert.verify_url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="admin-btn admin-btn-gray"
+                                            style={{ padding: '6px 12px', fontSize: '12px' }}
+                                            title="Verify credential link"
+                                        >
+                                            <ExternalLink size={13} /> Verify
+                                        </a>
+                                    )}
+
+                                    {isEditing ? (
+                                        <>
+                                            <button
+                                                onClick={handleSave}
+                                                disabled={loading}
+                                                className="admin-btn admin-btn-green"
+                                                style={{ padding: '6px 12px', fontSize: '12px' }}
+                                            >
+                                                <Save size={13} /> Save
+                                            </button>
+                                            <button
+                                                onClick={handleCancelEdit}
+                                                className="admin-btn admin-btn-gray"
+                                                style={{ padding: '6px 12px', fontSize: '12px' }}
+                                            >
+                                                <X size={13} />
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <button
+                                                onClick={() => handleEdit(cert)}
+                                                className="admin-btn-icon edit"
+                                                title="Edit Certification"
+                                            >
+                                                <Edit size={14} />
+                                            </button>
+                                            <button
+                                                onClick={() => cert.id != null && handleDelete(cert.id)}
+                                                className="admin-btn-icon delete"
+                                                title="Delete Certification"
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
-                            <div className="admin-item-actions admin-experience-card-actions">
-                                {editingId === cert.id ? (
-                                    <>
-                                        <button
-                                            onClick={handleSave}
-                                            disabled={loading}
-                                            className="admin-btn admin-btn-green admin-experience-action-btn"
-                                        >
-                                            <Save />
-                                            {loading ? 'Saving...' : 'Save'}
-                                        </button>
-                                        <button
-                                            onClick={handleCancelEdit}
-                                            className="admin-btn admin-btn-gray admin-experience-action-btn"
-                                        >
-                                            <X />
-                                            Cancel
-                                        </button>
-                                    </>
-                                ) : (
-                                    <>
-                                        <button
-                                            onClick={() => handleEdit(cert)}
-                                            className="admin-btn admin-btn-blue admin-experience-action-btn"
-                                            title="Edit this certification"
-                                        >
-                                            <Edit />
-                                            Edit
-                                        </button>
-                                        <button
-                                            onClick={() => cert.id != null && handleDelete(cert.id)}
-                                            className="admin-btn admin-btn-red admin-experience-action-btn"
-                                            title="Delete this certification"
-                                            disabled={cert.id == null}
-                                        >
-                                            <Trash2 />
-                                            Delete
-                                        </button>
-                                    </>
-                                )}
-                            </div>
-                        </div>
 
-                        {editingId === cert.id && editData ? (
-                            <div className="admin-experience-edit-form">
-                                <div className="admin-form-grid">
-                                    <div className="admin-form-group">
-                                        <label className="admin-form-label">Name *</label>
-                                        <input
-                                            type="text"
-                                            value={editData.name ?? ''}
-                                            onChange={(e) => setEditData({ ...editData, name: e.target.value })}
-                                            className="admin-form-input"
-                                            placeholder="AWS Certified Solutions Architect"
-                                        />
-                                    </div>
-                                    <div className="admin-form-group">
-                                        <label className="admin-form-label">Issuer *</label>
-                                        <input
-                                            type="text"
-                                            value={editData.issuer ?? ''}
-                                            onChange={(e) => setEditData({ ...editData, issuer: e.target.value })}
-                                            className="admin-form-input"
-                                            placeholder="Amazon Web Services"
-                                        />
-                                    </div>
-                                    <div className="admin-form-group">
-                                        <label className="admin-form-label">Date</label>
-                                        <input
-                                            type="text"
-                                            value={editData.date ?? ''}
-                                            onChange={(e) => setEditData({ ...editData, date: e.target.value })}
-                                            className="admin-form-input"
-                                            placeholder="August 2023"
-                                        />
-                                    </div>
-                                    <div className="admin-form-group">
-                                        <label className="admin-form-label">Credential ID</label>
-                                        <input
-                                            type="text"
-                                            value={editData.credential ?? ''}
-                                            onChange={(e) => setEditData({ ...editData, credential: e.target.value })}
-                                            className="admin-form-input"
-                                            placeholder="A1B2C3D4E5"
-                                        />
-                                    </div>
-                                    <div className="admin-form-group">
-                                        <label className="admin-form-label">Validity</label>
-                                        <input
-                                            type="text"
-                                            value={editData.validity ?? ''}
-                                            onChange={(e) => setEditData({ ...editData, validity: e.target.value })}
-                                            className="admin-form-input"
-                                            placeholder="Valid until Jan 2026"
-                                        />
-                                    </div>
-                                    <div className="admin-form-group">
-                                        <label className="admin-form-label">Badge Image</label>
-                                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                            <div style={{ flex: 1, position: 'relative' }}>
+                            {/* Details Row */}
+                            {!isEditing && (cert.credential || cert.validity) && (
+                                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '14px', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                                    {cert.credential && (
+                                        <span style={{ fontSize: '12px', color: '#94a3b8', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', padding: '3px 9px', borderRadius: '6px', fontFamily: 'monospace' }}>
+                                            ID: {cert.credential}
+                                        </span>
+                                    )}
+                                    {cert.validity && (
+                                        <span style={{ fontSize: '12px', color: '#10b981', background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.2)', padding: '3px 9px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                            <CheckCircle2 size={12} /> {cert.validity}
+                                        </span>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Inline Edit Form */}
+                            {isEditing && editData && (
+                                <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '16px', marginTop: '16px' }}>
+                                    <div className="admin-form-grid" style={{ marginBottom: '14px' }}>
+                                        <div className="admin-form-group">
+                                            <label className="admin-form-label">Certification Name</label>
+                                            <input
+                                                type="text"
+                                                value={editData.name ?? ''}
+                                                onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                                                className="admin-form-input"
+                                            />
+                                        </div>
+                                        <div className="admin-form-group">
+                                            <label className="admin-form-label">Issuer</label>
+                                            <input
+                                                type="text"
+                                                value={editData.issuer ?? ''}
+                                                onChange={(e) => setEditData({ ...editData, issuer: e.target.value })}
+                                                className="admin-form-input"
+                                            />
+                                        </div>
+                                        <div className="admin-form-group">
+                                            <label className="admin-form-label">Date</label>
+                                            <input
+                                                type="text"
+                                                value={editData.date ?? ''}
+                                                onChange={(e) => setEditData({ ...editData, date: e.target.value })}
+                                                className="admin-form-input"
+                                            />
+                                        </div>
+                                        <div className="admin-form-group">
+                                            <label className="admin-form-label">Credential ID</label>
+                                            <input
+                                                type="text"
+                                                value={editData.credential ?? ''}
+                                                onChange={(e) => setEditData({ ...editData, credential: e.target.value })}
+                                                className="admin-form-input"
+                                            />
+                                        </div>
+                                        <div className="admin-form-group">
+                                            <label className="admin-form-label">Validity</label>
+                                            <input
+                                                type="text"
+                                                value={editData.validity ?? ''}
+                                                onChange={(e) => setEditData({ ...editData, validity: e.target.value })}
+                                                className="admin-form-input"
+                                            />
+                                        </div>
+                                        <div className="admin-form-group">
+                                            <label className="admin-form-label">Verify URL</label>
+                                            <input
+                                                type="text"
+                                                value={editData.verify_url ?? ''}
+                                                onChange={(e) => setEditData({ ...editData, verify_url: e.target.value })}
+                                                className="admin-form-input"
+                                            />
+                                        </div>
+                                        <div className="admin-form-group admin-form-group-full">
+                                            <label className="admin-form-label">Badge Image</label>
+                                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                                                 <input
                                                     type="text"
                                                     value={editData.badge ?? ''}
                                                     onChange={(e) => setEditData({ ...editData, badge: e.target.value })}
                                                     className="admin-form-input"
-                                                    placeholder="/images/badge.png or upload..."
+                                                    style={{ flex: 1 }}
                                                 />
-                                                {editData.badge && (
-                                                    <div style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center' }}>
-                                                        <img src={editData.badge} alt="Preview" style={{ height: '20px', borderRadius: '2px' }} />
-                                                    </div>
-                                                )}
+                                                <label className="admin-btn admin-btn-blue" style={{ margin: 0, padding: '9px 14px', cursor: 'pointer' }}>
+                                                    {uploading === 'edit' ? <Loader2 className="animate-spin" size={16} /> : <Upload size={16} />}
+                                                    <input
+                                                        type="file"
+                                                        hidden
+                                                        accept="image/*"
+                                                        onChange={(e) => handleFileUpload(e, true)}
+                                                        disabled={!!uploading}
+                                                    />
+                                                </label>
                                             </div>
-                                            <label className="admin-btn admin-btn-gray" style={{ margin: 0, padding: '8px 12px', cursor: 'pointer' }}>
-                                                {uploading === 'edit' ? <Loader2 className="animate-spin" size={18} /> : <Upload size={18} />}
-                                                <input
-                                                    type="file"
-                                                    hidden
-                                                    accept="image/*"
-                                                    onChange={(e) => handleFileUpload(e, true)}
-                                                    disabled={!!uploading}
-                                                />
-                                            </label>
                                         </div>
                                     </div>
-                                    <div className="admin-form-group">
-                                        <label className="admin-form-label">Verify URL</label>
-                                        <input
-                                            type="text"
-                                            value={editData.verify_url ?? ''}
-                                            onChange={(e) => setEditData({ ...editData, verify_url: e.target.value })}
-                                            className="admin-form-input"
-                                            placeholder="https://..."
-                                        />
+                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                        <button onClick={handleSave} disabled={loading} className="admin-btn admin-btn-green">
+                                            <Save size={14} /> Save Changes
+                                        </button>
+                                        <button onClick={handleCancelEdit} className="admin-btn admin-btn-gray">
+                                            Cancel
+                                        </button>
                                     </div>
                                 </div>
-                                <div className="admin-experience-edit-actions">
-                                    <button
-                                        onClick={handleSave}
-                                        disabled={loading}
-                                        className="admin-btn admin-btn-green"
-                                    >
-                                        <Save />
-                                        {loading ? 'Saving...' : 'Save changes'}
-                                    </button>
-                                    <button
-                                        onClick={handleCancelEdit}
-                                        className="admin-btn admin-btn-gray"
-                                    >
-                                        <X />
-                                        Cancel
-                                    </button>
-                                </div>
-                            </div>
-                        ) : (
-                            <>
-                                {cert.credential && (
-                                    <p className="admin-item-content" style={{ marginTop: '0', fontSize: '14px' }}>Credential ID: {cert.credential}</p>
-                                )}
-                                {cert.validity && (
-                                    <p className="admin-item-content" style={{ marginTop: '0', fontSize: '14px' }}>Validity: {cert.validity}</p>
-                                )}
-                            </>
-                        )}
-                    </motion.div>
-                ))}
+                            )}
+                        </motion.div>
+                    )
+                })}
             </div>
 
+            {/* Empty State */}
             {certifications.length === 0 && !showAddForm && (
-                <div className="admin-empty-state">
-                    <Award />
-                    <h3>No certifications yet</h3>
-                    <p>Add your professional certifications</p>
+                <div className="admin-empty-state" style={{ padding: '80px 20px' }}>
+                    <div
+                        style={{
+                            width: '64px',
+                            height: '64px',
+                            borderRadius: '16px',
+                            background: 'rgba(6, 249, 249, 0.1)',
+                            border: '1px solid rgba(6, 249, 249, 0.25)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#06f9f9',
+                            margin: '0 auto 16px'
+                        }}
+                    >
+                        <Award size={30} />
+                    </div>
+                    <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#f8fafc', margin: '0 0 6px' }}>
+                        No certifications listed yet
+                    </h3>
+                    <p style={{ margin: '0 0 20px', fontSize: '13.5px', color: '#64748b', maxWidth: '380px' }}>
+                        Showcase your official cloud certifications, programming licenses, or accredited training credentials.
+                    </p>
                     <button
                         onClick={() => setShowAddForm(true)}
                         className="admin-btn admin-btn-blue"
                     >
-                        <Plus />
-                        Add Certification
+                        <Plus size={16} /> Add First Certification
                     </button>
                 </div>
             )}
 
+            {/* Delete Confirmation */}
             <ConfirmDialog
                 isOpen={deleteConfirm.isOpen}
                 onClose={() => setDeleteConfirm({ isOpen: false, id: null })}
