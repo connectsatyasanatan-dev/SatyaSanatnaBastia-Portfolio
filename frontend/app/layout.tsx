@@ -103,10 +103,11 @@ export const metadata: Metadata = {
     category: "technology",
     icons: {
         icon: [
+            { url: '/favicon.ico', sizes: 'any' },
             { url: '/favicon.png', type: 'image/png' },
             { url: '/images/Polished Bearded Avatar in Hoodie.png' },
         ],
-        shortcut: '/favicon.png',
+        shortcut: '/favicon.ico',
         apple: '/images/Polished Bearded Avatar in Hoodie.png',
     },
     openGraph: {
@@ -320,8 +321,9 @@ export default function RootLayout({
                 />
 
                 {/* ── Icons ── */}
+                <link rel="icon" href="/favicon.ico" sizes="any" />
                 <link rel="icon" type="image/png" href="/favicon.png" />
-                <link rel="shortcut icon" href="/favicon.png" />
+                <link rel="shortcut icon" href="/favicon.ico" />
                 <link rel="apple-touch-icon" href="/images/Polished Bearded Avatar in Hoodie.png" />
 
                 {/* ── AI Discovery links (GEO) ── */}

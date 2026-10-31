@@ -118,6 +118,11 @@ def create_app(config_class: type = Config) -> Flask:
 
     @app.route("/api/resume")
     @app.route("/api/resume.pdf")
+    @app.route("/favicon.ico")
+    def serve_favicon():
+        static_dir = os.path.join(app.root_path, "static")
+        return send_from_directory(static_dir, "favicon.ico", mimetype="image/vnd.microsoft.icon")
+
     @app.route("/resume.pdf")
     def serve_default_resume():
         static_dir = os.path.join(app.root_path, "static")
