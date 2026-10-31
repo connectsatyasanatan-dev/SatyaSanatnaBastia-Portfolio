@@ -1,8 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { Edit, Save, X, Plus, Trash2, ExternalLink, Github, Star, FileText } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import {
+    Edit, Save, X, Plus, Trash2, ExternalLink, Github, Star,
+    GitFork, FolderOpen, Code2, Package, Download, CheckCircle2,
+    Archive, Clock, Zap
+} from 'lucide-react'
 import type { Project } from '@/lib/admin-types'
 import { validateProject } from '@/lib/validation'
 import ErrorAlert from './ErrorAlert'
@@ -14,6 +18,36 @@ interface ProjectsTabProps {
     onAddProject: (project: Omit<Project, 'id'>) => Promise<void>
     onUpdateProject: (id: number, project: Partial<Project>) => Promise<void>
     onDeleteProject: (id: number) => Promise<void>
+}
+
+const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; border: string; icon: React.ElementType }> = {
+    active: { label: 'Active', color: '#10b981', bg: 'rgba(16,185,129,0.12)', border: 'rgba(16,185,129,0.35)', icon: CheckCircle2 },
+    'in-progress': { label: 'In Progress', color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.35)', icon: Clock },
+    archived: { label: 'Archived', color: '#64748b', bg: 'rgba(100,116,139,0.12)', border: 'rgba(100,116,139,0.35)', icon: Archive },
+    'coming-soon': { label: 'Coming Soon', color: '#a855f7', bg: 'rgba(168,85,247,0.12)', border: 'rgba(168,85,247,0.35)', icon: Zap },
+}
+
+const inputStyle: React.CSSProperties = {
+    width: '100%',
+    background: 'rgba(15,22,40,0.8)',
+    border: '1px solid rgba(255,255,255,0.1)',
+    borderRadius: '8px',
+    padding: '10px 14px',
+    color: '#f8fafc',
+    fontSize: '14px',
+    outline: 'none',
+    transition: 'border-color 0.2s',
+    boxSizing: 'border-box',
+}
+
+const labelStyle: React.CSSProperties = {
+    display: 'block',
+    fontSize: '12px',
+    fontWeight: 600,
+    color: '#94a3b8',
+    marginBottom: '6px',
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
 }
 
 const ProjectsTab = ({ projects, onAddProject, onUpdateProject, onDeleteProject }: ProjectsTabProps) => {
@@ -131,34 +165,52 @@ const ProjectsTab = ({ projects, onAddProject, onUpdateProject, onDeleteProject 
         }
     }
 
-    return (
-        <div>
-            <div className="admin-section-header">
-                <div className="admin-section-title-wrapper">
-                    <FileText />
-                    <h2 className="admin-section-title">Projects Management</h2>
-                </div>
-                <button
-                    onClick={() => setShowAddForm(true)}
-                    className="admin-btn admin-btn-green"
-                >
-                    <Plus size={18} />
-                    Add Project
-                </button>
-            </div>
+    const featuredCount = projects.filter(p => p.featured).length
 
-            <div className="admin-card admin-info-card" style={{ marginBottom: '24px', borderLeftColor: '#3b82f6', background: 'rgba(59, 130, 246, 0.05)' }}>
-                <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
-                    <div style={{ color: '#3b82f6', marginTop: '2px' }}><Star size={20} /></div>
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+
+            {/* ── Section Header ── */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                    <div style={{
+                        width: '46px', height: '46px', borderRadius: '12px',
+                        background: 'linear-gradient(135deg, rgba(59,130,246,0.25), rgba(59,130,246,0.08))',
+                        border: '1px solid rgba(59,130,246,0.4)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        color: '#3b82f6',
+                        boxShadow: '0 0 20px rgba(59,130,246,0.15)',
+                    }}>
+                        <Code2 size={22} />
+                    </div>
                     <div>
-                        <h4 style={{ fontSize: '15px', fontWeight: '600', marginBottom: '4px', color: '#fff' }}>Portfolio Stats Tip</h4>
-                        <p style={{ fontSize: '13px', color: '#9ca3af', lineHeight: '1.5' }}>
-                            Working with actual projects here? Great! Note that the <strong>&quot;Projects Delivered&quot;</strong> counter shown on your public site (e.g. &quot;10+&quot;) is a marketing number managed in the <strong>Achievements &amp; Stats</strong> tab.
+                        <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#f8fafc', margin: 0, letterSpacing: '-0.02em' }}>
+                            Projects Portfolio
+                        </h2>
+                        <p style={{ fontSize: '13px', color: '#64748b', margin: '3px 0 0' }}>
+                            {projects.length} projects
+                            <span style={{ margin: '0 6px', color: '#334155' }}>·</span>
+                            <span style={{ color: '#f59e0b' }}>⭐ {featuredCount} featured</span>
                         </p>
                     </div>
                 </div>
+                <button
+                    onClick={() => setShowAddForm(true)}
+                    style={{
+                        display: 'flex', alignItems: 'center', gap: '8px',
+                        padding: '10px 20px', borderRadius: '10px', border: 'none', cursor: 'pointer',
+                        background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+                        color: '#fff', fontSize: '14px', fontWeight: 600,
+                        boxShadow: '0 4px 15px rgba(59,130,246,0.3)',
+                        transition: 'all 0.2s',
+                    }}
+                >
+                    <Plus size={17} />
+                    Add New Project
+                </button>
             </div>
 
+            {/* ── Error Alert ── */}
             {error && (
                 <ErrorAlert
                     message={error}
@@ -167,60 +219,187 @@ const ProjectsTab = ({ projects, onAddProject, onUpdateProject, onDeleteProject 
                 />
             )}
 
-            {/* Add Project Form */}
-            {showAddForm && (
-                <motion.div
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="admin-card"
-                    style={{ marginBottom: '24px' }}
-                >
-                    <h3 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '16px' }}>Add New Project</h3>
+            {/* ── Add New Project Form ── */}
+            <AnimatePresence>
+                {showAddForm && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -16 }}
+                        transition={{ duration: 0.25 }}
+                        style={{
+                            background: 'rgba(15,22,40,0.85)',
+                            border: '1px solid rgba(255,255,255,0.08)',
+                            borderLeft: '4px solid #3b82f6',
+                            borderRadius: '14px',
+                            padding: '24px',
+                            backdropFilter: 'blur(12px)',
+                        }}
+                    >
+                        {/* Form header */}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <div style={{
+                                    width: '34px', height: '34px', borderRadius: '8px',
+                                    background: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.3)',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#3b82f6'
+                                }}>
+                                    <FolderOpen size={17} />
+                                </div>
+                                <div>
+                                    <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#f8fafc', margin: 0 }}>New Project</h3>
+                                    <p style={{ fontSize: '12px', color: '#64748b', margin: 0 }}>Fill in the details below</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setShowAddForm(false)}
+                                style={{
+                                    width: '32px', height: '32px', borderRadius: '8px',
+                                    background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
+                                    color: '#94a3b8', cursor: 'pointer', display: 'flex',
+                                    alignItems: 'center', justifyContent: 'center',
+                                }}
+                            >
+                                <X size={16} />
+                            </button>
+                        </div>
 
-                    {/* Basic Info */}
-                    <div style={{ marginBottom: '24px' }}>
-                        <h4 style={{ fontSize: '0.85rem', textTransform: 'uppercase', color: '#6b7280', marginBottom: '12px', letterSpacing: '0.05em' }}>Basic Information</h4>
-                        <div className="admin-form-grid">
-                            <div className="admin-form-group">
-                                <label className="admin-form-label">Project Name *</label>
+                        {/* Two-column grid */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                            {/* Row 1 */}
+                            <div>
+                                <label style={labelStyle}>Project Name <span style={{ color: '#ef4444' }}>*</span></label>
                                 <input
                                     type="text"
                                     value={newProject.name}
                                     onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
-                                    className="admin-form-input"
+                                    style={inputStyle}
                                     placeholder="My Awesome Project"
                                 />
                             </div>
-                            <div className="admin-form-group">
-                                <label className="admin-form-label">Status</label>
+                            <div>
+                                <label style={labelStyle}>NPM Package Filename</label>
+                                <input
+                                    type="text"
+                                    value={newProject.filename}
+                                    onChange={(e) => setNewProject({ ...newProject, filename: e.target.value })}
+                                    style={{ ...inputStyle, fontFamily: 'monospace' }}
+                                    placeholder="package-name"
+                                />
+                            </div>
+                            {/* Row 2 */}
+                            <div>
+                                <label style={labelStyle}>Version</label>
+                                <input
+                                    type="text"
+                                    value={newProject.version}
+                                    onChange={(e) => setNewProject({ ...newProject, version: e.target.value })}
+                                    style={inputStyle}
+                                    placeholder="v1.0.0"
+                                />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Downloads / Week</label>
+                                <input
+                                    type="text"
+                                    value={newProject.downloads}
+                                    onChange={(e) => setNewProject({ ...newProject, downloads: e.target.value })}
+                                    style={inputStyle}
+                                    placeholder="1.2k/wk"
+                                />
+                            </div>
+                            {/* Row 3 */}
+                            <div>
+                                <label style={labelStyle}>GitHub URL</label>
+                                <input
+                                    type="url"
+                                    value={newProject.githubUrl || ''}
+                                    onChange={(e) => setNewProject({ ...newProject, githubUrl: e.target.value })}
+                                    style={inputStyle}
+                                    placeholder="https://github.com/user/repo"
+                                />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Demo URL</label>
+                                <input
+                                    type="url"
+                                    value={newProject.demoUrl || ''}
+                                    onChange={(e) => setNewProject({ ...newProject, demoUrl: e.target.value })}
+                                    style={inputStyle}
+                                    placeholder="https://demo.example.com"
+                                />
+                            </div>
+                            {/* Row 4 */}
+                            <div>
+                                <label style={labelStyle}>Status</label>
                                 <select
                                     value={newProject.status}
                                     onChange={(e) => setNewProject({ ...newProject, status: e.target.value as "active" | "in-progress" | "archived" })}
-                                    className="admin-select"
+                                    style={{ ...inputStyle, cursor: 'pointer' }}
                                 >
                                     <option value="active">Active</option>
                                     <option value="in-progress">In Progress</option>
                                     <option value="archived">Archived</option>
+                                    <option value="coming-soon">Coming Soon</option>
                                 </select>
                             </div>
-                            <div className="admin-form-group admin-form-group-full">
-                                <label className="admin-form-label">Description *</label>
+                            <div>
+                                <label style={labelStyle}>Stars &amp; Forks</label>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                                    <input
+                                        type="number"
+                                        value={newProject.stars}
+                                        onChange={(e) => setNewProject({ ...newProject, stars: parseInt(e.target.value) || 0 })}
+                                        style={inputStyle}
+                                        placeholder="Stars"
+                                    />
+                                    <input
+                                        type="number"
+                                        value={newProject.forks}
+                                        onChange={(e) => setNewProject({ ...newProject, forks: parseInt(e.target.value) || 0 })}
+                                        style={inputStyle}
+                                        placeholder="Forks"
+                                    />
+                                </div>
+                            </div>
+                            {/* Row 5 — Featured checkbox full width */}
+                            <div style={{ gridColumn: '1 / -1' }}>
+                                <label style={{
+                                    display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer',
+                                    padding: '12px 16px', borderRadius: '8px',
+                                    background: newProject.featured ? 'rgba(245,158,11,0.08)' : 'rgba(255,255,255,0.03)',
+                                    border: `1px solid ${newProject.featured ? 'rgba(245,158,11,0.35)' : 'rgba(255,255,255,0.08)'}`,
+                                    transition: 'all 0.2s',
+                                }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={newProject.featured}
+                                        onChange={(e) => setNewProject({ ...newProject, featured: e.target.checked })}
+                                        style={{ width: '16px', height: '16px', accentColor: '#f59e0b', cursor: 'pointer' }}
+                                    />
+                                    <div>
+                                        <span style={{ fontSize: '14px', fontWeight: 600, color: newProject.featured ? '#f59e0b' : '#f8fafc' }}>
+                                            ⭐ Featured Project
+                                        </span>
+                                        <span style={{ fontSize: '12px', color: '#64748b', marginLeft: '8px' }}>
+                                            Highlighted in portfolio showcase
+                                        </span>
+                                    </div>
+                                </label>
+                            </div>
+                            {/* Description — full width */}
+                            <div style={{ gridColumn: '1 / -1' }}>
+                                <label style={labelStyle}>Description <span style={{ color: '#ef4444' }}>*</span></label>
                                 <textarea
                                     value={newProject.description}
                                     onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
-                                    className="admin-textarea"
                                     rows={3}
+                                    style={{ ...inputStyle, resize: 'vertical', minHeight: '80px' }}
                                     placeholder="Describe your project..."
                                 />
                             </div>
-                        </div>
-                    </div>
-
-                    {/* Technical Details */}
-                    <div style={{ marginBottom: '24px', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                        <h4 style={{ fontSize: '0.85rem', textTransform: 'uppercase', color: '#6b7280', marginBottom: '12px', letterSpacing: '0.05em' }}>Technical Details</h4>
-                        <div className="admin-form-grid">
-                            <div className="admin-form-group">
+                            {/* Technologies — full width */}
+                            <div style={{ gridColumn: '1 / -1' }}>
                                 <TagListField
                                     label="Technologies"
                                     hint=" Add technologies used"
@@ -229,7 +408,8 @@ const ProjectsTab = ({ projects, onAddProject, onUpdateProject, onDeleteProject 
                                     placeholder="e.g. React, Node.js"
                                 />
                             </div>
-                            <div className="admin-form-group">
+                            {/* Features — full width */}
+                            <div style={{ gridColumn: '1 / -1' }}>
                                 <TagListField
                                     label="Key Features"
                                     hint=" Add key features"
@@ -238,229 +418,305 @@ const ProjectsTab = ({ projects, onAddProject, onUpdateProject, onDeleteProject 
                                     placeholder="e.g. Responsive Design"
                                 />
                             </div>
-                            <div className="admin-form-group">
-                                <label className="admin-form-label">Version</label>
-                                <input
-                                    type="text"
-                                    value={newProject.version}
-                                    onChange={(e) => setNewProject({ ...newProject, version: e.target.value })}
-                                    className="admin-form-input"
-                                    placeholder="v1.0.0"
-                                />
-                            </div>
-                            <div className="admin-form-group">
-                                <label className="admin-form-label">Filename</label>
-                                <input
-                                    type="text"
-                                    value={newProject.filename}
-                                    onChange={(e) => setNewProject({ ...newProject, filename: e.target.value })}
-                                    className="admin-form-input"
-                                    placeholder="project-main.zip"
-                                />
-                            </div>
-                            <div className="admin-form-group">
-                                <label className="admin-form-label">Downloads</label>
-                                <input
-                                    type="text"
-                                    value={newProject.downloads}
-                                    onChange={(e) => setNewProject({ ...newProject, downloads: e.target.value })}
-                                    className="admin-form-input"
-                                    placeholder="1.2k/mo"
-                                />
-                            </div>
                         </div>
-                    </div>
 
-                    {/* Links & Stats */}
-                    <div style={{ paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                        <h4 style={{ fontSize: '0.85rem', textTransform: 'uppercase', color: '#6b7280', marginBottom: '12px', letterSpacing: '0.05em' }}>Links & Metrics</h4>
-                        <div className="admin-form-grid">
-                            <div className="admin-form-group">
-                                <label className="admin-form-label">Demo URL</label>
-                                <input
-                                    type="url"
-                                    value={newProject.demoUrl || ''}
-                                    onChange={(e) => setNewProject({ ...newProject, demoUrl: e.target.value })}
-                                    className="admin-form-input"
-                                    placeholder="https://demo.example.com"
-                                />
-                            </div>
-                            <div className="admin-form-group">
-                                <label className="admin-form-label">GitHub URL</label>
-                                <input
-                                    type="url"
-                                    value={newProject.githubUrl || ''}
-                                    onChange={(e) => setNewProject({ ...newProject, githubUrl: e.target.value })}
-                                    className="admin-form-input"
-                                    placeholder="https://github.com/user/repo"
-                                />
-                            </div>
-                            <div className="admin-form-group">
-                                <label className="admin-form-label">Stars</label>
-                                <input
-                                    type="number"
-                                    value={newProject.stars}
-                                    onChange={(e) => setNewProject({ ...newProject, stars: parseInt(e.target.value) || 0 })}
-                                    className="admin-form-input"
-                                />
-                            </div>
-                            <div className="admin-form-group">
-                                <label className="admin-form-label">Forks</label>
-                                <input
-                                    type="number"
-                                    value={newProject.forks}
-                                    onChange={(e) => setNewProject({ ...newProject, forks: parseInt(e.target.value) || 0 })}
-                                    className="admin-form-input"
-                                />
-                            </div>
-                            <div className="admin-form-group admin-form-group-full">
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={newProject.featured}
-                                        onChange={(e) => setNewProject({ ...newProject, featured: e.target.checked })}
-                                        style={{ width: '16px', height: '16px' }}
-                                    />
-                                    <span className="admin-form-label" style={{ marginBottom: 0 }}>Mark as Featured Project</span>
-                                </label>
-                            </div>
+                        {/* Form actions */}
+                        <div style={{ display: 'flex', gap: '12px', marginTop: '24px', paddingTop: '20px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                            <button
+                                onClick={handleAdd}
+                                disabled={loading}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: '8px',
+                                    padding: '10px 22px', borderRadius: '9px', border: 'none', cursor: loading ? 'not-allowed' : 'pointer',
+                                    background: loading ? 'rgba(59,130,246,0.4)' : 'linear-gradient(135deg,#3b82f6,#1d4ed8)',
+                                    color: '#fff', fontSize: '14px', fontWeight: 600,
+                                    boxShadow: '0 4px 14px rgba(59,130,246,0.3)',
+                                    opacity: loading ? 0.7 : 1,
+                                }}
+                            >
+                                <Save size={16} />
+                                {loading ? 'Saving...' : 'Save Project'}
+                            </button>
+                            <button
+                                onClick={() => setShowAddForm(false)}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: '8px',
+                                    padding: '10px 18px', borderRadius: '9px',
+                                    background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
+                                    color: '#94a3b8', fontSize: '14px', fontWeight: 500, cursor: 'pointer',
+                                }}
+                            >
+                                <X size={16} />
+                                Cancel
+                            </button>
                         </div>
-                    </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
-                    <div style={{ marginTop: '24px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                        <button
-                            onClick={handleAdd}
-                            disabled={loading}
-                            className="admin-btn admin-btn-green"
-                        >
-                            <Save size={18} />
-                            {loading ? 'Adding...' : 'Add Project'}
-                        </button>
-                        <button
-                            onClick={() => setShowAddForm(false)}
-                            className="admin-btn admin-btn-gray"
-                        >
-                            <X size={18} />
-                            Cancel
-                        </button>
+            {/* ── Empty State ── */}
+            {projects.length === 0 && !showAddForm && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    style={{
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                        padding: '80px 20px', textAlign: 'center',
+                        background: 'rgba(15,22,40,0.6)', border: '1px dashed rgba(255,255,255,0.1)',
+                        borderRadius: '16px',
+                    }}
+                >
+                    <div style={{
+                        width: '72px', height: '72px', borderRadius: '20px',
+                        background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        marginBottom: '20px', color: '#3b82f6',
+                    }}>
+                        <FolderOpen size={32} />
                     </div>
+                    <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#f8fafc', margin: '0 0 8px' }}>No projects yet</h3>
+                    <p style={{ fontSize: '14px', color: '#64748b', margin: '0 0 24px' }}>
+                        Add your first project to showcase your work!
+                    </p>
+                    <button
+                        onClick={() => setShowAddForm(true)}
+                        style={{
+                            display: 'flex', alignItems: 'center', gap: '8px',
+                            padding: '10px 20px', borderRadius: '9px', border: 'none', cursor: 'pointer',
+                            background: 'linear-gradient(135deg,#3b82f6,#1d4ed8)',
+                            color: '#fff', fontSize: '14px', fontWeight: 600,
+                        }}
+                    >
+                        <Plus size={17} />
+                        Add Project
+                    </button>
                 </motion.div>
             )}
 
-            {/* Projects List */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                {projects.map((project) => (
-                    <motion.div
-                        key={project.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="admin-card"
-                    >
-                        <div className="admin-item-header">
-                            <div>
-                                <h3 className="admin-item-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    {project.name}
-                                    {project.featured && (
-                                        <Star size={16} fill="#fbbf24" color="#fbbf24" />
-                                    )}
-                                </h3>
-                                <div className="admin-experience-meta-row">
-                                    <span className={`admin-experience-badge`} style={{
-                                        background: project.status === 'active' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(107, 114, 128, 0.15)',
-                                        color: project.status === 'active' ? '#34d399' : '#9ca3af'
-                                    }}>
-                                        {project.status}
-                                    </span>
-                                    <span className="admin-experience-meta-item">v{project.version}</span>
-                                    <span className="admin-experience-meta-item">{project.downloads} downloads</span>
-                                </div>
-                            </div>
-                            <div className="admin-item-actions admin-experience-card-actions">
-                                {editingId === project.id ? (
-                                    <>
-                                        <button
-                                            onClick={handleSave}
-                                            disabled={loading}
-                                            className="admin-btn admin-btn-green admin-experience-action-btn"
-                                        >
-                                            <Save size={18} />
-                                            {loading ? 'Saving...' : 'Save'}
-                                        </button>
-                                        <button
-                                            onClick={handleCancelEdit}
-                                            className="admin-btn admin-btn-gray admin-experience-action-btn"
-                                        >
-                                            <X size={18} />
-                                            Cancel
-                                        </button>
-                                    </>
-                                ) : (
-                                    <>
-                                        <button
-                                            onClick={() => handleEdit(project)}
-                                            className="admin-btn admin-btn-blue admin-experience-action-btn"
-                                            title="Edit project"
-                                        >
-                                            <Edit size={18} />
-                                            Edit
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(project.id)}
-                                            className="admin-btn admin-btn-red admin-experience-action-btn"
-                                            title="Delete project"
-                                        >
-                                            <Trash2 size={18} />
-                                            Delete
-                                        </button>
-                                    </>
-                                )}
-                            </div>
-                        </div>
+            {/* ── Project Cards ── */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                {projects.map((project, idx) => {
+                    const statusCfg = STATUS_CONFIG[project.status] || STATUS_CONFIG.active
+                    const StatusIcon = statusCfg.icon
+                    const isEditing = editingId === project.id
 
-                        {editingId === project.id && editData ? (
-                            <div className="admin-experience-edit-form">
-                                {/* Basic Info */}
-                                <div style={{ marginBottom: '24px' }}>
-                                    <h4 style={{ fontSize: '0.85rem', textTransform: 'uppercase', color: '#6b7280', marginBottom: '12px', letterSpacing: '0.05em' }}>Basic Information</h4>
-                                    <div className="admin-form-grid">
-                                        <div className="admin-form-group">
-                                            <label className="admin-form-label">Project Name *</label>
-                                            <input
-                                                type="text"
-                                                value={editData.name || ''}
-                                                onChange={(e) => setEditData({ ...editData, name: e.target.value })}
-                                                className="admin-form-input"
-                                            />
-                                        </div>
-                                        <div className="admin-form-group">
-                                            <label className="admin-form-label">Status</label>
-                                            <select
-                                                value={editData.status || 'active'}
-                                                onChange={(e) => setEditData({ ...editData, status: e.target.value as "active" | "in-progress" | "archived" })}
-                                                className="admin-select"
-                                            >
-                                                <option value="active">Active</option>
-                                                <option value="in-progress">In Progress</option>
-                                                <option value="archived">Archived</option>
-                                            </select>
-                                        </div>
-                                        <div className="admin-form-group admin-form-group-full">
-                                            <label className="admin-form-label">Description *</label>
-                                            <textarea
-                                                value={editData.description || ''}
-                                                onChange={(e) => setEditData({ ...editData, description: e.target.value })}
-                                                className="admin-textarea"
-                                                rows={3}
-                                            />
-                                        </div>
+                    return (
+                        <motion.div
+                            key={project.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: idx * 0.05 }}
+                            style={{
+                                background: 'rgba(15,22,40,0.85)',
+                                border: isEditing
+                                    ? '1px solid rgba(59,130,246,0.5)'
+                                    : '1px solid rgba(255,255,255,0.08)',
+                                borderLeft: isEditing ? '4px solid #3b82f6' : '4px solid rgba(59,130,246,0.3)',
+                                borderRadius: '14px',
+                                padding: '24px',
+                                backdropFilter: 'blur(12px)',
+                                boxShadow: isEditing
+                                    ? '0 0 30px rgba(59,130,246,0.12), 0 8px 32px rgba(0,0,0,0.3)'
+                                    : '0 4px 24px rgba(0,0,0,0.2)',
+                                transition: 'box-shadow 0.3s, border-color 0.3s',
+                                position: 'relative',
+                            }}
+                        >
+                            {/* ── TOP ROW: name + badges + actions ── */}
+                            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', marginBottom: '16px' }}>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                    {/* Name + featured badge */}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '8px' }}>
+                                        <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#f8fafc', margin: 0, letterSpacing: '-0.01em' }}>
+                                            {project.name}
+                                        </h3>
+                                        {/* Status badge */}
+                                        <span style={{
+                                            display: 'inline-flex', alignItems: 'center', gap: '4px',
+                                            padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 700,
+                                            color: statusCfg.color, background: statusCfg.bg,
+                                            border: `1px solid ${statusCfg.border}`,
+                                        }}>
+                                            <StatusIcon size={11} />
+                                            {statusCfg.label}
+                                        </span>
+                                        {/* Featured badge */}
+                                        {project.featured && (
+                                            <span style={{
+                                                display: 'inline-flex', alignItems: 'center', gap: '4px',
+                                                padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 700,
+                                                color: '#f59e0b', background: 'rgba(245,158,11,0.12)',
+                                                border: '1px solid rgba(245,158,11,0.3)',
+                                            }}>
+                                                <Star size={11} fill="#f59e0b" />
+                                                Featured
+                                            </span>
+                                        )}
+                                    </div>
+                                    {/* META ROW: package + version + downloads */}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                        {project.filename && (
+                                            <span style={{
+                                                display: 'inline-flex', alignItems: 'center', gap: '5px',
+                                                padding: '3px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: 500,
+                                                fontFamily: 'monospace', color: '#94a3b8',
+                                                background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
+                                            }}>
+                                                <Package size={11} />
+                                                {project.filename}
+                                            </span>
+                                        )}
+                                        {project.version && (
+                                            <span style={{
+                                                padding: '3px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: 600,
+                                                color: '#3b82f6', background: 'rgba(59,130,246,0.1)',
+                                                border: '1px solid rgba(59,130,246,0.25)',
+                                            }}>
+                                                {project.version}
+                                            </span>
+                                        )}
+                                        {project.downloads && (
+                                            <span style={{
+                                                display: 'inline-flex', alignItems: 'center', gap: '4px',
+                                                fontSize: '12px', color: '#64748b',
+                                            }}>
+                                                <Download size={11} />
+                                                {project.downloads}
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
 
-                                {/* Technical Details */}
-                                <div style={{ marginBottom: '24px', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                                    <h4 style={{ fontSize: '0.85rem', textTransform: 'uppercase', color: '#6b7280', marginBottom: '12px', letterSpacing: '0.05em' }}>Technical Details</h4>
-                                    <div className="admin-form-grid">
-                                        <div className="admin-form-group">
+                                {/* Action buttons */}
+                                <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                                    {isEditing ? (
+                                        <>
+                                            <button
+                                                onClick={handleSave}
+                                                disabled={loading}
+                                                style={{
+                                                    display: 'flex', alignItems: 'center', gap: '6px',
+                                                    padding: '8px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer',
+                                                    background: 'linear-gradient(135deg,#10b981,#059669)',
+                                                    color: '#fff', fontSize: '13px', fontWeight: 600,
+                                                }}
+                                            >
+                                                <Save size={14} />
+                                                {loading ? 'Saving…' : 'Save'}
+                                            </button>
+                                            <button
+                                                onClick={handleCancelEdit}
+                                                style={{
+                                                    display: 'flex', alignItems: 'center', gap: '6px',
+                                                    padding: '8px 14px', borderRadius: '8px',
+                                                    background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                                                    color: '#94a3b8', fontSize: '13px', fontWeight: 500, cursor: 'pointer',
+                                                }}
+                                            >
+                                                <X size={14} />
+                                                Cancel
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <button
+                                                onClick={() => handleEdit(project)}
+                                                style={{
+                                                    display: 'flex', alignItems: 'center', gap: '6px',
+                                                    padding: '8px 14px', borderRadius: '8px',
+                                                    background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.3)',
+                                                    color: '#3b82f6', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+                                                    transition: 'all 0.2s',
+                                                }}
+                                            >
+                                                <Edit size={14} />
+                                                Edit
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(project.id)}
+                                                style={{
+                                                    display: 'flex', alignItems: 'center', gap: '6px',
+                                                    padding: '8px 14px', borderRadius: '8px',
+                                                    background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)',
+                                                    color: '#ef4444', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+                                                    transition: 'all 0.2s',
+                                                }}
+                                            >
+                                                <Trash2 size={14} />
+                                                Delete
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* ── EDIT FORM or VIEW ── */}
+                            {isEditing && editData ? (
+                                <div style={{ paddingTop: '20px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                                        {/* Row 1 */}
+                                        <div>
+                                            <label style={labelStyle}>Project Name <span style={{ color: '#ef4444' }}>*</span></label>
+                                            <input type="text" value={editData.name || ''} onChange={(e) => setEditData({ ...editData, name: e.target.value })} style={inputStyle} />
+                                        </div>
+                                        <div>
+                                            <label style={labelStyle}>NPM Package Filename</label>
+                                            <input type="text" value={editData.filename || ''} onChange={(e) => setEditData({ ...editData, filename: e.target.value })} style={{ ...inputStyle, fontFamily: 'monospace' }} />
+                                        </div>
+                                        {/* Row 2 */}
+                                        <div>
+                                            <label style={labelStyle}>Version</label>
+                                            <input type="text" value={editData.version || ''} onChange={(e) => setEditData({ ...editData, version: e.target.value })} style={inputStyle} />
+                                        </div>
+                                        <div>
+                                            <label style={labelStyle}>Downloads / Week</label>
+                                            <input type="text" value={editData.downloads || ''} onChange={(e) => setEditData({ ...editData, downloads: e.target.value })} style={inputStyle} />
+                                        </div>
+                                        {/* Row 3 */}
+                                        <div>
+                                            <label style={labelStyle}>GitHub URL</label>
+                                            <input type="url" value={editData.githubUrl || ''} onChange={(e) => setEditData({ ...editData, githubUrl: e.target.value })} style={inputStyle} />
+                                        </div>
+                                        <div>
+                                            <label style={labelStyle}>Demo URL</label>
+                                            <input type="url" value={editData.demoUrl || ''} onChange={(e) => setEditData({ ...editData, demoUrl: e.target.value })} style={inputStyle} />
+                                        </div>
+                                        {/* Row 4 */}
+                                        <div>
+                                            <label style={labelStyle}>Status</label>
+                                            <select value={editData.status || 'active'} onChange={(e) => setEditData({ ...editData, status: e.target.value as "active" | "in-progress" | "archived" })} style={{ ...inputStyle, cursor: 'pointer' }}>
+                                                <option value="active">Active</option>
+                                                <option value="in-progress">In Progress</option>
+                                                <option value="archived">Archived</option>
+                                                <option value="coming-soon">Coming Soon</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label style={labelStyle}>Stars &amp; Forks</label>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                                                <input type="number" value={editData.stars || 0} onChange={(e) => setEditData({ ...editData, stars: parseInt(e.target.value) || 0 })} style={inputStyle} placeholder="Stars" />
+                                                <input type="number" value={editData.forks || 0} onChange={(e) => setEditData({ ...editData, forks: parseInt(e.target.value) || 0 })} style={inputStyle} placeholder="Forks" />
+                                            </div>
+                                        </div>
+                                        {/* Featured */}
+                                        <div style={{ gridColumn: '1 / -1' }}>
+                                            <label style={{
+                                                display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer',
+                                                padding: '12px 16px', borderRadius: '8px',
+                                                background: editData.featured ? 'rgba(245,158,11,0.08)' : 'rgba(255,255,255,0.03)',
+                                                border: `1px solid ${editData.featured ? 'rgba(245,158,11,0.35)' : 'rgba(255,255,255,0.08)'}`,
+                                            }}>
+                                                <input type="checkbox" checked={editData.featured || false} onChange={(e) => setEditData({ ...editData, featured: e.target.checked })} style={{ width: '16px', height: '16px', accentColor: '#f59e0b', cursor: 'pointer' }} />
+                                                <span style={{ fontSize: '14px', fontWeight: 600, color: editData.featured ? '#f59e0b' : '#f8fafc' }}>⭐ Featured Project</span>
+                                            </label>
+                                        </div>
+                                        {/* Description */}
+                                        <div style={{ gridColumn: '1 / -1' }}>
+                                            <label style={labelStyle}>Description <span style={{ color: '#ef4444' }}>*</span></label>
+                                            <textarea value={editData.description || ''} onChange={(e) => setEditData({ ...editData, description: e.target.value })} rows={3} style={{ ...inputStyle, resize: 'vertical', minHeight: '80px' }} />
+                                        </div>
+                                        {/* Technologies */}
+                                        <div style={{ gridColumn: '1 / -1' }}>
                                             <TagListField
                                                 label="Technologies"
                                                 hint=" Add technologies used"
@@ -469,7 +725,8 @@ const ProjectsTab = ({ projects, onAddProject, onUpdateProject, onDeleteProject 
                                                 placeholder="e.g. React, Node.js"
                                             />
                                         </div>
-                                        <div className="admin-form-group">
+                                        {/* Features */}
+                                        <div style={{ gridColumn: '1 / -1' }}>
                                             <TagListField
                                                 label="Key Features"
                                                 hint=" Add key features"
@@ -478,172 +735,123 @@ const ProjectsTab = ({ projects, onAddProject, onUpdateProject, onDeleteProject 
                                                 placeholder="e.g. Responsive Design"
                                             />
                                         </div>
-                                        <div className="admin-form-group">
-                                            <label className="admin-form-label">Version</label>
-                                            <input
-                                                type="text"
-                                                value={editData.version || ''}
-                                                onChange={(e) => setEditData({ ...editData, version: e.target.value })}
-                                                className="admin-form-input"
-                                            />
-                                        </div>
-                                        <div className="admin-form-group">
-                                            <label className="admin-form-label">Filename</label>
-                                            <input
-                                                type="text"
-                                                value={editData.filename || ''}
-                                                onChange={(e) => setEditData({ ...editData, filename: e.target.value })}
-                                                className="admin-form-input"
-                                            />
-                                        </div>
-                                        <div className="admin-form-group">
-                                            <label className="admin-form-label">Downloads</label>
-                                            <input
-                                                type="text"
-                                                value={editData.downloads || ''}
-                                                onChange={(e) => setEditData({ ...editData, downloads: e.target.value })}
-                                                className="admin-form-input"
-                                            />
-                                        </div>
                                     </div>
                                 </div>
+                            ) : (
+                                <>
+                                    {/* ── Description ── */}
+                                    <p style={{
+                                        fontSize: '14px', color: '#94a3b8', lineHeight: '1.6',
+                                        margin: '0 0 16px',
+                                        overflow: 'hidden',
+                                        display: '-webkit-box',
+                                        WebkitLineClamp: 2,
+                                        WebkitBoxOrient: 'vertical',
+                                    }}>
+                                        {project.description}
+                                    </p>
 
-                                {/* Links & Stats */}
-                                <div style={{ paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                                    <h4 style={{ fontSize: '0.85rem', textTransform: 'uppercase', color: '#6b7280', marginBottom: '12px', letterSpacing: '0.05em' }}>Links & Metrics</h4>
-                                    <div className="admin-form-grid">
-                                        <div className="admin-form-group">
-                                            <label className="admin-form-label">Demo URL</label>
-                                            <input
-                                                type="url"
-                                                value={editData.demoUrl || ''}
-                                                onChange={(e) => setEditData({ ...editData, demoUrl: e.target.value })}
-                                                className="admin-form-input"
-                                            />
+                                    {/* ── Tech stack ── */}
+                                    {project.technologies && project.technologies.length > 0 && (
+                                        <div style={{ marginBottom: '14px' }}>
+                                            <p style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 8px' }}>
+                                                Tech Stack
+                                            </p>
+                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                                {project.technologies.map((tech, i) => (
+                                                    <span key={i} style={{
+                                                        padding: '3px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: 500,
+                                                        color: '#06f9f9', background: 'rgba(6,249,249,0.08)',
+                                                        border: '1px solid rgba(6,249,249,0.2)',
+                                                    }}>
+                                                        {tech}
+                                                    </span>
+                                                ))}
+                                            </div>
                                         </div>
-                                        <div className="admin-form-group">
-                                            <label className="admin-form-label">GitHub URL</label>
-                                            <input
-                                                type="url"
-                                                value={editData.githubUrl || ''}
-                                                onChange={(e) => setEditData({ ...editData, githubUrl: e.target.value })}
-                                                className="admin-form-input"
-                                            />
-                                        </div>
-                                        <div className="admin-form-group">
-                                            <label className="admin-form-label">Stars</label>
-                                            <input
-                                                type="number"
-                                                value={editData.stars || 0}
-                                                onChange={(e) => setEditData({ ...editData, stars: parseInt(e.target.value) || 0 })}
-                                                className="admin-form-input"
-                                            />
-                                        </div>
-                                        <div className="admin-form-group">
-                                            <label className="admin-form-label">Forks</label>
-                                            <input
-                                                type="number"
-                                                value={editData.forks || 0}
-                                                onChange={(e) => setEditData({ ...editData, forks: parseInt(e.target.value) || 0 })}
-                                                className="admin-form-input"
-                                            />
-                                        </div>
-                                        <div className="admin-form-group admin-form-group-full">
-                                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={editData.featured || false}
-                                                    onChange={(e) => setEditData({ ...editData, featured: e.target.checked })}
-                                                    style={{ width: '16px', height: '16px' }}
-                                                />
-                                                <span className="admin-form-label" style={{ marginBottom: 0 }}>Mark as Featured Project</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        ) : (
-                            <>
-                                <p className="admin-item-content admin-experience-description">{project.description}</p>
+                                    )}
 
-                                {project.technologies && project.technologies.length > 0 && (
-                                    <div className="admin-experience-block">
-                                        <h4 className="admin-experience-block-title">Technologies Used</h4>
-                                        <div className="admin-item-meta">
-                                            {project.technologies.map((tech, i) => (
-                                                <span key={i} className="admin-badge primary">
-                                                    {tech}
-                                                </span>
-                                            ))}
+                                    {/* ── Key Features ── */}
+                                    {project.features && project.features.length > 0 && (
+                                        <div style={{ marginBottom: '16px' }}>
+                                            <p style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 8px' }}>
+                                                Key Features
+                                            </p>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 16px' }}>
+                                                {project.features.map((feat, i) => (
+                                                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '13px', color: '#cbd5e1' }}>
+                                                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#06f9f9', flexShrink: 0, boxShadow: '0 0 6px #06f9f9' }} />
+                                                        {feat}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* ── Links + Stats row ── */}
+                                    <div style={{
+                                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                        flexWrap: 'wrap', gap: '12px',
+                                        paddingTop: '14px', borderTop: '1px solid rgba(255,255,255,0.06)',
+                                    }}>
+                                        {/* Links */}
+                                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                            {project.githubUrl && (
+                                                <a
+                                                    href={project.githubUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    style={{
+                                                        display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                                        padding: '7px 14px', borderRadius: '8px', textDecoration: 'none',
+                                                        background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                                                        color: '#cbd5e1', fontSize: '13px', fontWeight: 500,
+                                                        transition: 'all 0.2s',
+                                                    }}
+                                                >
+                                                    <Github size={14} />
+                                                    GitHub
+                                                </a>
+                                            )}
+                                            {project.demoUrl && (
+                                                <a
+                                                    href={project.demoUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    style={{
+                                                        display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                                        padding: '7px 14px', borderRadius: '8px', textDecoration: 'none',
+                                                        background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.3)',
+                                                        color: '#3b82f6', fontSize: '13px', fontWeight: 600,
+                                                        transition: 'all 0.2s',
+                                                    }}
+                                                >
+                                                    <ExternalLink size={14} />
+                                                    Live Demo
+                                                </a>
+                                            )}
+                                        </div>
+
+                                        {/* Stats */}
+                                        <div style={{ display: 'flex', gap: '14px' }}>
+                                            <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', color: '#94a3b8' }}>
+                                                <Star size={13} fill="#f59e0b" color="#f59e0b" />
+                                                {project.stars}
+                                            </span>
+                                            <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', color: '#94a3b8' }}>
+                                                <GitFork size={13} color="#64748b" />
+                                                {project.forks}
+                                            </span>
                                         </div>
                                     </div>
-                                )}
-
-                                {project.features && project.features.length > 0 && (
-                                    <div className="admin-experience-block">
-                                        <h4 className="admin-experience-block-title">Key Features</h4>
-                                        <ul className="admin-experience-list">
-                                            {project.features.map((feature, i) => (
-                                                <li key={i}>{feature}</li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
-
-                                <div className="admin-experience-block" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-                                    <div style={{ display: 'flex', gap: '16px', fontSize: '0.9rem', color: '#9ca3af' }}>
-                                        <span>⭐ {project.stars} stars</span>
-                                        <span>🍴 {project.forks} forks</span>
-                                    </div>
-                                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                                        {project.demoUrl && (
-                                            <a
-                                                href={project.demoUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="admin-btn admin-btn-blue"
-                                                style={{ fontSize: '0.85rem', padding: '6px 12px' }}
-                                            >
-                                                <ExternalLink size={14} />
-                                                Demo
-                                            </a>
-                                        )}
-                                        {project.githubUrl && (
-                                            <a
-                                                href={project.githubUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="admin-btn admin-btn-gray"
-                                                style={{ fontSize: '0.85rem', padding: '6px 12px' }}
-                                            >
-                                                <Github size={14} />
-                                                Code
-                                            </a>
-                                        )}
-                                    </div>
-                                </div>
-                            </>
-                        )}
-                    </motion.div>
-                ))}
+                                </>
+                            )}
+                        </motion.div>
+                    )
+                })}
             </div>
 
-            {projects.length === 0 && !showAddForm && (
-                <div className="admin-empty-state">
-                    <FileText size={48} style={{ opacity: 0.5, marginBottom: '16px' }} />
-                    <h3>No projects yet</h3>
-                    <p>Add your first project to showcase your work!</p>
-                    <button
-                        onClick={() => setShowAddForm(true)}
-                        className="admin-btn admin-btn-blue"
-                        style={{ marginTop: '16px' }}
-                    >
-                        <Plus size={18} />
-                        Add Project
-                    </button>
-                </div>
-            )}
-
+            {/* ── Confirm Delete Dialog ── */}
             <ConfirmDialog
                 isOpen={deleteConfirm.isOpen}
                 onClose={() => setDeleteConfirm({ isOpen: false, id: null })}

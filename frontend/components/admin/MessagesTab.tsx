@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-    Mail, Trash2, Search, X, Reply, Copy, Filter, Calendar, Eye, Sparkles, Phone, Building2
+    Mail, Trash2, Search, X, Reply, Copy, Filter, Calendar, Eye, Sparkles, Phone, Building2, ChevronRight
 } from 'lucide-react'
 import ConfirmDialog from './ConfirmDialog'
 import type { ContactMessage, AiLead } from '@/lib/admin-types'
@@ -18,6 +18,48 @@ interface MessagesTabProps {
     onDeleteMessage: (id: number) => Promise<void>
     onDeleteAiLead?: (id: number) => Promise<void>
     onRefresh: () => void
+}
+
+// ─── Design tokens ────────────────────────────────────────────────────────────
+const CYAN = '#06f9f9'
+const PURPLE = '#a855f7'
+const BLUE = '#3b82f6'
+const RED = '#ef4444'
+const CARD_BG = 'rgba(15, 22, 40, 0.85)'
+const BORDER = 'rgba(255,255,255,0.08)'
+const TEXT_PRIMARY = '#f8fafc'
+const TEXT_SECONDARY = '#94a3b8'
+const TEXT_MUTED = '#64748b'
+
+// ─── Avatar circle ────────────────────────────────────────────────────────────
+const AVATAR_COLORS = [
+    '#06f9f9', '#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#a855f7',
+]
+function getAvatarColor(name: string): string {
+    let hash = 0
+    for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash)
+    return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length]
+}
+
+// ─── Inline styles helpers ────────────────────────────────────────────────────
+const glassCard: React.CSSProperties = {
+    background: CARD_BG,
+    border: `1px solid ${BORDER}`,
+    borderRadius: '16px',
+    backdropFilter: 'blur(12px)',
+}
+
+const iconBtnBase: React.CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '32px',
+    height: '32px',
+    borderRadius: '8px',
+    border: 'none',
+    cursor: 'pointer',
+    transition: 'all 0.18s ease',
+    flexShrink: 0,
 }
 
 const MessagesTab = ({
@@ -177,22 +219,70 @@ const MessagesTab = ({
         setDateFilter('')
     }
 
+    // ─── Shared select style ───────────────────────────────────────────────────
+    const selectStyle: React.CSSProperties = {
+        background: 'rgba(15,22,40,0.9)',
+        border: `1px solid ${BORDER}`,
+        borderRadius: '10px',
+        color: TEXT_PRIMARY,
+        fontSize: '13px',
+        padding: '8px 12px',
+        outline: 'none',
+        cursor: 'pointer',
+        appearance: 'none' as const,
+        WebkitAppearance: 'none' as const,
+        minWidth: '130px',
+    }
+
     return (
-        <div className="admin-messages-wrap">
-            <div className="admin-section-header admin-messages-header">
-                <div>
-                    <div className="admin-section-title-wrapper">
-                        <Mail />
-                        <h2 className="admin-section-title">Inquiries & Leads</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+
+            {/* ── Section Header ──────────────────────────────────────────────── */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+                    {/* Icon badge */}
+                    <div style={{
+                        width: '48px', height: '48px', borderRadius: '14px', flexShrink: 0,
+                        background: `linear-gradient(135deg, ${CYAN}22, ${BLUE}33)`,
+                        border: `1px solid ${CYAN}33`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                        <Mail size={22} color={CYAN} />
                     </div>
-                    <p className="admin-section-description">
-                        Manage direct contact form submissions and high-intent visitor leads from your AI portfolio assistant.
-                    </p>
+                    <div>
+                        <h2 style={{ margin: 0, fontSize: '1.35rem', fontWeight: 700, color: TEXT_PRIMARY, letterSpacing: '-0.01em' }}>
+                            Inquiries &amp; AI Leads
+                        </h2>
+                        <p style={{ margin: '4px 0 0', fontSize: '13px', color: TEXT_MUTED }}>
+                            Manage contact submissions and AI chat lead captures.
+                        </p>
+                        <div style={{ display: 'flex', gap: '8px', marginTop: '10px', flexWrap: 'wrap' }}>
+                            <span style={{
+                                fontSize: '11px', fontWeight: 600, padding: '3px 10px', borderRadius: '20px',
+                                background: `${BLUE}22`, color: '#60a5fa', border: `1px solid ${BLUE}44`,
+                            }}>
+                                <Mail size={10} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} />
+                                {messages.length} Contacts
+                            </span>
+                            <span style={{
+                                fontSize: '11px', fontWeight: 600, padding: '3px 10px', borderRadius: '20px',
+                                background: `${PURPLE}22`, color: '#c084fc', border: `1px solid ${PURPLE}44`,
+                            }}>
+                                <Sparkles size={10} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} />
+                                {aiLeads.length} AI Leads
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            {/* View Mode Switcher: Contact Form vs AI Chat Leads */}
-            <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+            {/* ── View Mode Pill Tabs ──────────────────────────────────────────── */}
+            <div style={{
+                display: 'inline-flex', gap: '4px', padding: '4px',
+                background: 'rgba(255,255,255,0.04)', borderRadius: '14px',
+                border: `1px solid ${BORDER}`, width: 'fit-content',
+            }}>
+                {/* Contact Forms Tab */}
                 <button
                     type="button"
                     onClick={() => {
@@ -201,25 +291,33 @@ const MessagesTab = ({
                         setDetailAiLead(null)
                     }}
                     style={{
-                        padding: '10px 20px',
+                        padding: '9px 20px',
                         borderRadius: '10px',
                         fontWeight: 600,
-                        fontSize: '14px',
+                        fontSize: '13px',
                         display: 'inline-flex',
                         alignItems: 'center',
-                        gap: '8px',
+                        gap: '7px',
                         cursor: 'pointer',
-                        border: '1px solid',
-                        borderColor: viewMode === 'contact' ? '#3b82f6' : 'rgba(255, 255, 255, 0.1)',
-                        background: viewMode === 'contact' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(255, 255, 255, 0.03)',
-                        color: viewMode === 'contact' ? '#60a5fa' : '#94a3b8',
+                        border: 'none',
                         transition: 'all 0.2s ease',
+                        background: viewMode === 'contact'
+                            ? `linear-gradient(135deg, ${CYAN}22, ${BLUE}33)`
+                            : 'transparent',
+                        color: viewMode === 'contact' ? CYAN : TEXT_SECONDARY,
+                        boxShadow: viewMode === 'contact' ? `0 0 16px ${CYAN}22` : 'none',
                     }}
                 >
-                    <Mail size={16} />
-                    <span>Contact Form Messages ({messages.length})</span>
+                    <Mail size={15} />
+                    <span>Contact Forms</span>
+                    <span style={{
+                        fontSize: '11px', fontWeight: 700, padding: '1px 7px', borderRadius: '10px',
+                        background: viewMode === 'contact' ? `${CYAN}33` : 'rgba(255,255,255,0.08)',
+                        color: viewMode === 'contact' ? CYAN : TEXT_MUTED,
+                    }}>{messages.length}</span>
                 </button>
 
+                {/* AI Chat Leads Tab */}
                 <button
                     type="button"
                     onClick={() => {
@@ -228,388 +326,724 @@ const MessagesTab = ({
                         setDetailAiLead(null)
                     }}
                     style={{
-                        padding: '10px 20px',
+                        padding: '9px 20px',
                         borderRadius: '10px',
                         fontWeight: 600,
-                        fontSize: '14px',
+                        fontSize: '13px',
                         display: 'inline-flex',
                         alignItems: 'center',
-                        gap: '8px',
+                        gap: '7px',
                         cursor: 'pointer',
-                        border: '1px solid',
-                        borderColor: viewMode === 'ai_leads' ? '#a855f7' : 'rgba(255, 255, 255, 0.1)',
-                        background: viewMode === 'ai_leads' ? 'rgba(168, 85, 247, 0.15)' : 'rgba(255, 255, 255, 0.03)',
-                        color: viewMode === 'ai_leads' ? '#c084fc' : '#94a3b8',
+                        border: 'none',
                         transition: 'all 0.2s ease',
+                        background: viewMode === 'ai_leads'
+                            ? `linear-gradient(135deg, ${PURPLE}22, ${PURPLE}11)`
+                            : 'transparent',
+                        color: viewMode === 'ai_leads' ? '#c084fc' : TEXT_SECONDARY,
+                        boxShadow: viewMode === 'ai_leads' ? `0 0 16px ${PURPLE}22` : 'none',
                     }}
                 >
-                    <Sparkles size={16} />
-                    <span>AI Visitor Leads ({aiLeads.length})</span>
+                    <Sparkles size={15} />
+                    <span>AI Chat Leads</span>
+                    <span style={{
+                        fontSize: '11px', fontWeight: 700, padding: '1px 7px', borderRadius: '10px',
+                        background: viewMode === 'ai_leads' ? `${PURPLE}33` : 'rgba(255,255,255,0.08)',
+                        color: viewMode === 'ai_leads' ? '#c084fc' : TEXT_MUTED,
+                    }}>{aiLeads.length}</span>
                 </button>
             </div>
 
-            {/* Toolbar: Search + Filters */}
-            <div className="admin-messages-toolbar-v2">
-                <div className="admin-messages-toolbar-group">
-                    <label className="admin-messages-toolbar-label">Search</label>
-                    <div className="admin-messages-search-wrap">
-                        <Search className="admin-messages-search-icon" />
-                        <input
-                            type="text"
-                            className="admin-search-input admin-messages-search"
-                            placeholder={viewMode === 'contact' ? "Name, email, subject or message..." : "Name, email, phone, company, message..."}
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            aria-label="Search"
-                        />
-                        {searchQuery && (
-                            <button
-                                type="button"
-                                className="admin-messages-clear-search"
-                                onClick={() => setSearchQuery('')}
-                                aria-label="Clear search"
-                            >
-                                <X />
-                            </button>
-                        )}
-                    </div>
+            {/* ── Filter Bar ──────────────────────────────────────────────────── */}
+            <div style={{
+                display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap',
+                ...glassCard, padding: '12px 16px',
+            }}>
+                {/* Search */}
+                <div style={{ flex: 1, minWidth: '200px', position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <Search size={15} style={{ position: 'absolute', left: '12px', color: TEXT_MUTED, pointerEvents: 'none' }} />
+                    <input
+                        type="text"
+                        placeholder={viewMode === 'contact' ? 'Name, email, subject or message…' : 'Name, email, phone, company…'}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        aria-label="Search"
+                        style={{
+                            width: '100%', padding: '8px 36px 8px 36px',
+                            background: 'rgba(255,255,255,0.05)', border: `1px solid ${BORDER}`,
+                            borderRadius: '10px', color: TEXT_PRIMARY, fontSize: '13px', outline: 'none',
+                        }}
+                    />
+                    {searchQuery && (
+                        <button
+                            type="button"
+                            onClick={() => setSearchQuery('')}
+                            aria-label="Clear search"
+                            style={{ ...iconBtnBase, position: 'absolute', right: '4px', background: 'transparent', color: TEXT_MUTED, width: '28px', height: '28px' }}
+                        >
+                            <X size={13} />
+                        </button>
+                    )}
                 </div>
 
-                <div className="admin-messages-toolbar-group">
-                    <label className="admin-messages-toolbar-label">Date</label>
-                    <div className="admin-messages-date-wrap">
-                        <Calendar className="admin-messages-date-icon" />
-                        <input
-                            type="date"
-                            className="admin-messages-date-input"
-                            value={dateFilter}
-                            onChange={(e) => setDateFilter(e.target.value)}
-                            aria-label="Filter by date"
-                        />
-                        {dateFilter && (
-                            <button
-                                type="button"
-                                className="admin-messages-clear-date"
-                                onClick={() => setDateFilter('')}
-                                aria-label="Clear date"
-                            >
-                                <X />
-                            </button>
-                        )}
-                    </div>
-                </div>
+                {/* Sort */}
+                <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as SortOption)}
+                    aria-label="Sort by date"
+                    style={selectStyle}
+                >
+                    <option value="newest">Newest first</option>
+                    <option value="oldest">Oldest first</option>
+                </select>
 
+                {/* Subject filter (contact only) */}
                 {viewMode === 'contact' && (
-                    <div className="admin-messages-toolbar-group">
-                        <label className="admin-messages-toolbar-label">Subject</label>
-                        <div className="admin-messages-select-wrap">
-                            <Filter className="admin-messages-filter-icon" />
-                            <select
-                                className="admin-messages-select"
-                                value={subjectFilter}
-                                onChange={(e) => setSubjectFilter(e.target.value as SubjectFilter)}
-                                aria-label="Filter by subject"
-                            >
-                                <option value="all">All</option>
-                                <option value="with_subject">With subject</option>
-                                <option value="no_subject">No subject</option>
-                            </select>
-                        </div>
+                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                        <Filter size={13} style={{ position: 'absolute', left: '10px', color: TEXT_MUTED, pointerEvents: 'none' }} />
+                        <select
+                            value={subjectFilter}
+                            onChange={(e) => setSubjectFilter(e.target.value as SubjectFilter)}
+                            aria-label="Filter by subject"
+                            style={{ ...selectStyle, paddingLeft: '28px' }}
+                        >
+                            <option value="all">All subjects</option>
+                            <option value="with_subject">With subject</option>
+                            <option value="no_subject">No subject</option>
+                        </select>
                     </div>
                 )}
 
-                <div className="admin-messages-toolbar-group">
-                    <label className="admin-messages-toolbar-label">Sort</label>
-                    <select
-                        className="admin-messages-select admin-messages-select-standalone"
-                        value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value as SortOption)}
-                        aria-label="Sort by date"
-                    >
-                        <option value="newest">Newest first</option>
-                        <option value="oldest">Oldest first</option>
-                    </select>
+                {/* Date filter */}
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <Calendar size={13} style={{ position: 'absolute', left: '10px', color: TEXT_MUTED, pointerEvents: 'none' }} />
+                    <input
+                        type="date"
+                        value={dateFilter}
+                        onChange={(e) => setDateFilter(e.target.value)}
+                        aria-label="Filter by date"
+                        style={{ ...selectStyle, paddingLeft: '28px', colorScheme: 'dark' }}
+                    />
+                    {dateFilter && (
+                        <button
+                            type="button"
+                            onClick={() => setDateFilter('')}
+                            aria-label="Clear date"
+                            style={{ ...iconBtnBase, position: 'absolute', right: '4px', background: 'transparent', color: TEXT_MUTED, width: '24px', height: '24px' }}
+                        >
+                            <X size={11} />
+                        </button>
+                    )}
                 </div>
 
-                {hasActiveFilters && (
-                    <button
-                        type="button"
-                        className="admin-btn admin-btn-gray admin-messages-clear-btn"
-                        onClick={clearAllFilters}
-                    >
-                        <X />
-                        Clear all
-                    </button>
+                {/* Clear all filters */}
+                <AnimatePresence>
+                    {hasActiveFilters && (
+                        <motion.button
+                            initial={{ opacity: 0, scale: 0.85 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.85 }}
+                            type="button"
+                            onClick={clearAllFilters}
+                            style={{
+                                display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                padding: '8px 14px', borderRadius: '10px', border: `1px solid ${BORDER}`,
+                                background: 'rgba(255,255,255,0.05)', color: TEXT_SECONDARY,
+                                fontSize: '12px', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap',
+                            }}
+                        >
+                            <X size={12} />
+                            Clear Filters
+                        </motion.button>
+                    )}
+                </AnimatePresence>
+            </div>
+
+            {/* ── Results count ────────────────────────────────────────────────── */}
+            <div style={{ fontSize: '12px', color: TEXT_MUTED, paddingLeft: '2px' }}>
+                {viewMode === 'contact' ? (
+                    <>Showing <strong style={{ color: TEXT_SECONDARY }}>{filteredAndSortedMessages.length}</strong> of {messages.length} contact message{messages.length !== 1 ? 's' : ''}</>
+                ) : (
+                    <>Showing <strong style={{ color: TEXT_SECONDARY }}>{filteredAndSortedLeads.length}</strong> of {aiLeads.length} AI visitor lead{aiLeads.length !== 1 ? 's' : ''}</>
+                )}
+                {dateFilter && (
+                    <span style={{ color: CYAN, marginLeft: '6px' }}>on {formatDateOnly(dateFilter + 'T12:00:00')}</span>
                 )}
             </div>
 
-            {/* Results count */}
-            <div className="admin-messages-results">
-                <span className="admin-messages-count">
-                    {viewMode === 'contact' ? (
-                        <>Showing <strong>{filteredAndSortedMessages.length}</strong> of {messages.length} contact message{messages.length !== 1 ? 's' : ''}</>
-                    ) : (
-                        <>Showing <strong>{filteredAndSortedLeads.length}</strong> of {aiLeads.length} verified AI visitor lead{aiLeads.length !== 1 ? 's' : ''}</>
-                    )}
-                    {dateFilter && (
-                        <span className="admin-messages-date-hint"> on {formatDateOnly(dateFilter + 'T12:00:00')}</span>
-                    )}
-                </span>
-            </div>
-
-            {/* ── Mode 1: Contact Form Messages ──────────────── */}
+            {/* ══ MODE 1: Contact Form Messages ══════════════════════════════════ */}
             {viewMode === 'contact' && (
                 <>
-                    <div className="admin-items-grid">
-                        <AnimatePresence mode="popLayout">
-                            {filteredAndSortedMessages.map((msg, index) => (
-                                <motion.div
-                                    key={msg.id}
-                                    layout
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, scale: 0.98 }}
-                                    transition={{ delay: Math.min(index * 0.03, 0.2) }}
-                                    className="admin-item-card admin-message-card admin-message-card-clickable"
-                                    onClick={() => setDetailMessage(msg)}
-                                    role="button"
-                                    tabIndex={0}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' || e.key === ' ') {
-                                            e.preventDefault()
-                                            setDetailMessage(msg)
-                                        }
-                                    }}
-                                    aria-label={`View message from ${msg.name}`}
-                                >
-                                    <div className="admin-item-header">
-                                        <div className="admin-message-meta">
-                                            <h3 className="admin-item-title">{msg.name}</h3>
-                                            <a
-                                                href={`mailto:${msg.email}`}
-                                                className="admin-message-email"
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
-                                                {msg.email}
-                                            </a>
-                                            {msg.subject && (
-                                                <p className="admin-message-subject">{msg.subject}</p>
-                                            )}
-                                            <p className="admin-message-date">{formatDate(msg.created_at)}</p>
-                                        </div>
-                                        <div className="admin-item-actions admin-message-actions" onClick={(e) => e.stopPropagation()}>
-                                            <button
-                                                type="button"
-                                                className="admin-btn-icon edit"
-                                                title="View full details"
-                                                onClick={(e) => {
-                                                    e.stopPropagation()
-                                                    setDetailMessage(msg)
+                    {messages.length === 0 ? (
+                        <motion.div
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            style={{
+                                ...glassCard, padding: '64px 24px', textAlign: 'center',
+                                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
+                            }}
+                        >
+                            <div style={{
+                                width: '56px', height: '56px', borderRadius: '16px',
+                                background: `${BLUE}22`, border: `1px solid ${BLUE}33`,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '4px',
+                            }}>
+                                <Mail size={24} color={BLUE} style={{ opacity: 0.7 }} />
+                            </div>
+                            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: TEXT_PRIMARY }}>No contact messages yet</h3>
+                            <p style={{ margin: 0, fontSize: '13px', color: TEXT_MUTED, maxWidth: '340px' }}>
+                                Contact form submissions from your portfolio will appear here.
+                            </p>
+                        </motion.div>
+                    ) : filteredAndSortedMessages.length === 0 ? (
+                        <motion.div
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            style={{
+                                ...glassCard, padding: '48px 24px', textAlign: 'center',
+                                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
+                            }}
+                        >
+                            <Search size={28} color={TEXT_MUTED} />
+                            <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: TEXT_PRIMARY }}>No items match your filters</h3>
+                            <p style={{ margin: 0, fontSize: '13px', color: TEXT_MUTED }}>Try a different date, search term, or clear filters.</p>
+                            <button
+                                type="button"
+                                onClick={clearAllFilters}
+                                style={{
+                                    marginTop: '8px', padding: '8px 20px', borderRadius: '10px',
+                                    background: `${BLUE}22`, border: `1px solid ${BLUE}44`,
+                                    color: '#60a5fa', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+                                }}
+                            >
+                                Clear all filters
+                            </button>
+                        </motion.div>
+                    ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            <AnimatePresence mode="popLayout">
+                                {filteredAndSortedMessages.map((msg, index) => {
+                                    const avatarColor = getAvatarColor(msg.name)
+                                    const isExpanded = detailMessage?.id === msg.id
+                                    return (
+                                        <motion.div
+                                            key={msg.id}
+                                            layout
+                                            initial={{ opacity: 0, y: 12 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, scale: 0.97 }}
+                                            transition={{ delay: Math.min(index * 0.03, 0.2) }}
+                                        >
+                                            {/* Card */}
+                                            <motion.div
+                                                whileHover={{ y: -2, boxShadow: `0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px ${BORDER}` }}
+                                                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                                                onClick={() => setDetailMessage(isExpanded ? null : msg)}
+                                                role="button"
+                                                tabIndex={0}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter' || e.key === ' ') {
+                                                        e.preventDefault()
+                                                        setDetailMessage(isExpanded ? null : msg)
+                                                    }
+                                                }}
+                                                aria-label={`View message from ${msg.name}`}
+                                                style={{
+                                                    ...glassCard,
+                                                    borderLeft: `3px solid ${BLUE}`,
+                                                    padding: '16px 20px',
+                                                    cursor: 'pointer',
+                                                    display: 'flex',
+                                                    gap: '14px',
+                                                    alignItems: 'flex-start',
                                                 }}
                                             >
-                                                <Eye />
-                                            </button>
-                                            <a
-                                                href={`mailto:${msg.email}?subject=Re: ${encodeURIComponent(msg.subject || 'Your message')}`}
-                                                className="admin-btn-icon edit"
-                                                title="Reply"
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
-                                                <Reply />
-                                            </a>
-                                            <button
-                                                type="button"
-                                                className={`admin-btn-icon edit ${copiedId === msg.id ? 'copied' : ''}`}
-                                                onClick={(e) => copyEmail(msg.name, msg.email, msg.id, e)}
-                                                title={copiedId === msg.id ? 'Copied!' : 'Copy email'}
-                                            >
-                                                <Copy />
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={(e) => {
-                                                    e.stopPropagation()
-                                                    handleDeleteContact(msg.id)
-                                                }}
-                                                className="admin-btn-icon delete"
-                                                title="Delete"
-                                            >
-                                                <Trash2 />
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <p className="admin-message-preview admin-message-card-preview">
-                                        {msg.message.length > 120 ? `${msg.message.slice(0, 120)}…` : msg.message}
-                                    </p>
-                                </motion.div>
-                            ))}
-                        </AnimatePresence>
-                    </div>
+                                                {/* Avatar */}
+                                                <div style={{
+                                                    width: '40px', height: '40px', borderRadius: '12px', flexShrink: 0,
+                                                    background: `${avatarColor}22`, border: `1px solid ${avatarColor}44`,
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    fontSize: '16px', fontWeight: 700, color: avatarColor,
+                                                }}>
+                                                    {msg.name.charAt(0).toUpperCase()}
+                                                </div>
 
-                    {messages.length === 0 && (
-                        <div className="admin-empty-state">
-                            <Mail />
-                            <h3>No contact messages yet</h3>
-                            <p>Contact form submissions from your portfolio will appear here.</p>
+                                                {/* Body */}
+                                                <div style={{ flex: 1, minWidth: 0 }}>
+                                                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
+                                                        <div style={{ minWidth: 0 }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                                                <span style={{ fontWeight: 700, fontSize: '14px', color: TEXT_PRIMARY }}>{msg.name}</span>
+                                                                {msg.subject && (
+                                                                    <span style={{
+                                                                        fontSize: '11px', padding: '2px 8px', borderRadius: '6px',
+                                                                        background: 'rgba(255,255,255,0.07)', color: TEXT_SECONDARY, maxWidth: '200px',
+                                                                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                                                                    }}>
+                                                                        {msg.subject}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+                                                                <Mail size={11} style={{ color: TEXT_MUTED, flexShrink: 0 }} />
+                                                                <a
+                                                                    href={`mailto:${msg.email}`}
+                                                                    onClick={(e) => e.stopPropagation()}
+                                                                    style={{ fontSize: '12px', color: TEXT_SECONDARY, textDecoration: 'none' }}
+                                                                >
+                                                                    {msg.email}
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }} onClick={(e) => e.stopPropagation()}>
+                                                            <a
+                                                                href={`mailto:${msg.email}?subject=Re: ${encodeURIComponent(msg.subject || 'Your message')}`}
+                                                                title="Reply"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                                style={{ ...iconBtnBase, background: 'rgba(59,130,246,0.12)', color: '#60a5fa', textDecoration: 'none' }}
+                                                            >
+                                                                <Reply size={14} />
+                                                            </a>
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => copyEmail(msg.name, msg.email, msg.id, e)}
+                                                                title={copiedId === msg.id ? 'Copied!' : 'Copy email'}
+                                                                style={{ ...iconBtnBase, background: copiedId === msg.id ? 'rgba(16,185,129,0.18)' : 'rgba(255,255,255,0.06)', color: copiedId === msg.id ? '#10b981' : TEXT_SECONDARY }}
+                                                            >
+                                                                <Copy size={14} />
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => { e.stopPropagation(); handleDeleteContact(msg.id) }}
+                                                                title="Delete"
+                                                                style={{ ...iconBtnBase, background: 'rgba(239,68,68,0.1)', color: RED }}
+                                                            >
+                                                                <Trash2 size={14} />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    <p style={{
+                                                        margin: '10px 0 0', fontSize: '13px', color: TEXT_MUTED,
+                                                        display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const,
+                                                        overflow: 'hidden', lineHeight: '1.5',
+                                                    }}>
+                                                        {msg.message}
+                                                    </p>
+                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '10px' }}>
+                                                        <span style={{ fontSize: '11px', color: TEXT_MUTED }}>
+                                                            <Calendar size={10} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} />
+                                                            {formatDate(msg.created_at)}
+                                                        </span>
+                                                        <span style={{ fontSize: '11px', color: CYAN, display: 'flex', alignItems: 'center', gap: '3px' }}>
+                                                            <ChevronRight size={12} style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
+                                                            {isExpanded ? 'Collapse' : 'View details'}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </motion.div>
+
+                                            {/* Inline expanded detail */}
+                                            <AnimatePresence>
+                                                {isExpanded && (
+                                                    <motion.div
+                                                        initial={{ opacity: 0, height: 0 }}
+                                                        animate={{ opacity: 1, height: 'auto' }}
+                                                        exit={{ opacity: 0, height: 0 }}
+                                                        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                                                        style={{ overflow: 'hidden' }}
+                                                    >
+                                                        <div style={{
+                                                            ...glassCard,
+                                                            borderLeft: `3px solid ${CYAN}`,
+                                                            marginTop: '4px', padding: '20px 24px',
+                                                            background: 'rgba(6,249,249,0.03)',
+                                                        }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                                                                <span style={{ fontSize: '11px', fontWeight: 700, color: CYAN, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                                                                    Full Message
+                                                                </span>
+                                                                <div style={{ display: 'flex', gap: '8px' }}>
+                                                                    <a
+                                                                        href={`mailto:${msg.email}?subject=Re: ${encodeURIComponent(msg.subject || 'Your message')}`}
+                                                                        style={{
+                                                                            display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                                                            padding: '6px 14px', borderRadius: '8px', textDecoration: 'none',
+                                                                            background: `${BLUE}22`, border: `1px solid ${BLUE}44`,
+                                                                            color: '#60a5fa', fontSize: '12px', fontWeight: 600,
+                                                                        }}
+                                                                    >
+                                                                        <Reply size={13} /> Reply
+                                                                    </a>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => copyEmail(msg.name, msg.email, msg.id)}
+                                                                        style={{
+                                                                            display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                                                            padding: '6px 14px', borderRadius: '8px', cursor: 'pointer',
+                                                                            background: copiedId === msg.id ? 'rgba(16,185,129,0.18)' : 'rgba(255,255,255,0.06)',
+                                                                            border: `1px solid ${BORDER}`,
+                                                                            color: copiedId === msg.id ? '#10b981' : TEXT_SECONDARY,
+                                                                            fontSize: '12px', fontWeight: 600,
+                                                                        }}
+                                                                    >
+                                                                        <Copy size={13} />
+                                                                        {copiedId === msg.id ? 'Copied!' : 'Copy email'}
+                                                                    </button>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => setDetailMessage(null)}
+                                                                        style={{
+                                                                            ...iconBtnBase, background: 'rgba(255,255,255,0.06)',
+                                                                            border: `1px solid ${BORDER}`, color: TEXT_MUTED,
+                                                                        }}
+                                                                    >
+                                                                        <X size={13} />
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+
+                                                            {msg.subject && (
+                                                                <div style={{ marginBottom: '12px' }}>
+                                                                    <span style={{ fontSize: '11px', color: TEXT_MUTED, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Subject</span>
+                                                                    <p style={{ margin: '4px 0 0', fontSize: '14px', color: TEXT_PRIMARY, fontWeight: 600 }}>{msg.subject}</p>
+                                                                </div>
+                                                            )}
+
+                                                            <div>
+                                                                <span style={{ fontSize: '11px', color: TEXT_MUTED, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Message</span>
+                                                                <p style={{ margin: '8px 0 0', fontSize: '14px', color: TEXT_SECONDARY, lineHeight: '1.7', whiteSpace: 'pre-wrap' }}>
+                                                                    {msg.message}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
+                                        </motion.div>
+                                    )
+                                })}
+                            </AnimatePresence>
                         </div>
                     )}
                 </>
             )}
 
-            {/* ── Mode 2: AI Visitor Leads (Only verified users who provided details) ── */}
+            {/* ══ MODE 2: AI Visitor Leads ════════════════════════════════════════ */}
             {viewMode === 'ai_leads' && (
                 <>
-                    <div className="admin-items-grid">
-                        <AnimatePresence mode="popLayout">
-                            {filteredAndSortedLeads.map((lead, index) => (
-                                <motion.div
-                                    key={lead.id}
-                                    layout
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, scale: 0.98 }}
-                                    transition={{ delay: Math.min(index * 0.03, 0.2) }}
-                                    className="admin-item-card admin-message-card admin-message-card-clickable"
-                                    onClick={() => setDetailAiLead(lead)}
-                                    role="button"
-                                    tabIndex={0}
-                                    style={{ borderLeft: '3px solid #a855f7' }}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' || e.key === ' ') {
-                                            e.preventDefault()
-                                            setDetailAiLead(lead)
-                                        }
-                                    }}
-                                    aria-label={`View AI Lead from ${lead.name}`}
-                                >
-                                    <div className="admin-item-header">
-                                        <div className="admin-message-meta">
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                                                <h3 className="admin-item-title">{lead.name || 'Visitor'}</h3>
-                                                <span style={{
-                                                    fontSize: '11px',
-                                                    background: 'rgba(168, 85, 247, 0.18)',
-                                                    color: '#c084fc',
-                                                    padding: '2px 8px',
-                                                    borderRadius: '12px',
-                                                    fontWeight: 600,
-                                                    display: 'inline-flex',
-                                                    alignItems: 'center',
-                                                    gap: '4px'
+                    {aiLeads.length === 0 ? (
+                        <motion.div
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            style={{
+                                ...glassCard, padding: '64px 24px', textAlign: 'center',
+                                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
+                            }}
+                        >
+                            <div style={{
+                                width: '56px', height: '56px', borderRadius: '16px',
+                                background: `${PURPLE}22`, border: `1px solid ${PURPLE}33`,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '4px',
+                            }}>
+                                <Sparkles size={24} color={PURPLE} style={{ opacity: 0.8 }} />
+                            </div>
+                            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: TEXT_PRIMARY }}>No AI visitor leads yet</h3>
+                            <p style={{ margin: 0, fontSize: '13px', color: TEXT_MUTED, maxWidth: '380px' }}>
+                                Only visitors who provide their contact details (name, email, phone, company) in the chatbot will appear here.
+                            </p>
+                        </motion.div>
+                    ) : filteredAndSortedLeads.length === 0 ? (
+                        <motion.div
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            style={{
+                                ...glassCard, padding: '48px 24px', textAlign: 'center',
+                                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
+                            }}
+                        >
+                            <Search size={28} color={TEXT_MUTED} />
+                            <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: TEXT_PRIMARY }}>No items match your filters</h3>
+                            <p style={{ margin: 0, fontSize: '13px', color: TEXT_MUTED }}>Try a different date, search term, or clear filters.</p>
+                            <button
+                                type="button"
+                                onClick={clearAllFilters}
+                                style={{
+                                    marginTop: '8px', padding: '8px 20px', borderRadius: '10px',
+                                    background: `${PURPLE}22`, border: `1px solid ${PURPLE}44`,
+                                    color: '#c084fc', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+                                }}
+                            >
+                                Clear all filters
+                            </button>
+                        </motion.div>
+                    ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            <AnimatePresence mode="popLayout">
+                                {filteredAndSortedLeads.map((lead, index) => {
+                                    const avatarColor = PURPLE
+                                    const isExpanded = detailAiLead?.id === lead.id
+                                    return (
+                                        <motion.div
+                                            key={lead.id}
+                                            layout
+                                            initial={{ opacity: 0, y: 12 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, scale: 0.97 }}
+                                            transition={{ delay: Math.min(index * 0.03, 0.2) }}
+                                        >
+                                            {/* Card */}
+                                            <motion.div
+                                                whileHover={{ y: -2, boxShadow: `0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px ${BORDER}` }}
+                                                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                                                onClick={() => setDetailAiLead(isExpanded ? null : lead)}
+                                                role="button"
+                                                tabIndex={0}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter' || e.key === ' ') {
+                                                        e.preventDefault()
+                                                        setDetailAiLead(isExpanded ? null : lead)
+                                                    }
+                                                }}
+                                                aria-label={`View AI Lead from ${lead.name}`}
+                                                style={{
+                                                    ...glassCard,
+                                                    borderLeft: `3px solid ${PURPLE}`,
+                                                    padding: '16px 20px',
+                                                    cursor: 'pointer',
+                                                    display: 'flex',
+                                                    gap: '14px',
+                                                    alignItems: 'flex-start',
+                                                }}
+                                            >
+                                                {/* Avatar */}
+                                                <div style={{
+                                                    width: '40px', height: '40px', borderRadius: '12px', flexShrink: 0,
+                                                    background: `${avatarColor}22`, border: `1px solid ${avatarColor}44`,
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    fontSize: '16px', fontWeight: 700, color: avatarColor,
                                                 }}>
-                                                    <Sparkles size={11} /> AI Lead
-                                                </span>
-                                            </div>
+                                                    {(lead.name || 'V').charAt(0).toUpperCase()}
+                                                </div>
 
-                                            {lead.email && (
-                                                <a
-                                                    href={`mailto:${lead.email}`}
-                                                    className="admin-message-email"
-                                                    onClick={(e) => e.stopPropagation()}
-                                                >
-                                                    {lead.email}
-                                                </a>
-                                            )}
+                                                {/* Body */}
+                                                <div style={{ flex: 1, minWidth: 0 }}>
+                                                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
+                                                        <div style={{ minWidth: 0 }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                                                <span style={{ fontWeight: 700, fontSize: '14px', color: TEXT_PRIMARY }}>{lead.name || 'Visitor'}</span>
+                                                                <span style={{
+                                                                    fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '10px',
+                                                                    background: `${PURPLE}22`, color: '#c084fc', border: `1px solid ${PURPLE}33`,
+                                                                    display: 'inline-flex', alignItems: 'center', gap: '4px',
+                                                                }}>
+                                                                    <Sparkles size={9} /> AI Lead
+                                                                </span>
+                                                            </div>
+                                                            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '4px' }}>
+                                                                {lead.email && (
+                                                                    <a
+                                                                        href={`mailto:${lead.email}`}
+                                                                        onClick={(e) => e.stopPropagation()}
+                                                                        style={{ fontSize: '12px', color: TEXT_SECONDARY, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                                                                    >
+                                                                        <Mail size={11} style={{ color: TEXT_MUTED }} /> {lead.email}
+                                                                    </a>
+                                                                )}
+                                                                {lead.phone && (
+                                                                    <span style={{ fontSize: '12px', color: TEXT_SECONDARY, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                                                        <Phone size={11} style={{ color: TEXT_MUTED }} /> {lead.phone}
+                                                                    </span>
+                                                                )}
+                                                                {lead.company && (
+                                                                    <span style={{ fontSize: '12px', color: '#a78bfa', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                                                        <Building2 size={11} /> {lead.company}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }} onClick={(e) => e.stopPropagation()}>
+                                                            {lead.email && (
+                                                                <a
+                                                                    href={`mailto:${lead.email}?subject=Regarding your message with Satya Sanatan`}
+                                                                    title="Reply via Email"
+                                                                    onClick={(e) => e.stopPropagation()}
+                                                                    style={{ ...iconBtnBase, background: `${PURPLE}18`, color: '#c084fc', textDecoration: 'none' }}
+                                                                >
+                                                                    <Reply size={14} />
+                                                                </a>
+                                                            )}
+                                                            {lead.email && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={(e) => copyEmail(lead.name, lead.email, lead.id, e)}
+                                                                    title={copiedId === lead.id ? 'Copied!' : 'Copy email'}
+                                                                    style={{ ...iconBtnBase, background: copiedId === lead.id ? 'rgba(16,185,129,0.18)' : 'rgba(255,255,255,0.06)', color: copiedId === lead.id ? '#10b981' : TEXT_SECONDARY }}
+                                                                >
+                                                                    <Copy size={14} />
+                                                                </button>
+                                                            )}
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => { e.stopPropagation(); handleDeleteLead(lead.id) }}
+                                                                title="Delete"
+                                                                style={{ ...iconBtnBase, background: 'rgba(239,68,68,0.1)', color: RED }}
+                                                            >
+                                                                <Trash2 size={14} />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    <p style={{
+                                                        margin: '10px 0 0', fontSize: '13px', color: TEXT_MUTED,
+                                                        display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const,
+                                                        overflow: 'hidden', lineHeight: '1.5',
+                                                    }}>
+                                                        {lead.message}
+                                                    </p>
+                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '10px' }}>
+                                                        <span style={{ fontSize: '11px', color: TEXT_MUTED }}>
+                                                            <Calendar size={10} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} />
+                                                            {formatDate(lead.created_at)}
+                                                        </span>
+                                                        <span style={{ fontSize: '11px', color: '#c084fc', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                                                            <ChevronRight size={12} style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
+                                                            {isExpanded ? 'Collapse' : 'View details'}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </motion.div>
 
-                                            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '4px' }}>
-                                                {lead.phone && (
-                                                    <span style={{ fontSize: '12px', color: '#94a3b8', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                                                        <Phone size={12} /> {lead.phone}
-                                                    </span>
+                                            {/* Inline expanded detail */}
+                                            <AnimatePresence>
+                                                {isExpanded && (
+                                                    <motion.div
+                                                        initial={{ opacity: 0, height: 0 }}
+                                                        animate={{ opacity: 1, height: 'auto' }}
+                                                        exit={{ opacity: 0, height: 0 }}
+                                                        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                                                        style={{ overflow: 'hidden' }}
+                                                    >
+                                                        <div style={{
+                                                            ...glassCard,
+                                                            borderLeft: `3px solid ${PURPLE}`,
+                                                            marginTop: '4px', padding: '20px 24px',
+                                                            background: `${PURPLE}08`,
+                                                        }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                                                                <span style={{ fontSize: '11px', fontWeight: 700, color: '#c084fc', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                                    <Sparkles size={12} /> AI Lead Details
+                                                                </span>
+                                                                <div style={{ display: 'flex', gap: '8px' }}>
+                                                                    {lead.email && (
+                                                                        <a
+                                                                            href={`mailto:${lead.email}?subject=Regarding your message with Satya Sanatan`}
+                                                                            style={{
+                                                                                display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                                                                padding: '6px 14px', borderRadius: '8px', textDecoration: 'none',
+                                                                                background: `${BLUE}22`, border: `1px solid ${BLUE}44`,
+                                                                                color: '#60a5fa', fontSize: '12px', fontWeight: 600,
+                                                                            }}
+                                                                        >
+                                                                            <Reply size={13} /> Reply
+                                                                        </a>
+                                                                    )}
+                                                                    {lead.phone && (
+                                                                        <a
+                                                                            href={`tel:${lead.phone}`}
+                                                                            style={{
+                                                                                display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                                                                padding: '6px 14px', borderRadius: '8px', textDecoration: 'none',
+                                                                                background: 'rgba(255,255,255,0.06)', border: `1px solid ${BORDER}`,
+                                                                                color: TEXT_SECONDARY, fontSize: '12px', fontWeight: 600,
+                                                                            }}
+                                                                        >
+                                                                            <Phone size={13} /> Call
+                                                                        </a>
+                                                                    )}
+                                                                    {lead.email && (
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => copyEmail(lead.name, lead.email, lead.id)}
+                                                                            style={{
+                                                                                display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                                                                padding: '6px 14px', borderRadius: '8px', cursor: 'pointer',
+                                                                                background: copiedId === lead.id ? 'rgba(16,185,129,0.18)' : 'rgba(255,255,255,0.06)',
+                                                                                border: `1px solid ${BORDER}`,
+                                                                                color: copiedId === lead.id ? '#10b981' : TEXT_SECONDARY,
+                                                                                fontSize: '12px', fontWeight: 600,
+                                                                            }}
+                                                                        >
+                                                                            <Copy size={13} />
+                                                                            {copiedId === lead.id ? 'Copied!' : 'Copy email'}
+                                                                        </button>
+                                                                    )}
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => setDetailAiLead(null)}
+                                                                        style={{
+                                                                            ...iconBtnBase, background: 'rgba(255,255,255,0.06)',
+                                                                            border: `1px solid ${BORDER}`, color: TEXT_MUTED,
+                                                                        }}
+                                                                    >
+                                                                        <X size={13} />
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+
+                                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', marginBottom: '16px' }}>
+                                                                {lead.company && (
+                                                                    <div>
+                                                                        <span style={{ fontSize: '10px', color: TEXT_MUTED, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Company</span>
+                                                                        <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#a78bfa', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                                                            <Building2 size={12} /> {lead.company}
+                                                                        </p>
+                                                                    </div>
+                                                                )}
+                                                                <div>
+                                                                    <span style={{ fontSize: '10px', color: TEXT_MUTED, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Date &amp; Time</span>
+                                                                    <p style={{ margin: '4px 0 0', fontSize: '13px', color: TEXT_SECONDARY }}>{formatDate(lead.created_at)}</p>
+                                                                </div>
+                                                            </div>
+
+                                                            <div>
+                                                                <span style={{ fontSize: '11px', color: TEXT_MUTED, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Chat Inquiry / Requirement</span>
+                                                                <p style={{ margin: '8px 0 0', fontSize: '14px', color: TEXT_SECONDARY, lineHeight: '1.7', whiteSpace: 'pre-wrap' }}>
+                                                                    {lead.message}
+                                                                </p>
+                                                            </div>
+
+                                                            <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: `1px solid ${BORDER}`, display: 'flex', justifyContent: 'flex-end' }}>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        const id = lead.id
+                                                                        setDetailAiLead(null)
+                                                                        handleDeleteLead(id)
+                                                                    }}
+                                                                    style={{
+                                                                        display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                                                        padding: '7px 16px', borderRadius: '8px', cursor: 'pointer',
+                                                                        background: 'rgba(239,68,68,0.1)', border: `1px solid rgba(239,68,68,0.3)`,
+                                                                        color: RED, fontSize: '12px', fontWeight: 600,
+                                                                    }}
+                                                                >
+                                                                    <Trash2 size={13} /> Delete Lead
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </motion.div>
                                                 )}
-                                                {lead.company && (
-                                                    <span style={{ fontSize: '12px', color: '#a78bfa', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                                                        <Building2 size={12} /> {lead.company}
-                                                    </span>
-                                                )}
-                                            </div>
-
-                                            <p className="admin-message-date" style={{ marginTop: '4px' }}>{formatDate(lead.created_at)}</p>
-                                        </div>
-
-                                        <div className="admin-item-actions admin-message-actions" onClick={(e) => e.stopPropagation()}>
-                                            <button
-                                                type="button"
-                                                className="admin-btn-icon edit"
-                                                title="View full inquiry"
-                                                onClick={(e) => {
-                                                    e.stopPropagation()
-                                                    setDetailAiLead(lead)
-                                                }}
-                                            >
-                                                <Eye />
-                                            </button>
-                                            {lead.email && (
-                                                <a
-                                                    href={`mailto:${lead.email}?subject=Regarding your message with Satya Sanatan`}
-                                                    className="admin-btn-icon edit"
-                                                    title="Reply via Email"
-                                                    onClick={(e) => e.stopPropagation()}
-                                                >
-                                                    <Reply />
-                                                </a>
-                                            )}
-                                            {lead.email && (
-                                                <button
-                                                    type="button"
-                                                    className={`admin-btn-icon edit ${copiedId === lead.id ? 'copied' : ''}`}
-                                                    onClick={(e) => copyEmail(lead.name, lead.email, lead.id, e)}
-                                                    title={copiedId === lead.id ? 'Copied!' : 'Copy email'}
-                                                >
-                                                    <Copy />
-                                                </button>
-                                            )}
-                                            <button
-                                                type="button"
-                                                onClick={(e) => {
-                                                    e.stopPropagation()
-                                                    handleDeleteLead(lead.id)
-                                                }}
-                                                className="admin-btn-icon delete"
-                                                title="Delete"
-                                            >
-                                                <Trash2 />
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <p className="admin-message-preview admin-message-card-preview" style={{ marginTop: '8px' }}>
-                                        {lead.message.length > 120 ? `${lead.message.slice(0, 120)}…` : lead.message}
-                                    </p>
-                                </motion.div>
-                            ))}
-                        </AnimatePresence>
-                    </div>
-
-                    {aiLeads.length === 0 && (
-                        <div className="admin-empty-state">
-                            <Sparkles />
-                            <h3>No AI visitor leads yet</h3>
-                            <p>Only visitors who provide their contact details (name, email, phone, company) in the chatbot will appear here.</p>
+                                            </AnimatePresence>
+                                        </motion.div>
+                                    )
+                                })}
+                            </AnimatePresence>
                         </div>
                     )}
                 </>
             )}
 
-            {/* Empty search filter state */}
-            {((viewMode === 'contact' && messages.length > 0 && filteredAndSortedMessages.length === 0) ||
-              (viewMode === 'ai_leads' && aiLeads.length > 0 && filteredAndSortedLeads.length === 0)) && (
-                <div className="admin-empty-state admin-empty-state-filtered">
-                    <Search />
-                    <h3>No items match your filters</h3>
-                    <p>Try a different date, search term, or clear filters.</p>
-                    <button
-                        type="button"
-                        className="admin-btn admin-btn-blue"
-                        onClick={clearAllFilters}
-                    >
-                        Clear all filters
-                    </button>
-                </div>
-            )}
-
-            {/* Contact Message detail modal */}
+            {/* ── Contact Message Detail Modal ────────────────────────────────── */}
             <AnimatePresence>
-                {detailMessage && (
+                {detailMessage && viewMode !== 'contact' && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -641,10 +1075,7 @@ const MessagesTab = ({
                                     <span className="admin-message-detail-label">From</span>
                                     <div className="admin-message-detail-value">
                                         <strong>{detailMessage.name}</strong>
-                                        <a
-                                            href={`mailto:${detailMessage.email}`}
-                                            className="admin-message-email"
-                                        >
+                                        <a href={`mailto:${detailMessage.email}`} className="admin-message-email">
                                             {detailMessage.email}
                                         </a>
                                     </div>
@@ -656,7 +1087,7 @@ const MessagesTab = ({
                                     </div>
                                 )}
                                 <div className="admin-message-detail-row">
-                                    <span className="admin-message-detail-label">Date & time</span>
+                                    <span className="admin-message-detail-label">Date &amp; time</span>
                                     <span className="admin-message-detail-value">{formatDate(detailMessage.created_at)}</span>
                                 </div>
                                 <div className="admin-message-detail-row admin-message-detail-message">
@@ -699,9 +1130,9 @@ const MessagesTab = ({
                 )}
             </AnimatePresence>
 
-            {/* AI Visitor Lead detail modal */}
+            {/* ── AI Visitor Lead Detail Modal ────────────────────────────────── */}
             <AnimatePresence>
-                {detailAiLead && (
+                {detailAiLead && viewMode !== 'ai_leads' && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -765,7 +1196,7 @@ const MessagesTab = ({
                                     </div>
                                 )}
                                 <div className="admin-message-detail-row">
-                                    <span className="admin-message-detail-label">Date & time</span>
+                                    <span className="admin-message-detail-label">Date &amp; time</span>
                                     <span className="admin-message-detail-value">{formatDate(detailAiLead.created_at)}</span>
                                 </div>
                                 <div className="admin-message-detail-row admin-message-detail-message">
