@@ -6,10 +6,8 @@ export default function AdminLayout({
     children: React.ReactNode
 }) {
     return (
-        <html lang="en">
-            <body>
-                {children}
-            </body>
-        </html>
+        <div className="admin-root-shell">
+            {children}
+        </div>
     )
 }

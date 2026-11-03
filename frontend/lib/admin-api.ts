@@ -438,6 +438,18 @@ class AdminApiClient {
     }
 
     // Generic File Upload
+    // Festive Theme Management
+    async getFestiveTheme(): Promise<{ success: boolean; data: { activeFestival: string; enabled: boolean; updatedAt?: number } }> {
+        return this.request('/festive-theme')
+    }
+
+    async updateFestiveTheme(data: { activeFestival: string; enabled: boolean }): Promise<{ success: boolean; message: string; data: any }> {
+        return this.request('/festive-theme', {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        })
+    }
+
     async uploadFile(file: File, isRetry: boolean = false): Promise<{ success: boolean; url: string; filename: string }> {
         const formData = new FormData()
         formData.append('file', file)

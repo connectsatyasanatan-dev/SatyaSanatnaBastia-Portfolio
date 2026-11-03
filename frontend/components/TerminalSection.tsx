@@ -3,8 +3,27 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Terminal, Minimize2, Maximize2, X, CornerDownLeft } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { TerminalSectionSkeleton } from './AppSkeletons'
 import { applyTheme } from '@/lib/theme'
+
+function TerminalFallbackSkeleton() {
+    return (
+        <div className="terminal-window glass-panel rounded-xl overflow-hidden m-6" style={{ height: '400px' }}>
+            <div className="terminal-header p-4 border-b border-border-color flex justify-between">
+                <div className="flex gap-2">
+                    <div className="window-dot red" />
+                    <div className="window-dot yellow" />
+                    <div className="window-dot green" />
+                </div>
+                <div className="skeleton skeleton-text" style={{ width: '100px', height: '15px' }} />
+            </div>
+            <div className="p-6 space-y-4">
+                {[45, 65, 35, 55, 40, 28].map((w, i) => (
+                    <div key={i} className="skeleton skeleton-text" style={{ width: `${w}%` }} />
+                ))}
+            </div>
+        </div>
+    )
+}
 
 interface TerminalLog {
     text: string
@@ -225,7 +244,7 @@ export default function TerminalSection() {
                     exit={{ opacity: 0, scale: 0.98, filter: 'blur(10px)' }}
                     transition={{ duration: 0.5 }}
                 >
-                    <TerminalSectionSkeleton />
+                    <TerminalFallbackSkeleton />
                 </motion.div>
             ) : (
                 <motion.section

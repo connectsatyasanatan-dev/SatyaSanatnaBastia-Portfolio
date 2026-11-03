@@ -30,6 +30,7 @@
 @import './admin/achievements.css';
 @import './admin/blog.css';
 @import './admin/messages.css';
+@import './admin/festive.css';
 
 /* 5. Complete Mobile-First Multi-Resolution Responsive Engine */
 @import './admin/responsive.css';

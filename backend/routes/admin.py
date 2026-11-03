@@ -1054,3 +1054,40 @@ def upload_restore():
         logger.error(f"Restore error: {e}")
         return jsonify({"error": f"Restore failed: {e}"}), 500
 
+
+
+@admin.route("/festive-theme", methods=["GET"])
+@admin_required
+def get_admin_festive_theme():
+    default_config = {
+        "activeFestival": "diwali",
+        "enabled": True,
+        "updatedAt": None
+    }
+    try:
+        config = db.get_setting("festive_theme", default_config)
+    except Exception as e:
+        logger.warning(f"Error fetching festive theme: {e}")
+        config = default_config
+    return jsonify({"success": True, "data": config}), 200
+
+
+@admin.route("/festive-theme", methods=["PUT"])
+@admin_required
+def update_admin_festive_theme():
+    data = request.get_json() or {}
+    active_festival = data.get("activeFestival", "none")
+    enabled = bool(data.get("enabled", False))
+    config = {
+        "activeFestival": active_festival,
+        "enabled": enabled,
+        "updatedAt": int(time.time())
+    }
+    try:
+        success = db.set_setting("festive_theme", config)
+        if success:
+            _invalidate_cache("festive_theme")
+            return jsonify({"success": True, "message": "Festive theme updated successfully", "data": config}), 200
+    except Exception as e:
+        logger.error(f"Failed to update festive theme: {e}")
+    return jsonify({"success": False, "message": "Failed to update festive theme"}), 500

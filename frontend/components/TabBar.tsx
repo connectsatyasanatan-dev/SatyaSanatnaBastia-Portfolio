@@ -2,17 +2,26 @@
 
 import { X, ChevronRight } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
-import { SECTION_FILES, SectionFile } from './Sidebar'
+import { SECTION_FILES, SectionFile } from '@/lib/sections'
 
 interface TabBarProps {
     activeSection: string
 }
 
+const DEFAULT_FILE: SectionFile = {
+    id: 'hero',
+    filename: 'index.tsx',
+    icon: 'tsx',
+    color: '#61dafb',
+    sectionId: 'hero-section',
+}
+
 const TabBar = ({ activeSection }: TabBarProps) => {
-    const [openTabs, setOpenTabs] = useState<string[]>(SECTION_FILES.map((f) => f.id))
+    const files = SECTION_FILES || []
+    const [openTabs, setOpenTabs] = useState<string[]>(() => files.map((f) => f.id))
     const tabContainerRef = useRef<HTMLDivElement>(null)
 
-    const activeFile = SECTION_FILES.find((f) => f.id === activeSection) ?? SECTION_FILES[0]
+    const activeFile = files.find((f) => f.id === activeSection) ?? files[0] ?? DEFAULT_FILE
 
     // Auto-scroll active tab into view
     useEffect(() => {
@@ -51,7 +60,7 @@ const TabBar = ({ activeSection }: TabBarProps) => {
 
     // Keyboard: arrow keys to move between tabs, Enter to navigate
     function handleTabKeyDown(e: React.KeyboardEvent, file: SectionFile, idx: number) {
-        const tabs = SECTION_FILES.filter((f) => openTabs.includes(f.id))
+        const tabs = files.filter((f) => openTabs.includes(f.id))
         if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault()
             handleTabClick(file)
@@ -78,7 +87,7 @@ const TabBar = ({ activeSection }: TabBarProps) => {
         }
     }
 
-    const visibleTabs = SECTION_FILES.filter((f) => openTabs.includes(f.id))
+    const visibleTabs = files.filter((f) => openTabs.includes(f.id))
 
     return (
         <div id="portfolio-tabbar">
@@ -120,7 +129,7 @@ const TabBar = ({ activeSection }: TabBarProps) => {
                 })}
 
                 {/* Closed tabs - ghost pills to reopen */}
-                {SECTION_FILES.filter((f) => !openTabs.includes(f.id)).map((file) => (
+                {files.filter((f) => !openTabs.includes(f.id)).map((file) => (
                     <div
                         key={`closed-${file.id}`}
                         role="tab"

@@ -276,6 +276,14 @@ def init_database():
     cur.execute(
         """CREATE INDEX IF NOT EXISTS idx_ai_leads_created_at ON ai_leads(created_at DESC)"""
     )
+    cur.execute(
+        """CREATE TABLE IF NOT EXISTS site_settings (
+        key VARCHAR(64) PRIMARY KEY,
+        value TEXT NOT NULL,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )"""
+    )
+
 
     # Safe schema auto-alignments (adds new columns if table existed without them)
     try:
@@ -438,6 +446,45 @@ class Database:
     def __init__(self):
         init_database()
         _init_default_data()
+
+    # ── Site Settings (Festive themes, site toggles) ────────────────────────
+    def get_setting(self, key: str, default=None):
+        try:
+            conn = get_connection()
+            cur = _cursor(conn)
+            cur.execute("SELECT value FROM site_settings WHERE key = %s", (key,))
+            row = cur.fetchone()
+            cur.close()
+            conn.close()
+            if row and row.get("value"):
+                try:
+                    return json.loads(row["value"])
+                except Exception:
+                    return row["value"]
+            return default
+        except Exception as e:
+            logger.error(f"Error reading setting {key}: {e}")
+            return default
+
+    def set_setting(self, key: str, value) -> bool:
+        try:
+            val_str = json.dumps(value) if not isinstance(value, str) else value
+            conn = get_connection()
+            cur = _cursor(conn)
+            cur.execute(
+                """INSERT INTO site_settings (key, value, updated_at)
+                   VALUES (%s, %s, CURRENT_TIMESTAMP)
+                   ON CONFLICT (key) DO UPDATE
+                   SET value = EXCLUDED.value, updated_at = CURRENT_TIMESTAMP""",
+                (key, val_str),
+            )
+            conn.commit()
+            cur.close()
+            conn.close()
+            return True
+        except Exception as e:
+            logger.error(f"Error setting {key}: {e}")
+            return False
 
     # ── Personal Info ──────────────────────────────────────────────────
     def get_personal_info(self) -> Dict[str, Any]:

@@ -9,7 +9,8 @@ import GlobalBackground from '@/components/GlobalBackground'
 import PreLoader from '@/components/PreLoader'
 import ScrollToTop from '@/components/ScrollToTop'
 import CommandPalette from '@/components/CommandPalette'
-import { SECTION_FILES } from '@/components/Sidebar'
+import DiwaliDecoration from '@/components/DiwaliDecoration'
+import { SECTION_FILES } from '@/lib/sections'
 import { getStoredTheme, applyTheme } from '@/lib/theme'
 
 interface AppContainerProps {
@@ -36,7 +37,8 @@ export default function AppContainer({ children }: AppContainerProps) {
         const observers: IntersectionObserver[] = []
         const ratioMap: Record<string, number> = {}
 
-        SECTION_FILES.forEach((file) => {
+        const files = SECTION_FILES || []
+        files.forEach((file) => {
             const el = document.getElementById(file.sectionId)
             if (!el) return
 
@@ -73,7 +75,8 @@ export default function AppContainer({ children }: AppContainerProps) {
             let currentBest = ''
             let minDistance = Infinity
 
-            SECTION_FILES.forEach((file) => {
+            const files = SECTION_FILES || []
+            files.forEach((file) => {
                 const el = document.getElementById(file.sectionId)
                 if (el) {
                     const rect = el.getBoundingClientRect()
@@ -110,6 +113,7 @@ export default function AppContainer({ children }: AppContainerProps) {
 
             <div className="app-container">
                 <GlobalBackground />
+                <DiwaliDecoration />
                 <CommandPalette />
                 <Header />
 

@@ -7,6 +7,8 @@ import '../styles/sections-extended.css'
 import '../styles/sections-final.css'
 import '../styles/skills-modern.css'
 import '../styles/responsive.css'
+import '../styles/diwali-decor.css'
+import '../styles/chatbot.css'
 
 const inter = Inter({ subsets: ['latin'] })
 

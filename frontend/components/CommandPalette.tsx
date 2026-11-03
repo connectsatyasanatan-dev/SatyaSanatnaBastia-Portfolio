@@ -6,7 +6,7 @@ import {
     Search, FileCode, FileText, Terminal, Palette,
     Download, Linkedin, Github, Mail, Sparkles, X, ChevronRight, Check
 } from 'lucide-react'
-import { SECTION_FILES } from './Sidebar'
+import { SECTION_FILES } from '@/lib/sections'
 import { applyTheme, getStoredTheme, THEME_OPTIONS, VSCodeTheme } from '@/lib/theme'
 
 interface PaletteItem {

@@ -711,3 +711,28 @@ def aeo_data():
     except Exception as e:
         logger.error(f"AEO data error: {e}")
         return jsonify({"error": "AEO data temporarily unavailable"}), 500
+
+
+@api.route("/festive-theme", methods=["GET"])
+def get_festive_theme():
+    """
+    Public endpoint to fetch active festive theme configuration.
+    Cached for fast response, falls back gracefully.
+    """
+    cached = get_cached("festive_theme")
+    if cached:
+        return jsonify(cached), 200
+
+    default_config = {
+        "activeFestival": "diwali",
+        "enabled": True,
+        "updatedAt": None
+    }
+    try:
+        config = db.get_setting("festive_theme", default_config)
+    except Exception as e:
+        logger.warning(f"Error fetching festive theme from DB: {e}")
+        config = default_config
+
+    set_cache("festive_theme", config)
+    return jsonify(config), 200

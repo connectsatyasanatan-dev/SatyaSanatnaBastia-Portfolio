@@ -1,22 +1,17 @@
-import '@/styles/responsive.css'
-import '@/styles/chatbot.css'
-import dynamic from 'next/dynamic'
 import HeroSection from '@/components/HeroSection'
 import SkillsSection from '@/components/SkillsSection'
 import GitHistory from '@/components/GitHistory'
 import EducationSection from '@/components/EducationSection'
 import CertificationsSection from '@/components/CertificationsSection'
 import ProjectsSection from '@/components/ProjectsSection'
+import TestimonialsSection from '@/components/TestimonialsSection'
+import BlogSection from '@/components/BlogSection'
+import TerminalSection from '@/components/TerminalSection'
 import ContactSection from '@/components/ContactSection'
 import AppContainer from '@/components/AppContainer'
 import Footer from '@/components/Footer'
+import ChatBot from '@/components/ChatBot'
 import SEOHead from '@/components/SEOHead'
-
-// Dynamic imports for heavy non-initial-viewport components to minimize compilation time
-const TestimonialsSection = dynamic(() => import('@/components/TestimonialsSection'))
-const BlogSection = dynamic(() => import('@/components/BlogSection'))
-const TerminalSection = dynamic(() => import('@/components/TerminalSection'), { ssr: false })
-const ChatBot = dynamic(() => import('@/components/ChatBot'), { ssr: false })
 
 export default async function Home() {
     return (
@@ -52,7 +47,7 @@ export default async function Home() {
                     Available for hire as a Full Stack Developer, Frontend Developer, or Backend Developer.
                     Contact: connectsatyasanatan@gmail.com.
                     Portfolio: https://satyasanatnabastia.onrender.com.
-                    GitHub: https://github.com/connectsatyasanatan.
+                    GitHub: https://github.com/connectsatyasanatan-dev.
                     LinkedIn: https://www.linkedin.com/in/satya-sanatan-bastia-298644223/.
                     Open to full-time remote roles and freelance projects worldwide.
                 </div>

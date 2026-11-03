@@ -2,6 +2,9 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useFestiveTheme } from '@/hooks/useFestiveTheme'
+import { DiyaLamp, BULB_COLORS } from '@/components/DiwaliDecoration'
+import PreLoaderFireworks from '@/components/PreLoaderFireworks'
 
 interface PreLoaderProps {
     onLoadingComplete: () => void;
@@ -37,6 +40,13 @@ const PreLoader: React.FC<PreLoaderProps> = ({ onLoadingComplete }) => {
     const isFlying = phase === 'flying' || phase === 'landed'
     const current = languageSequences[seqIndex]
     const isLastSeq = seqIndex === languageSequences.length - 1
+
+    const { activeFestival, isFestiveActive, isMounted } = useFestiveTheme()
+    const showFestive = isMounted && isFestiveActive
+    const showDiwali = showFestive && activeFestival === 'diwali'
+    const showNewYear = showFestive && activeFestival === 'newyear'
+    const showChristmas = showFestive && activeFestival === 'christmas'
+    const showHoli = showFestive && activeFestival === 'holi'
 
     useEffect(() => {
         if (typeof document !== 'undefined') {
@@ -485,18 +495,246 @@ const PreLoader: React.FC<PreLoaderProps> = ({ onLoadingComplete }) => {
                     .preloader-title { font-size: 1.1rem; letter-spacing: 0; }
                     .preloader-cursor { height: 1.1rem; }
                 }
+
+                /* ── Festive Seasonal Theme Overlays for PreLoader ── */
+                .preloader-root--diwali {
+                    background: radial-gradient(ellipse at 50% 20%, #190c29 0%, #0d071a 50%, #06040e 100%) !important;
+                }
+
+                .preloader-glow--diwali {
+                    background: radial-gradient(circle, #ff9933 0%, rgba(255, 107, 26, 0.28) 45%, transparent 70%) !important;
+                    filter: blur(80px);
+                }
+
+                .preloader-diwali-topbar {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    height: 48px;
+                    z-index: 10;
+                    pointer-events: none;
+                    user-select: none;
+                    overflow: visible;
+                }
+
+                .preloader-festive-badge {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    margin-bottom: 14px;
+                    padding: 5px 16px;
+                    background: linear-gradient(135deg, rgba(255, 153, 51, 0.18), rgba(255, 107, 26, 0.12));
+                    border: 1px solid rgba(255, 193, 7, 0.45);
+                    border-radius: 999px;
+                    backdrop-filter: blur(10px);
+                    font-family: var(--font-mono);
+                    font-size: 11px;
+                    font-weight: 600;
+                    letter-spacing: 1px;
+                    color: #ffe082;
+                    box-shadow: 0 0 20px rgba(255, 153, 51, 0.35);
+                    z-index: 2;
+                }
+
+                .preloader-diwali-corner {
+                    position: absolute;
+                    bottom: clamp(24px, 5vh, 44px);
+                    z-index: 12;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 8px;
+                    pointer-events: none;
+                    user-select: none;
+                }
+
+                .preloader-diwali-corner--left {
+                    left: clamp(16px, 4vw, 48px);
+                }
+
+                .preloader-diwali-corner--right {
+                    right: clamp(16px, 4vw, 48px);
+                }
+
+                .preloader-diya-label {
+                    font-family: var(--font-mono);
+                    font-size: 10px;
+                    letter-spacing: 1.2px;
+                    color: #ffca28;
+                    text-shadow: 0 0 8px rgba(255, 193, 7, 0.6);
+                    background: rgba(10, 8, 20, 0.75);
+                    padding: 3px 9px;
+                    border-radius: 12px;
+                    border: 1px solid rgba(255, 193, 7, 0.25);
+                    backdrop-filter: blur(6px);
+                }
+
+                .preloader-avatar-core--diwali {
+                    box-shadow:
+                        0 0 0 1px rgba(255, 215, 0, 0.45),
+                        0 0 0 2px rgba(255, 153, 51, 0.55),
+                        0 0 35px rgba(255, 153, 51, 0.5),
+                        0 16px 36px rgba(0, 0, 0, 0.8) !important;
+                }
+
+                .preloader-orbit-runner--diwali {
+                    stroke: #ff9933 !important;
+                    filter: drop-shadow(0 0 6px #ff9933) !important;
+                }
+
+                .preloader-reticle--diwali {
+                    border-color: rgba(255, 193, 7, 0.85) !important;
+                }
+
+                .preloader-id-pill--diwali {
+                    border-color: rgba(255, 193, 7, 0.4) !important;
+                    color: #ffe082 !important;
+                    background: rgba(26, 15, 36, 0.88) !important;
+                }
+
+                .id-pill-dot--diwali {
+                    background: #ffb300 !important;
+                    box-shadow: 0 0 8px #ffb300 !important;
+                }
+
+                /* ── Firecracker burst animations in PreLoader ── */
+                .preloader-fireworks-layer {
+                    position: absolute;
+                    inset: 0;
+                    pointer-events: none;
+                    z-index: 1;
+                    overflow: hidden;
+                    user-select: none;
+                }
+
+                .preloader-burst-origin {
+                    position: absolute;
+                    width: 0;
+                    height: 0;
+                    pointer-events: none;
+                }
+
+                .preloader-burst-flash {
+                    position: absolute;
+                    left: -24px;
+                    top: -24px;
+                    width: 48px;
+                    height: 48px;
+                    border-radius: 50%;
+                    pointer-events: none;
+                    filter: blur(4px);
+                    animation: burstFlashAnim 0.45s ease-out forwards;
+                }
+
+                .preloader-burst-spark {
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    border-radius: 50%;
+                    pointer-events: none;
+                    animation: burstSparkAnim 1.3s cubic-bezier(0.12, 0.8, 0.32, 1) forwards;
+                    will-change: transform, opacity;
+                }
+
+                @keyframes burstFlashAnim {
+                    0% { transform: scale(0.2); opacity: 0; }
+                    25% { transform: scale(1.3); opacity: 1; }
+                    100% { transform: scale(2.4); opacity: 0; }
+                }
+
+                @keyframes burstSparkAnim {
+                    0% {
+                        transform: translate(0, 0) scale(1.4);
+                        opacity: 1;
+                    }
+                    45% {
+                        opacity: 0.95;
+                    }
+                    75% {
+                        opacity: 0.6;
+                        transform: translate(calc(var(--tx) * 0.9), calc(var(--ty) * 0.9)) scale(0.9);
+                    }
+                    100% {
+                        transform: translate(var(--tx), var(--ty)) scale(0.2);
+                        opacity: 0;
+                    }
+                }
             `}</style>
 
             <AnimatePresence>
                 {showContent && (
                     <motion.div
-                        className={`preloader-root ${isFlying ? 'preloader-root--flying' : ''}`}
+                        className={`preloader-root ${showDiwali ? 'preloader-root--diwali' : ''} ${isFlying ? 'preloader-root--flying' : ''}`}
                         initial={{ opacity: 1 }}
                         exit={{ opacity: 0, transition: { duration: 0.5, ease: 'easeInOut' } }}
                     >
+                        {/* Festive Firecracker / Fireworks Burst Layer */}
+                        <PreLoaderFireworks active={Boolean(showDiwali)} isFlying={isFlying} />
+                        {/* Top Hanging Fairy Lights Strand across PreLoader */}
+                        {showDiwali && (
+                            <div className={`preloader-diwali-topbar preloader-fadeable ${isFlying ? 'preloader-fadeable--hidden' : ''}`} aria-hidden="true">
+                                <div className="diwali-wire" />
+                                <div className="diwali-lights-strand">
+                                    {Array.from({ length: 24 }).map((_, i) => {
+                                        const colorType = BULB_COLORS[i % BULB_COLORS.length]
+                                        return (
+                                            <div key={i} className="diwali-bulb-wrap">
+                                                <div className="diwali-bulb-cord" />
+                                                <div className="diwali-bulb-socket" />
+                                                <div className={`diwali-bulb diwali-bulb--${colorType}`} />
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Ambient Deep Floating Embers */}
+                        {showDiwali && (
+                            <div className={`diwali-embers-wrap preloader-fadeable ${isFlying ? 'preloader-fadeable--hidden' : ''}`} aria-hidden="true">
+                                {[
+                                    { left: '8%', size: 3, delay: '0s', duration: '14s' },
+                                    { left: '22%', size: 3.5, delay: '2.5s', duration: '17s' },
+                                    { left: '42%', size: 2.5, delay: '6s', duration: '15s' },
+                                    { left: '60%', size: 3.5, delay: '1s', duration: '18s' },
+                                    { left: '78%', size: 4, delay: '4s', duration: '16s' },
+                                    { left: '92%', size: 2.5, delay: '3s', duration: '13s' },
+                                ].map((ember, idx) => (
+                                    <div
+                                        key={idx}
+                                        className="diwali-ember"
+                                        style={{
+                                            left: ember.left,
+                                            width: `${ember.size}px`,
+                                            height: `${ember.size}px`,
+                                            animationDelay: ember.delay,
+                                            animationDuration: ember.duration,
+                                        }}
+                                    />
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Bottom Corner Glowing Diyas */}
+                        {showDiwali && (
+                            <>
+                                <div className={`preloader-diwali-corner preloader-diwali-corner--left preloader-fadeable ${isFlying ? 'preloader-fadeable--hidden' : ''}`} aria-hidden="true">
+                                    <div className="diwali-diya-aura" />
+                                    <DiyaLamp />
+                                    <span className="preloader-diya-label">🪔 Shubh Deepawali</span>
+                                </div>
+                                <div className={`preloader-diwali-corner preloader-diwali-corner--right preloader-fadeable ${isFlying ? 'preloader-fadeable--hidden' : ''}`} aria-hidden="true">
+                                    <div className="diwali-diya-aura" />
+                                    <DiyaLamp />
+                                    <span className="preloader-diya-label">✨ Happy Diwali</span>
+                                </div>
+                            </>
+                        )}
+
                         {/* Pulsing radial glow */}
                         <motion.div
-                            className={`preloader-glow preloader-fadeable ${isFlying ? 'preloader-fadeable--hidden' : ''}`}
+                            className={`preloader-glow ${showDiwali ? 'preloader-glow--diwali' : ''} preloader-fadeable ${isFlying ? 'preloader-fadeable--hidden' : ''}`}
                             initial={{ scale: 0.8, opacity: 0 }}
                             animate={{ scale: 1.6, opacity: 0.12 }}
                             transition={{ duration: 2.5, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
@@ -504,6 +742,45 @@ const PreLoader: React.FC<PreLoaderProps> = ({ onLoadingComplete }) => {
 
                         {/* Center content */}
                         <div className="preloader-center">
+
+                            {/* Festive Seasonal Greeting Badge */}
+                            {showFestive && !isFlying && (
+                                <motion.div
+                                    className="preloader-festive-badge preloader-fadeable"
+                                    initial={{ opacity: 0, y: -10, scale: 0.9 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    transition={{ duration: 0.6, delay: 0.2 }}
+                                >
+                                    {showDiwali && (
+                                        <>
+                                            <span>🪔</span>
+                                            <span>Shubh Deepawali // Festival of Lights</span>
+                                            <span>✨</span>
+                                        </>
+                                    )}
+                                    {showNewYear && (
+                                        <>
+                                            <span>✨</span>
+                                            <span>Happy New Year Celebration</span>
+                                            <span>🥂</span>
+                                        </>
+                                    )}
+                                    {showChristmas && (
+                                        <>
+                                            <span>🎄</span>
+                                            <span>Merry Christmas & Happy Holidays</span>
+                                            <span>❄️</span>
+                                        </>
+                                    )}
+                                    {showHoli && (
+                                        <>
+                                            <span>🎨</span>
+                                            <span>Happy Holi // Festival of Colors</span>
+                                            <span>🌸</span>
+                                        </>
+                                    )}
+                                </motion.div>
+                            )}
 
                             {/* Modern HUD Avatar Stage */}
                             <motion.div
@@ -515,28 +792,30 @@ const PreLoader: React.FC<PreLoaderProps> = ({ onLoadingComplete }) => {
                                 {!isFlying && (
                                     <>
                                         <div className="preloader-avatar-aura" />
-                                        <span className="preloader-reticle reticle-tl" />
-                                        <span className="preloader-reticle reticle-tr" />
-                                        <span className="preloader-reticle reticle-bl" />
-                                        <span className="preloader-reticle reticle-br" />
+                                        <span className={`preloader-reticle reticle-tl ${showDiwali ? 'preloader-reticle--diwali' : ''}`} />
+                                        <span className={`preloader-reticle reticle-tr ${showDiwali ? 'preloader-reticle--diwali' : ''}`} />
+                                        <span className={`preloader-reticle reticle-bl ${showDiwali ? 'preloader-reticle--diwali' : ''}`} />
+                                        <span className={`preloader-reticle reticle-br ${showDiwali ? 'preloader-reticle--diwali' : ''}`} />
 
                                         <svg className="preloader-orbit-svg" viewBox="0 0 120 120">
                                             <circle cx="60" cy="60" r="54" className="preloader-orbit-track" />
-                                            <circle cx="60" cy="60" r="54" className="preloader-orbit-runner" />
+                                            <circle cx="60" cy="60" r="54" className={`preloader-orbit-runner ${showDiwali ? 'preloader-orbit-runner--diwali' : ''}`} />
                                         </svg>
                                     </>
                                 )}
 
                                 <motion.div
                                     ref={avatarRef}
-                                    className="preloader-avatar-core"
+                                    className={`preloader-avatar-core ${showDiwali ? 'preloader-avatar-core--diwali' : ''}`}
                                     animate={
                                         isFlying && flyCoords
                                             ? {
                                                 x: flyCoords.x,
                                                 y: flyCoords.y,
                                                 scale: flyCoords.scale,
-                                                boxShadow: '0 0 32px rgba(34, 211, 238, 0.95), 0 0 60px rgba(34, 211, 238, 0.4)',
+                                                boxShadow: showDiwali
+                                                    ? '0 0 32px rgba(255, 179, 0, 0.95), 0 0 60px rgba(255, 107, 26, 0.5)'
+                                                    : '0 0 32px rgba(34, 211, 238, 0.95), 0 0 60px rgba(34, 211, 238, 0.4)',
                                             }
                                             : {
                                                 x: 0,
@@ -567,8 +846,8 @@ const PreLoader: React.FC<PreLoaderProps> = ({ onLoadingComplete }) => {
                                 </motion.div>
 
                                 {!isFlying && (
-                                    <div className="preloader-id-pill">
-                                        <span className="id-pill-dot" />
+                                    <div className={`preloader-id-pill ${showDiwali ? 'preloader-id-pill--diwali' : ''}`}>
+                                        <span className={`id-pill-dot ${showDiwali ? 'id-pill-dot--diwali' : ''}`} />
                                         <span>DEV // SATYA</span>
                                     </div>
                                 )}
@@ -621,14 +900,19 @@ const PreLoader: React.FC<PreLoaderProps> = ({ onLoadingComplete }) => {
                         <div className={`preloader-status preloader-fadeable ${isFlying ? 'preloader-fadeable--hidden' : ''}`}>
                             <div className="preloader-status-text">
                                 SYSTEM_STATUS:{' '}
-                                <span style={{ color: 'var(--primary)', opacity: 0.8 }}>{currentLog}</span>
+                                <span style={{ color: showDiwali ? '#ffb300' : 'var(--primary)', opacity: 0.9 }}>{currentLog}</span>
                             </div>
                             <div className="preloader-bar-track">
                                 <motion.div
                                     initial={{ width: 0 }}
                                     animate={{ width: '100%' }}
                                     transition={{ duration: languageSequences.length * 4.5, ease: 'linear' }}
-                                    style={{ height: '100%', background: 'var(--primary)', borderRadius: '2px' }}
+                                    style={{
+                                        height: '100%',
+                                        background: showDiwali ? 'linear-gradient(90deg, #ff9933, #ffd166, #ff9933)' : 'var(--primary)',
+                                        boxShadow: showDiwali ? '0 0 10px rgba(255, 179, 0, 0.6)' : undefined,
+                                        borderRadius: '2px'
+                                    }}
                                 />
                             </div>
                         </div>
