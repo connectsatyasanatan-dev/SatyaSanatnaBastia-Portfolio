@@ -1089,7 +1089,10 @@ def update_admin_festive_theme():
         success = db.set_setting("festive_theme", config)
         if success:
             _invalidate_cache("festive_theme")
-            return jsonify({"success": True, "message": "Festive theme updated successfully", "data": config}), 200
+            response = jsonify({"success": True, "message": "Festive theme updated successfully", "data": config})
+            response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0, private"
+            response.headers["Pragma"] = "no-cache"
+            return response, 200
     except Exception as e:
         logger.error(f"Failed to update festive theme: {e}")
     return jsonify({"success": False, "message": "Failed to update festive theme"}), 500

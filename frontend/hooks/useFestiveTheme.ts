@@ -12,112 +12,195 @@ export interface FestiveThemeState {
 }
 
 const STORAGE_KEY = 'portfolio_festive_theme';
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 const DEFAULT_CONFIG = {
     activeFestival: 'diwali',
     enabled: true,
 };
 
-export function useFestiveTheme(): FestiveThemeState {
-    const [isMounted, setIsMounted] = useState(false);
-    const [state, setState] = useState({
-        activeFestival: DEFAULT_CONFIG.activeFestival,
-        isEnabled: DEFAULT_CONFIG.enabled,
-        isLoading: true,
-    });
+function getApiEndpoint(): string {
+    if (typeof window !== 'undefined') {
+        const envUrl = process.env.NEXT_PUBLIC_API_URL;
+        // If NEXT_PUBLIC_API_URL is a valid remote URL or relative path, use it; avoid hardcoded localhost in browser prod
+        if (envUrl && !envUrl.startsWith('http://localhost') && !envUrl.startsWith('http://127.0.0.1')) {
+            return `${envUrl.replace(/\/$/, '')}/festive-theme`;
+        }
+        return '/api/festive-theme';
+    }
+    const backend = process.env.BACKEND_URL || 'http://127.0.0.1:5000';
+    return `${backend.replace(/\/$/, '')}/api/festive-theme`;
+}
 
-    const syncTheme = useCallback(async () => {
-        if (typeof window === 'undefined') return;
+interface SharedState {
+    activeFestival: string;
+    isEnabled: boolean;
+    isLoading: boolean;
+    hasFetched: boolean;
+}
 
+// Module-level reactive singleton store shared across PreLoader, DiwaliDecoration, and Admin
+let sharedState: SharedState = {
+    activeFestival: DEFAULT_CONFIG.activeFestival,
+    isEnabled: DEFAULT_CONFIG.enabled,
+    isLoading: true,
+    hasFetched: false,
+};
+
+const listeners = new Set<(state: SharedState) => void>();
+
+function notifyListeners() {
+    listeners.forEach(fn => {
         try {
-            const res = await fetch(`${API_URL}/festive-theme`, {
-                headers: { 'Accept': 'application/json' },
+            fn({ ...sharedState });
+        } catch {}
+    });
+}
+
+function updateSharedState(partial: Partial<SharedState>, saveToStorage = true) {
+    sharedState = { ...sharedState, ...partial };
+    if (saveToStorage && typeof window !== 'undefined') {
+        try {
+            localStorage.setItem(
+                STORAGE_KEY,
+                JSON.stringify({
+                    activeFestival: sharedState.activeFestival,
+                    enabled: sharedState.isEnabled,
+                    updatedAt: Date.now(),
+                })
+            );
+        } catch {}
+    }
+    notifyListeners();
+}
+
+let activeFetchPromise: Promise<void> | null = null;
+
+async function fetchLiveTheme(): Promise<void> {
+    if (typeof window === 'undefined') return;
+
+    if (activeFetchPromise) {
+        return activeFetchPromise;
+    }
+
+    activeFetchPromise = (async () => {
+        try {
+            const endpoint = getApiEndpoint();
+            const res = await fetch(`${endpoint}?_t=${Date.now()}`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                },
                 cache: 'no-store',
             });
+
             if (res.ok) {
                 const data = await res.json();
                 const activeFestival = data.activeFestival ?? 'none';
                 const isEnabled = Boolean(data.enabled);
 
-                setState({ activeFestival, isEnabled, isLoading: false });
-
-                try {
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify({ activeFestival, enabled: isEnabled }));
-                } catch {}
-                return;
-            }
-        } catch {
-            // Silently fall back to cached / default state — zero console errors
-        }
-
-        // Fallback to localStorage if API unavailable
-        try {
-            const cached = localStorage.getItem(STORAGE_KEY);
-            if (cached) {
-                const parsed = JSON.parse(cached);
-                setState({
-                    activeFestival: parsed.activeFestival ?? DEFAULT_CONFIG.activeFestival,
-                    isEnabled: Boolean(parsed.enabled),
+                updateSharedState({
+                    activeFestival,
+                    isEnabled,
                     isLoading: false,
+                    hasFetched: true,
                 });
                 return;
             }
-        } catch {}
+        } catch (err) {
+            // Silently fall back to cached / default state on network glitch
+        } finally {
+            activeFetchPromise = null;
+        }
 
-        setState(prev => ({ ...prev, isLoading: false }));
-    }, []);
+        updateSharedState({ isLoading: false, hasFetched: true });
+    })();
+
+    return activeFetchPromise;
+}
+
+export function useFestiveTheme(): FestiveThemeState {
+    const [isMounted, setIsMounted] = useState(false);
+    const [localState, setLocalState] = useState<SharedState>(sharedState);
 
     useEffect(() => {
         setIsMounted(true);
 
-        // Immediate hydrate from local cache on mount
-        try {
-            const cached = localStorage.getItem(STORAGE_KEY);
-            if (cached) {
-                const parsed = JSON.parse(cached);
-                setState({
-                    activeFestival: parsed.activeFestival ?? DEFAULT_CONFIG.activeFestival,
-                    isEnabled: Boolean(parsed.enabled),
-                    isLoading: false,
-                });
-            }
-        } catch {}
+        // 1. Initial hydration from localStorage if not yet fetched
+        if (!sharedState.hasFetched) {
+            try {
+                const cached = localStorage.getItem(STORAGE_KEY);
+                if (cached) {
+                    const parsed = JSON.parse(cached);
+                    updateSharedState(
+                        {
+                            activeFestival: parsed.activeFestival ?? DEFAULT_CONFIG.activeFestival,
+                            isEnabled: Boolean(parsed.enabled),
+                        },
+                        false
+                    );
+                }
+            } catch {}
+        }
 
-        syncTheme();
+        // 2. Subscribe to reactive singleton updates
+        const listener = (nextState: SharedState) => {
+            setLocalState(nextState);
+        };
+        listeners.add(listener);
+        setLocalState({ ...sharedState });
 
-        const handleCustomChange = (e: Event) => {
+        // 3. Immediately trigger fresh live sync from database
+        fetchLiveTheme();
+
+        // 4. Cross-tab & intra-window real-time event listeners
+        const handleCustomEvent = (e: Event) => {
             const detail = (e as CustomEvent).detail;
             if (detail) {
                 const activeFestival = detail.activeFestival ?? 'none';
                 const isEnabled = Boolean(detail.enabled);
-                setState({ activeFestival, isEnabled, isLoading: false });
-                try {
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify({ activeFestival, enabled: isEnabled }));
-                } catch {}
+                updateSharedState({ activeFestival, isEnabled, isLoading: false, hasFetched: true });
             } else {
-                syncTheme();
+                fetchLiveTheme();
             }
         };
 
-        window.addEventListener('festive-theme-changed', handleCustomChange);
-        const handleStorage = (e: StorageEvent) => {
-            if (e.key === STORAGE_KEY) syncTheme();
+        const handleStorageEvent = (e: StorageEvent) => {
+            if (e.key === STORAGE_KEY) {
+                try {
+                    if (e.newValue) {
+                        const parsed = JSON.parse(e.newValue);
+                        updateSharedState({
+                            activeFestival: parsed.activeFestival ?? DEFAULT_CONFIG.activeFestival,
+                            isEnabled: Boolean(parsed.enabled),
+                            isLoading: false,
+                        });
+                    }
+                } catch {
+                    fetchLiveTheme();
+                }
+            }
         };
-        window.addEventListener('storage', handleStorage);
+
+        window.addEventListener('festive-theme-changed', handleCustomEvent);
+        window.addEventListener('storage', handleStorageEvent);
 
         return () => {
-            window.removeEventListener('festive-theme-changed', handleCustomChange);
-            window.removeEventListener('storage', handleStorage);
+            listeners.delete(listener);
+            window.removeEventListener('festive-theme-changed', handleCustomEvent);
+            window.removeEventListener('storage', handleStorageEvent);
         };
-    }, [syncTheme]);
+    }, []);
+
+    const isFestiveActive = isMounted && localState.isEnabled && localState.activeFestival !== 'none';
 
     return {
-        activeFestival: state.activeFestival,
-        isEnabled: state.isEnabled,
-        isFestiveActive: isMounted && state.isEnabled && state.activeFestival !== 'none',
+        activeFestival: localState.activeFestival,
+        isEnabled: localState.isEnabled,
+        isFestiveActive,
         isMounted,
-        isLoading: state.isLoading,
-        refresh: syncTheme,
+        isLoading: localState.isLoading,
+        refresh: fetchLiveTheme,
     };
 }

@@ -729,12 +729,8 @@ def aeo_data():
 def get_festive_theme():
     """
     Public endpoint to fetch active festive theme configuration.
-    Cached for fast response, falls back gracefully.
+    Real-time: always reads live state directly from database with zero-cache headers.
     """
-    cached = get_cached("festive_theme")
-    if cached:
-        return jsonify(cached), 200
-
     default_config = {
         "activeFestival": "diwali",
         "enabled": True,
@@ -746,5 +742,8 @@ def get_festive_theme():
         logger.warning(f"Error fetching festive theme from DB: {e}")
         config = default_config
 
-    set_cache("festive_theme", config)
-    return jsonify(config), 200
+    response = jsonify(config)
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0, private"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response, 200

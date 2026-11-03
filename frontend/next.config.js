@@ -110,9 +110,11 @@ const nextConfig = {
       },
       {
         // ── Forbid caching for stateful/dynamic endpoints ──────────────────
-        source: '/api/(contact|chat|track-visit|track-duration|health)',
+        source: '/api/(contact|chat|track-visit|track-duration|health|festive-theme)',
         headers: [
-          { key: 'Cache-Control', value: 'no-store, private' },
+          { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate, max-age=0, private' },
+          { key: 'Pragma', value: 'no-cache' },
+          { key: 'Expires', value: '0' },
         ],
       },
     ]
