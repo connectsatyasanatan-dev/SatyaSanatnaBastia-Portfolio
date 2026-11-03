@@ -276,9 +276,9 @@ def get_location_from_ip(ip):
 @api.route("/track-visit", methods=["POST"])
 @limiter.limit("30 per minute")
 def track_visit():
-    """Track a new visit session"""
+    """Track a new visit session (failsafe: never breaks user experience)"""
     try:
-        data = request.get_json()
+        data = request.get_json(silent=True) or {}
         if not data or not data.get("visitorId") or not data.get("sessionId"):
             return jsonify({"error": "Missing visitorId or sessionId"}), 400
 
@@ -301,28 +301,40 @@ def track_visit():
             "location_city": city,
         }
 
-        db.track_visit(visit_data)
-        return jsonify({"success": True})
+        try:
+            db.track_visit(visit_data)
+        except Exception as db_err:
+            logger.warning(f"Analytics visit recording deferred: {db_err}")
+            return jsonify({"success": False, "status": "skipped"}), 200
+
+        return jsonify({"success": True}), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        logger.error(f"Track visit error: {e}")
+        return jsonify({"success": False, "status": "error"}), 200
 
 
 @api.route("/track-duration", methods=["POST"])
 @limiter.limit("60 per minute")
 def track_duration():
-    """Update session duration"""
+    """Update session duration (failsafe)"""
     try:
-        data = request.get_json()
+        data = request.get_json(silent=True) or {}
         session_id = data.get("sessionId")
         duration = data.get("duration")
 
         if not session_id:
             return jsonify({"error": "Missing sessionId"}), 400
 
-        db.update_duration(session_id, duration)
-        return jsonify({"success": True})
+        try:
+            db.update_duration(session_id, duration)
+        except Exception as db_err:
+            logger.debug(f"Duration update deferred: {db_err}")
+            return jsonify({"success": False, "status": "skipped"}), 200
+
+        return jsonify({"success": True}), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        logger.error(f"Track duration error: {e}")
+        return jsonify({"success": False, "status": "error"}), 200
 
 
 @api.route("/static/uploads/<filename>", methods=["GET"])

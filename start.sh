@@ -12,7 +12,7 @@ echo "=================================================="
 # 1. Start Python Flask Backend in the background
 echo "Starting Flask Backend on http://127.0.0.1:5000..."
 cd /app/backend
-python -m gunicorn wsgi:app --bind 127.0.0.1:5000 --workers 2 --timeout 120 --access-logfile - --error-logfile - &
+python -m gunicorn wsgi:app --bind 0.0.0.0:5000 --workers 2 --timeout 120 --access-logfile - --error-logfile - &
 
 # 2. Wait for Flask Backend to be ready
 echo "Waiting for Flask Backend to become available on 127.0.0.1:5000..."

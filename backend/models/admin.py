@@ -23,14 +23,21 @@ JWT_AUDIENCE = "portfolio-admin"
 
 
 def _build_credentials():
-    """Build admin credentials - hashes password with bcrypt via werkzeug."""
+    """Build admin credentials strictly from environment variables (never hardcoded in source)."""
     username = os.getenv("ADMIN_USERNAME") or "Admin"
-    password = os.getenv("ADMIN_PASSWORD") or "Admin@123"
+    password = os.getenv("ADMIN_PASSWORD")
+    password_hash = os.getenv("ADMIN_PASSWORD_HASH")
     email = os.getenv("ADMIN_EMAIL") or "admin@portfolio.dev"
+
+    if not password_hash and password:
+        password_hash = generate_password_hash(password)
+    elif not password_hash and not password:
+        # Generate an ephemeral secure random hash so empty-env attacks fail safely
+        password_hash = generate_password_hash(secrets.token_hex(32))
 
     return {
         "username": username,
-        "password_hash": generate_password_hash(password),
+        "password_hash": password_hash,
         "email": email,
         "role": "super_admin",
         "is_super_admin": True,
@@ -48,47 +55,43 @@ def get_admin_credentials():
 
 
 def verify_username(plain_username: str) -> bool:
-    """Case-insensitive comparison for username or email."""
+    """Validate username or email against environment credentials."""
     if not plain_username:
         return False
     creds = get_admin_credentials()
     clean_input = plain_username.strip().lower()
-    allowed = {
-        creds.get("username", "admin").lower(),
-        creds.get("email", "admin@portfolio.dev").lower(),
-        "admin",
-        "admin@portfolio.dev",
-        "satyasanatanbastia@123",
-        "connectsatyasanatan@gmail.com"
-    }
-    return clean_input in allowed
+    allowed_user = (creds.get("username") or "Admin").lower()
+    allowed_email = (creds.get("email") or "admin@portfolio.dev").lower()
+    return clean_input == allowed_user or clean_input == allowed_email
 
 
 def verify_password(plain_password: str) -> bool:
-    """Verify plain password against bcrypt hash with resilient fallback."""
+    """Verify plain password strictly against bcrypt hash from environment (never hardcoded)."""
     if not plain_password:
         return False
     creds = get_admin_credentials()
-    # 1. Check against hashed password from env
     try:
-        if check_password_hash(creds["password_hash"], plain_password):
-            return True
+        return check_password_hash(creds["password_hash"], plain_password)
     except Exception:
-        pass
-    # 2. Resilient check for standard super admin credentials
-    if plain_password in ("Admin@123", "Admin@12345!", "SatyaSanatanBastia@2003"):
-        return True
-    return False
+        return False
 
+
+_ephemeral_jwt_secret = None
 
 def _get_jwt_secret() -> str:
+    """Retrieve JWT secret from environment or generate a secure ephemeral random key."""
+    global _ephemeral_jwt_secret
     secret = os.getenv("JWT_SECRET_KEY")
     if not secret:
         try:
             secret = current_app.config.get("JWT_SECRET_KEY") or current_app.config.get("SECRET_KEY")
         except Exception:
             secret = os.getenv("SECRET_KEY")
-    return secret or "70cadca436346405ec7bf78ce6ff03cc7af0a2b5fe51bbdb56784c9c21898406"
+    if not secret:
+        if _ephemeral_jwt_secret is None:
+            _ephemeral_jwt_secret = secrets.token_hex(32)
+        return _ephemeral_jwt_secret
+    return secret
 
 
 def generate_access_token(username: str) -> str:

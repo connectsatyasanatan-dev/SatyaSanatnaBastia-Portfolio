@@ -74,7 +74,7 @@ class Config:
     # Admin credentials (stored in env, not in source code)
     # ------------------------------------------------------------------ #
     ADMIN_USERNAME: str = os.environ.get("ADMIN_USERNAME", "Admin")
-    ADMIN_PASSWORD: str = os.environ.get("ADMIN_PASSWORD", "Admin@123")
+    ADMIN_PASSWORD: str = os.environ.get("ADMIN_PASSWORD", "")
     ADMIN_EMAIL: str = os.environ.get("ADMIN_EMAIL", "admin@portfolio.dev")
 
     # ------------------------------------------------------------------ #

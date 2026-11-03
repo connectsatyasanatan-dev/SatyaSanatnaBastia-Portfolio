@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, current_app
 from models.admin import (
     ADMIN_CREDENTIALS,
+    get_admin_credentials,
     verify_username,
     verify_password,
     generate_token,
@@ -96,6 +97,7 @@ def admin_login():
             token_pair = create_token_pair(username)
             logger.info(f"Admin login success for {username} from {ip}")
             
+            creds = get_admin_credentials()
             is_prod = current_app.config.get("FLASK_ENV") == "production"
             response = jsonify(
                 {
@@ -103,7 +105,7 @@ def admin_login():
                     **token_pair,
                     "user": {
                         "username": username,
-                        "email": ADMIN_CREDENTIALS["email"],
+                        "email": creds.get("email", "admin@portfolio.dev"),
                         "role": "super_admin",
                         "is_super_admin": True,
                     },
@@ -128,8 +130,8 @@ def admin_login():
         return jsonify({"error": "Invalid credentials"}), 401
 
     except Exception as e:
-        logger.error(f"Admin login error: {e}")
-        return jsonify({"error": "Login failed"}), 500
+        logger.error(f"Admin login error: {e}", exc_info=True)
+        return jsonify({"error": "Login failed", "details": str(e)}), 500
 
 
 @admin.route("/refresh", methods=["POST"])

@@ -22,8 +22,12 @@ def _get_db_url() -> str:
     db_url = os.environ.get("DATABASE_URL", "")
     if db_url.startswith("postgres://"):
         db_url = db_url.replace("postgres://", "postgresql://", 1)
-    if not db_url:
-        raise RuntimeError("DATABASE_URL environment variable is not set.")
+    # Ensure SSL is enforced for remote cloud PostgreSQL databases (Render/Neon/Supabase)
+    if db_url and "localhost" not in db_url and "127.0.0.1" not in db_url:
+        if "?" not in db_url:
+            db_url += "?sslmode=require"
+        elif "sslmode" not in db_url:
+            db_url += "&sslmode=require"
     return db_url
 
 
@@ -32,6 +36,9 @@ def _init_pool():
     if _pool is None:
         try:
             db_url = _get_db_url()
+            if not db_url:
+                logger.warning("DATABASE_URL is not set; skipping PostgreSQL connection pool.")
+                return
             min_conn = int(os.environ.get("DB_POOL_MIN", 2))
             max_conn = int(os.environ.get("DB_POOL_MAX", 20))
             _pool = ThreadedConnectionPool(minconn=min_conn, maxconn=max_conn, dsn=db_url)
@@ -85,6 +92,10 @@ def get_connection():
     Thread-safe connection acquisition from pool, with direct fallback.
     """
     global _pool
+    db_url = _get_db_url()
+    if not db_url:
+        raise RuntimeError("DATABASE_URL environment variable is not configured.")
+
     if _pool is None:
         _init_pool()
 
@@ -99,7 +110,7 @@ def get_connection():
             logger.warning(f"Connection pool acquisition failed ({e}); falling back to direct connection.")
 
     # Direct connection fallback
-    return psycopg2.connect(_get_db_url())
+    return psycopg2.connect(db_url)
 
 
 def _cursor(conn):
@@ -444,8 +455,22 @@ def _init_default_data():
 
 class Database:
     def __init__(self):
-        init_database()
-        _init_default_data()
+        self._initialized = False
+        try:
+            init_database()
+            _init_default_data()
+            self._initialized = True
+        except Exception as e:
+            logger.error(f"Database initial setup notice: {e}. Server will stay operational and initialize on demand.")
+
+    def ensure_initialized(self):
+        if not self._initialized:
+            try:
+                init_database()
+                _init_default_data()
+                self._initialized = True
+            except Exception as e:
+                logger.debug(f"Database lazy-init attempt: {e}")
 
     # ── Site Settings (Festive themes, site toggles) ────────────────────────
     def get_setting(self, key: str, default=None):
