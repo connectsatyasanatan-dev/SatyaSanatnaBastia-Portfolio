@@ -15,6 +15,114 @@ interface ExperienceTabProps {
     onDeleteExperience: (id: number) => Promise<void>
 }
 
+const ExperienceFormFields = ({
+    data,
+    onChange,
+}: {
+    data: Partial<Experience>
+    onChange: (updated: Partial<Experience>) => void
+}) => (
+    <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+        gap: '16px'
+    }}>
+        <div className="admin-form-group">
+            <label className="admin-form-label">Job Title *</label>
+            <input
+                type="text"
+                value={data.title ?? ''}
+                onChange={(e) => onChange({ ...data, title: e.target.value })}
+                className="admin-form-input"
+                placeholder="Senior Developer"
+            />
+        </div>
+        <div className="admin-form-group">
+            <label className="admin-form-label">Company *</label>
+            <input
+                type="text"
+                value={data.company ?? ''}
+                onChange={(e) => onChange({ ...data, company: e.target.value })}
+                className="admin-form-input"
+                placeholder="Tech Corp Inc."
+            />
+        </div>
+        <div className="admin-form-group">
+            <label className="admin-form-label">Location</label>
+            <input
+                type="text"
+                value={data.location ?? ''}
+                onChange={(e) => onChange({ ...data, location: e.target.value })}
+                className="admin-form-input"
+                placeholder="San Francisco, CA"
+            />
+        </div>
+        <div className="admin-form-group">
+            <label className="admin-form-label">Period</label>
+            <input
+                type="text"
+                value={data.period ?? ''}
+                onChange={(e) => onChange({ ...data, period: e.target.value })}
+                className="admin-form-input"
+                placeholder="Jan 2020 - Present"
+            />
+        </div>
+        <div className="admin-form-group">
+            <label className="admin-form-label">Duration</label>
+            <input
+                type="text"
+                value={data.duration ?? ''}
+                onChange={(e) => onChange({ ...data, duration: e.target.value })}
+                className="admin-form-input"
+                placeholder="2 years 6 months"
+            />
+        </div>
+        <div className="admin-form-group">
+            <label className="admin-form-label">Type</label>
+            <select
+                value={data.type ?? 'Full-time'}
+                onChange={(e) => onChange({ ...data, type: e.target.value })}
+                className="admin-select"
+            >
+                <option value="Full-time">Full-time</option>
+                <option value="Part-time">Part-time</option>
+                <option value="Contract">Contract</option>
+                <option value="Freelance">Freelance</option>
+                <option value="Internship">Internship</option>
+            </select>
+        </div>
+        <div className="admin-form-group" style={{ gridColumn: '1 / -1' }}>
+            <label className="admin-form-label">Description *</label>
+            <textarea
+                value={data.description ?? ''}
+                onChange={(e) => onChange({ ...data, description: e.target.value })}
+                className="admin-textarea"
+                rows={3}
+                placeholder="Describe your role and responsibilities..."
+            />
+        </div>
+        <div className="admin-form-group">
+            <TagListField
+                label="Achievements"
+                hint=" Add one by one or paste multiple lines"
+                value={data.achievements ?? []}
+                onChange={(items) => onChange({ ...data, achievements: items })}
+                placeholder="e.g. Led team of 5 developers"
+                variant="long"
+            />
+        </div>
+        <div className="admin-form-group">
+            <TagListField
+                label="Technologies"
+                hint=" Add one by one or paste multiple lines"
+                value={data.technologies ?? []}
+                onChange={(items) => onChange({ ...data, technologies: items })}
+                placeholder="e.g. React, Node.js"
+            />
+        </div>
+    </div>
+)
+
 const ExperienceTab = ({ experience, onAddExperience, onUpdateExperience, onDeleteExperience }: ExperienceTabProps) => {
     const [editingId, setEditingId] = useState<number | null>(null)
     const [editData, setEditData] = useState<Partial<Experience> | null>(null)
@@ -145,114 +253,6 @@ const ExperienceTab = ({ experience, onAddExperience, onUpdateExperience, onDele
         'Freelance':  '#a855f7',
         'Internship': '#06f9f9',
     }
-
-    const ExperienceFormFields = ({
-        data,
-        onChange,
-    }: {
-        data: Partial<Experience>
-        onChange: (updated: Partial<Experience>) => void
-    }) => (
-        <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-            gap: '16px'
-        }}>
-            <div className="admin-form-group">
-                <label className="admin-form-label">Job Title *</label>
-                <input
-                    type="text"
-                    value={data.title ?? ''}
-                    onChange={(e) => onChange({ ...data, title: e.target.value })}
-                    className="admin-form-input"
-                    placeholder="Senior Developer"
-                />
-            </div>
-            <div className="admin-form-group">
-                <label className="admin-form-label">Company *</label>
-                <input
-                    type="text"
-                    value={data.company ?? ''}
-                    onChange={(e) => onChange({ ...data, company: e.target.value })}
-                    className="admin-form-input"
-                    placeholder="Tech Corp Inc."
-                />
-            </div>
-            <div className="admin-form-group">
-                <label className="admin-form-label">Location</label>
-                <input
-                    type="text"
-                    value={data.location ?? ''}
-                    onChange={(e) => onChange({ ...data, location: e.target.value })}
-                    className="admin-form-input"
-                    placeholder="San Francisco, CA"
-                />
-            </div>
-            <div className="admin-form-group">
-                <label className="admin-form-label">Period</label>
-                <input
-                    type="text"
-                    value={data.period ?? ''}
-                    onChange={(e) => onChange({ ...data, period: e.target.value })}
-                    className="admin-form-input"
-                    placeholder="Jan 2020 - Present"
-                />
-            </div>
-            <div className="admin-form-group">
-                <label className="admin-form-label">Duration</label>
-                <input
-                    type="text"
-                    value={data.duration ?? ''}
-                    onChange={(e) => onChange({ ...data, duration: e.target.value })}
-                    className="admin-form-input"
-                    placeholder="2 years 6 months"
-                />
-            </div>
-            <div className="admin-form-group">
-                <label className="admin-form-label">Type</label>
-                <select
-                    value={data.type ?? 'Full-time'}
-                    onChange={(e) => onChange({ ...data, type: e.target.value })}
-                    className="admin-select"
-                >
-                    <option value="Full-time">Full-time</option>
-                    <option value="Part-time">Part-time</option>
-                    <option value="Contract">Contract</option>
-                    <option value="Freelance">Freelance</option>
-                    <option value="Internship">Internship</option>
-                </select>
-            </div>
-            <div className="admin-form-group" style={{ gridColumn: '1 / -1' }}>
-                <label className="admin-form-label">Description *</label>
-                <textarea
-                    value={data.description ?? ''}
-                    onChange={(e) => onChange({ ...data, description: e.target.value })}
-                    className="admin-textarea"
-                    rows={3}
-                    placeholder="Describe your role and responsibilities..."
-                />
-            </div>
-            <div className="admin-form-group">
-                <TagListField
-                    label="Achievements"
-                    hint=" Add one by one or paste multiple lines"
-                    value={data.achievements ?? []}
-                    onChange={(items) => onChange({ ...data, achievements: items })}
-                    placeholder="e.g. Led team of 5 developers"
-                    variant="long"
-                />
-            </div>
-            <div className="admin-form-group">
-                <TagListField
-                    label="Technologies"
-                    hint=" Add one by one or paste multiple lines"
-                    value={data.technologies ?? []}
-                    onChange={(items) => onChange({ ...data, technologies: items })}
-                    placeholder="e.g. React, Node.js"
-                />
-            </div>
-        </div>
-    )
 
     return (
         <div>
