@@ -761,23 +761,35 @@ class Database:
     def update_experience(self, exp_id: int, data: Dict[str, Any]) -> bool:
         conn = get_connection()
         cur = _cursor(conn)
+        has_badge = "badge" in data
+        badge_val = data.get("badge") if has_badge else None
+        has_location = "location" in data
+        location_val = data.get("location") if has_location else None
+        has_duration = "duration" in data
+        duration_val = data.get("duration") if has_duration else None
+
         cur.execute(
             """UPDATE experience SET
                title=COALESCE(%s,title), company=COALESCE(%s,company),
-               location=COALESCE(%s,location), period=COALESCE(%s,period),
-               duration=COALESCE(%s,duration), type=COALESCE(%s,type),
+               location=CASE WHEN %s THEN %s ELSE location END,
+               period=COALESCE(%s,period),
+               duration=CASE WHEN %s THEN %s ELSE duration END,
+               type=COALESCE(%s,type),
                description=COALESCE(%s,description),
                achievements=COALESCE(%s,achievements),
                technologies=COALESCE(%s,technologies),
                commit_hash=COALESCE(%s,commit_hash),
-               color=COALESCE(%s,color), badge=COALESCE(%s,badge),
+               color=COALESCE(%s,color),
+               badge=CASE WHEN %s THEN %s ELSE badge END,
                updated_at=CURRENT_TIMESTAMP WHERE id=%s""",
             (
                 data.get("title"),
                 data.get("company"),
-                data.get("location"),
+                has_location,
+                location_val,
                 data.get("period"),
-                data.get("duration"),
+                has_duration,
+                duration_val,
                 data.get("type"),
                 data.get("description"),
                 (
@@ -792,7 +804,8 @@ class Database:
                 ),
                 data.get("commit"),
                 data.get("color"),
-                data.get("badge"),
+                has_badge,
+                badge_val,
                 exp_id,
             ),
         )

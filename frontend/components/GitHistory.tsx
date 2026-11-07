@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback } from 'react'
 import portfolioAPI, { Experience } from '@/lib/api'
 import { FALLBACK_EXPERIENCES } from '@/lib/fallbackData'
 import { ExperienceSectionSkeleton } from './AppSkeletons'
+import { isRoleActive } from '@/lib/experience-utils'
 
 const GitHistory = () => {
     const [experiences, setExperiences] = useState<Experience[]>([])
@@ -77,13 +78,7 @@ const GitHistory = () => {
 
                             {experiences.map((exp, index) => {
                                 const periodStr = exp.period || ''
-                                const isPresent = Boolean(
-                                    periodStr.toLowerCase().includes('present') ||
-                                    periodStr.toLowerCase().includes('current') ||
-                                    exp.badge?.toLowerCase().includes('current') ||
-                                    exp.badge?.toLowerCase().includes('active') ||
-                                    (index === 0 && (periodStr.toLowerCase().includes('2026') || periodStr.toLowerCase().includes('2025')))
-                                )
+                                const isPresent = isRoleActive(periodStr, exp.badge)
                                 const expColor = exp.color || 'cyan';
                                 return (
                                     <motion.div

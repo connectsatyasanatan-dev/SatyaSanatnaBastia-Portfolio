@@ -1,6 +1,7 @@
-'use client'
+﻿'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { MONTHS, YEARS, isRoleActive, parsePeriod, calculateDuration } from '@/lib/experience-utils'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Edit, Save, X, Plus, Trash2, Calendar, MapPin, Briefcase, Clock } from 'lucide-react'
 import type { Experience } from '@/lib/admin-types'
@@ -13,63 +14,6 @@ interface ExperienceTabProps {
     onAddExperience: (experience: Omit<Experience, 'id'>) => Promise<void>
     onUpdateExperience: (id: number, experience: Partial<Experience>) => Promise<void>
     onDeleteExperience: (id: number) => Promise<void>
-}
-
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-const CURRENT_YEAR = new Date().getFullYear()
-const YEARS = Array.from({ length: 16 }, (_, i) => String(CURRENT_YEAR - 6 + i))
-
-function parsePeriod(periodStr = '') {
-    const isPresent = Boolean(
-        periodStr.toLowerCase().includes('present') ||
-        periodStr.toLowerCase().includes('current')
-    )
-    const parts = periodStr.split(/[-–—]/)
-    const startPart = (parts[0] || '').trim()
-    const endPart = (parts[1] || '').trim()
-
-    let startMonth = 'Jan'
-    let startYear = String(CURRENT_YEAR - 1)
-    let endMonth = 'Dec'
-    let endYear = String(CURRENT_YEAR)
-
-    for (const m of MONTHS) {
-        if (new RegExp(m, 'i').test(startPart)) startMonth = m
-        if (new RegExp(m, 'i').test(endPart)) endMonth = m
-    }
-
-    const startYearMatch = startPart.match(/\b(20\d\d)\b/)
-    if (startYearMatch) startYear = startYearMatch[1]
-
-    const endYearMatch = endPart.match(/\b(20\d\d)\b/)
-    if (endYearMatch) endYear = endYearMatch[1]
-
-    return { startMonth, startYear, endMonth, endYear, isPresent }
-}
-
-function calculateDuration(startMonth: string, startYear: string, endMonth: string, endYear: string, isPresent: boolean) {
-    const sMonthIdx = MONTHS.indexOf(startMonth)
-    const sYearNum = parseInt(startYear, 10) || CURRENT_YEAR
-    let eMonthIdx: number
-    let eYearNum: number
-
-    if (isPresent) {
-        const now = new Date()
-        eMonthIdx = now.getMonth()
-        eYearNum = now.getFullYear()
-    } else {
-        eMonthIdx = MONTHS.indexOf(endMonth)
-        eYearNum = parseInt(endYear, 10) || CURRENT_YEAR
-    }
-
-    const totalMonths = (eYearNum - sYearNum) * 12 + (eMonthIdx - sMonthIdx) + 1
-    if (totalMonths <= 0) return '1 month'
-    const years = Math.floor(totalMonths / 12)
-    const months = totalMonths % 12
-    const parts = []
-    if (years > 0) parts.push(`${years} ${years === 1 ? 'year' : 'years'}`)
-    if (months > 0) parts.push(`${months} ${months === 1 ? 'month' : 'months'}`)
-    return parts.join(' ') || '1 month'
 }
 
 const ExperienceFormFields = ({
@@ -87,6 +31,15 @@ const ExperienceFormFields = ({
     const [endYear, setEndYear] = useState(parsed.endYear)
     const [isCurrentRole, setIsCurrentRole] = useState(parsed.isPresent)
 
+    useEffect(() => {
+        const p = parsePeriod(data.period ?? '')
+        setStartMonth(p.startMonth)
+        setStartYear(p.startYear)
+        setEndMonth(p.endMonth)
+        setEndYear(p.endYear)
+        setIsCurrentRole(p.isPresent)
+    }, [data.period])
+
     const updatePeriodFromPicker = (sM: string, sY: string, eM: string, eY: string, isCurr: boolean) => {
         const newPeriod = isCurr ? `${sM} ${sY} – Present` : `${sM} ${sY} – ${eM} ${eY}`
         const newDur = calculateDuration(sM, sY, eM, eY, isCurr)
@@ -94,12 +47,12 @@ const ExperienceFormFields = ({
             ...data,
             period: newPeriod,
             duration: newDur,
-            badge: isCurr ? 'Current Role' : (data.badge === 'Current Role' ? undefined : data.badge)
+            badge: isCurr ? 'Current Role' : ''
         })
     }
 
     const handleStartMonthChange = (val: string) => {
-        setStartMonth(val)
+        setStartMonth(val as any)
         updatePeriodFromPicker(val, startYear, endMonth, endYear, isCurrentRole)
     }
 
@@ -109,7 +62,7 @@ const ExperienceFormFields = ({
     }
 
     const handleEndMonthChange = (val: string) => {
-        setEndMonth(val)
+        setEndMonth(val as any)
         updatePeriodFromPicker(startMonth, startYear, val, endYear, isCurrentRole)
     }
 
@@ -180,7 +133,7 @@ const ExperienceFormFields = ({
                 </select>
             </div>
 
-            {/* ── Period Selector (Month/Year Picker + Current Checkbox) ── */}
+            {/* ΓöÇΓöÇ Period Selector (Month/Year Picker + Current Checkbox) ΓöÇΓöÇ */}
             <div className="admin-form-group" style={{ gridColumn: '1 / -1', background: 'rgba(15, 23, 42, 0.5)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '12px', padding: '16px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
                     <label className="admin-form-label" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -200,7 +153,7 @@ const ExperienceFormFields = ({
                             textDecoration: 'underline'
                         }}
                     >
-                        {useCustomPeriod ? 'Switch to Month/Year Picker' : '✏️ Edit as custom text'}
+                        {useCustomPeriod ? 'Switch to Month/Year Picker' : 'Γ£Å∩╕Å Edit as custom text'}
                     </button>
                 </div>
 
@@ -213,7 +166,7 @@ const ExperienceFormFields = ({
                                 value={data.period ?? ''}
                                 onChange={(e) => onChange({ ...data, period: e.target.value })}
                                 className="admin-form-input"
-                                placeholder="e.g. May 2024 – Present"
+                                placeholder="e.g. May 2024 ΓÇô Present"
                             />
                         </div>
                         <div>
@@ -288,15 +241,21 @@ const ExperienceFormFields = ({
                                     onChange={(e) => handleCurrentRoleToggle(e.target.checked)}
                                     style={{ width: '16px', height: '16px', accentColor: '#10b981', cursor: 'pointer' }}
                                 />
-                                <span>🟢 I currently work here (Active / Present)</span>
+                                <span>≡ƒƒó I currently work here (Active / Present)</span>
                             </label>
                         </div>
 
                         {/* Live preview badge */}
-                        <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '12px', color: '#94a3b8' }}>
+                        <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '12px', color: '#94a3b8', flexWrap: 'wrap', padding: '10px 14px', background: 'rgba(0, 0, 0, 0.25)', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
                             <span>Period: <strong style={{ color: '#06f9f9' }}>{data.period || `${startMonth} ${startYear} – ${isCurrentRole ? 'Present' : `${endMonth} ${endYear}`}`}</strong></span>
                             <span>·</span>
                             <span>Duration: <strong style={{ color: '#f8fafc' }}>{data.duration || calculateDuration(startMonth, startYear, endMonth, endYear, isCurrentRole)}</strong></span>
+                            <span>·</span>
+                            <span>Status: {isCurrentRole ? (
+                                <strong style={{ color: '#34d399' }}>Active Role (Current)</strong>
+                            ) : (
+                                <strong style={{ color: '#94a3b8' }}>Completed Role</strong>
+                            )}</span>
                         </div>
                     </div>
                 )}
@@ -379,16 +338,20 @@ const ExperienceTab = ({ experience, onAddExperience, onUpdateExperience, onDele
         setLoading(true)
         setError(null)
         try {
+            const isCurr = isRoleActive(editData.period, editData.badge)
+            const p = parsePeriod(editData.period ?? '')
+            const computedDuration = (editData.duration ?? '').trim() || calculateDuration(p.startMonth, p.startYear, p.endMonth, p.endYear, isCurr)
             const payload = {
                 title: editData.title.trim(),
                 company: editData.company.trim(),
-                location: (editData.location ?? '').trim() || undefined,
-                period: (editData.period ?? '').trim() || undefined,
-                duration: (editData.duration ?? '').trim() || undefined,
+                location: (editData.location ?? '').trim(),
+                period: (editData.period ?? '').trim(),
+                duration: computedDuration,
                 type: editData.type ?? 'Full-time',
                 description: editData.description.trim(),
                 achievements: Array.isArray(editData.achievements) ? editData.achievements : [],
                 technologies: Array.isArray(editData.technologies) ? editData.technologies : [],
+                badge: isCurr ? 'Current Role' : '',
             }
             await onUpdateExperience(Number(id), payload)
             setEditingId(null)
@@ -414,7 +377,15 @@ const ExperienceTab = ({ experience, onAddExperience, onUpdateExperience, onDele
 
         setLoading(true)
         try {
-            await onAddExperience(newExperience)
+            const isCurr = isRoleActive(newExperience.period, newExperience.badge)
+            const p = parsePeriod(newExperience.period ?? '')
+            const computedDuration = (newExperience.duration ?? '').trim() || calculateDuration(p.startMonth, p.startYear, p.endMonth, p.endYear, isCurr)
+            const payload = {
+                ...newExperience,
+                duration: computedDuration,
+                badge: isCurr ? 'Current Role' : '',
+            }
+            await onAddExperience(payload)
             setNewExperience({
                 title: '',
                 company: '',
@@ -470,7 +441,7 @@ const ExperienceTab = ({ experience, onAddExperience, onUpdateExperience, onDele
 
     return (
         <div>
-            {/* ── Section Header ── */}
+            {/* ΓöÇΓöÇ Section Header ΓöÇΓöÇ */}
             <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -536,7 +507,7 @@ const ExperienceTab = ({ experience, onAddExperience, onUpdateExperience, onDele
                 />
             )}
 
-            {/* ── Add Experience Form ── */}
+            {/* ΓöÇΓöÇ Add Experience Form ΓöÇΓöÇ */}
             <AnimatePresence>
                 {showAddForm && (
                     <motion.div
@@ -633,7 +604,7 @@ const ExperienceTab = ({ experience, onAddExperience, onUpdateExperience, onDele
                 )}
             </AnimatePresence>
 
-            {/* ── Experience List ── */}
+            {/* ΓöÇΓöÇ Experience List ΓöÇΓöÇ */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 {experience.map((exp, index) => {
                     const isEditing = editingId === exp.id
@@ -660,7 +631,7 @@ const ExperienceTab = ({ experience, onAddExperience, onUpdateExperience, onDele
                             }}
                         >
                             {isEditing && editData ? (
-                                /* ── Edit Form ── */
+                                /* ΓöÇΓöÇ Edit Form ΓöÇΓöÇ */
                                 <>
                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
                                         <h3 style={{ fontSize: '17px', fontWeight: '700', color: '#f8fafc', margin: 0 }}>
@@ -737,7 +708,7 @@ const ExperienceTab = ({ experience, onAddExperience, onUpdateExperience, onDele
                                     </div>
                                 </>
                             ) : (
-                                /* ── List View ── */
+                                /* ΓöÇΓöÇ List View ΓöÇΓöÇ */
                                 <>
                                     <div style={{ display: 'flex', gap: '16px', justifyContent: 'space-between', flexWrap: 'wrap' }}>
                                         {/* Left: info */}
@@ -752,7 +723,7 @@ const ExperienceTab = ({ experience, onAddExperience, onUpdateExperience, onDele
                                                 }}>
                                                     {exp.title}
                                                 </h3>
-                                                {(Boolean((exp.period || '').toLowerCase().includes('present') || (exp.period || '').toLowerCase().includes('current') || exp.badge?.toLowerCase().includes('current') || exp.badge?.toLowerCase().includes('active') || (index === 0 && ((exp.period || '').includes('2026') || (exp.period || '').includes('2025'))))) ? (
+                                                {isRoleActive(exp.period, exp.badge) ? (
                                                     <span style={{
                                                         display: 'inline-flex',
                                                         alignItems: 'center',
@@ -781,7 +752,7 @@ const ExperienceTab = ({ experience, onAddExperience, onUpdateExperience, onDele
                                                         color: '#94a3b8',
                                                         border: '1px solid rgba(100, 116, 139, 0.25)'
                                                     }}>
-                                                        ✓ COMPLETED
+                                                        Γ£ô COMPLETED
                                                     </span>
                                                 )}
                                             </div>
@@ -986,7 +957,7 @@ const ExperienceTab = ({ experience, onAddExperience, onUpdateExperience, onDele
                 })}
             </div>
 
-            {/* ── Empty State ── */}
+            {/* ΓöÇΓöÇ Empty State ΓöÇΓöÇ */}
             {experience.length === 0 && !showAddForm && (
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
