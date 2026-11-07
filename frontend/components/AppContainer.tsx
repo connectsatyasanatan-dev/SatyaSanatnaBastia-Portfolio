@@ -18,6 +18,9 @@ interface AppContainerProps {
     children: React.ReactNode
 }
 
+// Master PreLoader Toggle: Set to false if you want to bypass the entire PreLoader screen completely
+const ENABLE_PRELOADER = true
+
 export default function AppContainer({ children }: AppContainerProps) {
     const [isLoading, setIsLoading] = useState(true)
     const [activeSection, setActiveSection] = useState<string>('hero')
@@ -118,7 +121,7 @@ export default function AppContainer({ children }: AppContainerProps) {
     return (
         <>
             <AnimatePresence>
-                {isLoading && (
+                {ENABLE_PRELOADER && isLoading && (
                     <PreLoader key="loader" onLoadingComplete={() => setIsLoading(false)} />
                 )}
             </AnimatePresence>

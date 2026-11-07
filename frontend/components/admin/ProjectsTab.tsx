@@ -190,7 +190,7 @@ const ProjectsTab = ({ projects, onAddProject, onUpdateProject, onDeleteProject 
                         <p style={{ fontSize: '13px', color: '#64748b', margin: '3px 0 0' }}>
                             {projects.length} projects
                             <span style={{ margin: '0 6px', color: '#334155' }}>·</span>
-                            <span style={{ color: '#f59e0b' }}>⭐ {featuredCount} featured</span>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#f59e0b' }}><Star size={12} fill='#f59e0b' color='#f59e0b' /> {featuredCount} featured</span>
                         </p>
                     </div>
                 </div>
@@ -379,7 +379,7 @@ const ProjectsTab = ({ projects, onAddProject, onUpdateProject, onDeleteProject 
                                     />
                                     <div>
                                         <span style={{ fontSize: '14px', fontWeight: 600, color: newProject.featured ? '#f59e0b' : '#f8fafc' }}>
-                                            ⭐ Featured Project
+                                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}><Star size={13} fill='#f59e0b' color='#f59e0b' /> Featured Project</span>
                                         </span>
                                         <span style={{ fontSize: '12px', color: '#64748b', marginLeft: '8px' }}>
                                             Highlighted in portfolio showcase
@@ -707,7 +707,7 @@ const ProjectsTab = ({ projects, onAddProject, onUpdateProject, onDeleteProject 
                                                 border: `1px solid ${editData.featured ? 'rgba(245,158,11,0.35)' : 'rgba(255,255,255,0.08)'}`,
                                             }}>
                                                 <input type="checkbox" checked={editData.featured || false} onChange={(e) => setEditData({ ...editData, featured: e.target.checked })} style={{ width: '16px', height: '16px', accentColor: '#f59e0b', cursor: 'pointer' }} />
-                                                <span style={{ fontSize: '14px', fontWeight: 600, color: editData.featured ? '#f59e0b' : '#f8fafc' }}>⭐ Featured Project</span>
+                                                <span style={{ fontSize: '14px', fontWeight: 600, color: editData.featured ? '#f59e0b' : '#f8fafc' }}><span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}><Star size={13} fill='#f59e0b' color='#f59e0b' /> Featured Project</span></span>
                                             </label>
                                         </div>
                                         {/* Description */}

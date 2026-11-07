@@ -173,7 +173,7 @@ export default function FestiveThemeTab() {
             }
             const res = await adminApiClient.updateFestiveTheme(payload)
             if (res.success) {
-                toast.success('Festive theme updated and published live! 🚀')
+                toast.success('Festive theme updated and published live!')
                 setSavedFestival(selectedFestival)
                 setSavedEnabled(isEnabled)
                 const nowStr = new Date().toLocaleTimeString()
@@ -422,7 +422,7 @@ export default function FestiveThemeTab() {
                                 <div className="festive-features-wrap">
                                     {fest.features.map((feat, idx) => (
                                         <span key={idx} className="festive-feature-chip">
-                                            ✓ {feat}
+                                            <CheckCircle2 size={12} style={{ display: "inline", marginRight: "4px", color: "#10b981" }} /> {feat}
                                         </span>
                                     ))}
                                 </div>

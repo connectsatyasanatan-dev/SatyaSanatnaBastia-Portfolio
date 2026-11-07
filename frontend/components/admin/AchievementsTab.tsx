@@ -249,7 +249,7 @@ const AchievementsTab = ({ data, onUpdate }: AchievementsTabProps) => {
                 <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
                     <input
                         type="text"
-                        placeholder="e.g. 🏆 Built an AI full-stack app recognized in National Developer Summit"
+                        placeholder="e.g. Built an AI full-stack app recognized in National Developer Summit"
                         value={newHighlight}
                         onChange={(e) => setNewHighlight(e.target.value)}
                         className="admin-form-input"

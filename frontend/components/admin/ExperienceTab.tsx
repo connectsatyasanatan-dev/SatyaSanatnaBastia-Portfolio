@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { MONTHS, YEARS, isRoleActive, parsePeriod, calculateDuration } from '@/lib/experience-utils'
@@ -133,7 +133,7 @@ const ExperienceFormFields = ({
                 </select>
             </div>
 
-            {/* ΓöÇΓöÇ Period Selector (Month/Year Picker + Current Checkbox) ΓöÇΓöÇ */}
+            {/* --- Period Selector (Month/Year Picker + Current Checkbox) --- */}
             <div className="admin-form-group" style={{ gridColumn: '1 / -1', background: 'rgba(15, 23, 42, 0.5)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '12px', padding: '16px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
                     <label className="admin-form-label" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -153,7 +153,7 @@ const ExperienceFormFields = ({
                             textDecoration: 'underline'
                         }}
                     >
-                        {useCustomPeriod ? 'Switch to Month/Year Picker' : 'Γ£Å∩╕Å Edit as custom text'}
+                        {useCustomPeriod ? 'Switch to Month/Year Picker' : 'Edit as custom text'}
                     </button>
                 </div>
 
@@ -166,7 +166,7 @@ const ExperienceFormFields = ({
                                 value={data.period ?? ''}
                                 onChange={(e) => onChange({ ...data, period: e.target.value })}
                                 className="admin-form-input"
-                                placeholder="e.g. May 2024 ΓÇô Present"
+                                placeholder="e.g. May 2024 – Present"
                             />
                         </div>
                         <div>
@@ -241,7 +241,7 @@ const ExperienceFormFields = ({
                                     onChange={(e) => handleCurrentRoleToggle(e.target.checked)}
                                     style={{ width: '16px', height: '16px', accentColor: '#10b981', cursor: 'pointer' }}
                                 />
-                                <span>≡ƒƒó I currently work here (Active / Present)</span>
+                                <span><span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#10b981", display: "inline-block", marginRight: "6px", boxShadow: "0 0 6px #10b981" }} />I currently work here (Active / Present)</span>
                             </label>
                         </div>
 
@@ -441,7 +441,7 @@ const ExperienceTab = ({ experience, onAddExperience, onUpdateExperience, onDele
 
     return (
         <div>
-            {/* ΓöÇΓöÇ Section Header ΓöÇΓöÇ */}
+            {/* --- Section Header --- */}
             <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -507,7 +507,7 @@ const ExperienceTab = ({ experience, onAddExperience, onUpdateExperience, onDele
                 />
             )}
 
-            {/* ΓöÇΓöÇ Add Experience Form ΓöÇΓöÇ */}
+            {/* --- Add Experience Form --- */}
             <AnimatePresence>
                 {showAddForm && (
                     <motion.div
@@ -604,7 +604,7 @@ const ExperienceTab = ({ experience, onAddExperience, onUpdateExperience, onDele
                 )}
             </AnimatePresence>
 
-            {/* ΓöÇΓöÇ Experience List ΓöÇΓöÇ */}
+            {/* --- Experience List --- */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 {experience.map((exp, index) => {
                     const isEditing = editingId === exp.id
@@ -631,7 +631,7 @@ const ExperienceTab = ({ experience, onAddExperience, onUpdateExperience, onDele
                             }}
                         >
                             {isEditing && editData ? (
-                                /* ΓöÇΓöÇ Edit Form ΓöÇΓöÇ */
+                                /* --- Edit Form --- */
                                 <>
                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
                                         <h3 style={{ fontSize: '17px', fontWeight: '700', color: '#f8fafc', margin: 0 }}>
@@ -708,7 +708,7 @@ const ExperienceTab = ({ experience, onAddExperience, onUpdateExperience, onDele
                                     </div>
                                 </>
                             ) : (
-                                /* ΓöÇΓöÇ List View ΓöÇΓöÇ */
+                                /* --- List View --- */
                                 <>
                                     <div style={{ display: 'flex', gap: '16px', justifyContent: 'space-between', flexWrap: 'wrap' }}>
                                         {/* Left: info */}
@@ -752,7 +752,7 @@ const ExperienceTab = ({ experience, onAddExperience, onUpdateExperience, onDele
                                                         color: '#94a3b8',
                                                         border: '1px solid rgba(100, 116, 139, 0.25)'
                                                     }}>
-                                                        Γ£ô COMPLETED
+                                                        COMPLETED
                                                     </span>
                                                 )}
                                             </div>
@@ -957,7 +957,7 @@ const ExperienceTab = ({ experience, onAddExperience, onUpdateExperience, onDele
                 })}
             </div>
 
-            {/* ΓöÇΓöÇ Empty State ΓöÇΓöÇ */}
+            {/* --- Empty State --- */}
             {experience.length === 0 && !showAddForm && (
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}

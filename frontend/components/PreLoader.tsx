@@ -18,6 +18,9 @@ const languageSequences = [
 
 const typingSpeed = 70
 
+// Feature Toggle: Change to true whenever you want to re-enable the bottom SYSTEM_STATUS progress bar
+export const SHOW_SYSTEM_STATUS = false
+
 const logs = [
     "BOOTING_CORE_ENGINE",
     "LOADING_REACT_COMPONENTS",
@@ -896,7 +899,8 @@ const PreLoader: React.FC<PreLoaderProps> = ({ onLoadingComplete }) => {
                             </motion.p>
                         </div>
 
-                        {/* Bottom status */}
+                        {/* Bottom status (Controlled by SHOW_SYSTEM_STATUS toggle) */}
+                        {SHOW_SYSTEM_STATUS && (
                         <div className={`preloader-status preloader-fadeable ${isFlying ? 'preloader-fadeable--hidden' : ''}`}>
                             <div className="preloader-status-text">
                                 SYSTEM_STATUS:{' '}
@@ -916,6 +920,7 @@ const PreLoader: React.FC<PreLoaderProps> = ({ onLoadingComplete }) => {
                                 />
                             </div>
                         </div>
+                        )}
                     </motion.div>
                 )}
             </AnimatePresence>

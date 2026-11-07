@@ -45,7 +45,7 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
                             <Terminal size={16} />
                             <span className="pm-filename">{project.filename || 'project'}</span>
                             <span className="pm-version">{project.version ? (project.version.startsWith('v') ? project.version : `v${project.version}`) : 'v1.0.0'}</span>
-                            {project.featured && <span className="pm-featured">⭐ Featured</span>}
+                            {project.featured && <span className="pm-featured" style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}><Star size={12} fill="#f59e0b" color="#f59e0b" /> Featured</span>}
                         </div>
                         <button className="pm-close" onClick={onClose} aria-label="Close">
                             <X size={18} />

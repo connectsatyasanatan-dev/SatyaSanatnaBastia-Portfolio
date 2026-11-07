@@ -341,7 +341,7 @@ export default function SectionVisibilityTab() {
 
                 {hasChanges && (
                     <span style={{ fontSize: '12px', color: '#f59e0b', fontWeight: 600 }}>
-                        ● Unsaved changes pending
+                        <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#f59e0b", display: "inline-block", marginRight: "5px" }} /> Unsaved changes pending
                     </span>
                 )}
             </div>
