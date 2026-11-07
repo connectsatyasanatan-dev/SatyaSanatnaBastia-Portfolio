@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import {
     User, Settings, FileText, Briefcase,
@@ -33,7 +33,91 @@ const AnalyticsTab = dynamic(() => import('@/components/admin/AnalyticsTab'), { 
 const AdminPanel = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false)
     const [currentUser, setCurrentUser] = useState<{ username: string; email?: string; role?: string; is_super_admin?: boolean } | null>(null)
-    const [activeTab, setActiveTab] = useState('dashboard')
+    const VALID_ADMIN_TABS = [
+        'dashboard',
+        'analytics',
+        'projects',
+        'skills',
+        'experience',
+        'education',
+        'certifications',
+        'personal',
+        'messages',
+        'blog',
+        'testimonials',
+        'achievements',
+        'section-visibility',
+        'festive',
+    ]
+
+    const [activeTab, setActiveTab] = useState<string>(() => {
+        if (typeof window !== 'undefined') {
+            try {
+                const params = new URLSearchParams(window.location.search)
+                const tabFromUrl = params.get('tab')
+                if (tabFromUrl && VALID_ADMIN_TABS.includes(tabFromUrl)) {
+                    return tabFromUrl
+                }
+                const savedTab = localStorage.getItem('admin_active_tab')
+                if (savedTab && VALID_ADMIN_TABS.includes(savedTab)) {
+                    return savedTab
+                }
+            } catch {}
+        }
+        return 'dashboard'
+    })
+
+    const switchTab = useCallback((tabId: string, pushHistory = true) => {
+        if (!VALID_ADMIN_TABS.includes(tabId)) return
+        setActiveTab(tabId)
+        if (typeof window !== 'undefined') {
+            try {
+                localStorage.setItem('admin_active_tab', tabId)
+                const targetUrl = tabId === 'dashboard' ? window.location.pathname : `${window.location.pathname}?tab=${tabId}`
+                if (pushHistory) {
+                    const currentSearch = window.location.search
+                    const targetSearch = tabId === 'dashboard' ? '' : `?tab=${tabId}`
+                    if (currentSearch !== targetSearch) {
+                        window.history.pushState({ tab: tabId }, '', targetUrl)
+                    }
+                } else {
+                    window.history.replaceState({ tab: tabId }, '', targetUrl)
+                }
+            } catch {}
+        }
+    }, [])
+
+    // Synchronize initial URL with activeTab on mount
+    useEffect(() => {
+        if (typeof window === 'undefined') return
+        const currentSearch = window.location.search
+        const targetSearch = activeTab === 'dashboard' ? '' : `?tab=${activeTab}`
+
+        if (currentSearch !== targetSearch) {
+            window.history.replaceState({ tab: activeTab }, '', `${window.location.pathname}${targetSearch}`)
+        }
+    }, [activeTab])
+
+    // Listen for browser Back and Forward navigation buttons (popstate)
+    useEffect(() => {
+        const handlePopState = () => {
+            if (typeof window === 'undefined') return
+            try {
+                const params = new URLSearchParams(window.location.search)
+                const tabFromUrl = params.get('tab')
+                if (tabFromUrl && VALID_ADMIN_TABS.includes(tabFromUrl)) {
+                    setActiveTab(tabFromUrl)
+                    localStorage.setItem('admin_active_tab', tabFromUrl)
+                } else {
+                    setActiveTab('dashboard')
+                    localStorage.setItem('admin_active_tab', 'dashboard')
+                }
+            } catch {}
+        }
+
+        window.addEventListener('popstate', handlePopState)
+        return () => window.removeEventListener('popstate', handlePopState)
+    }, [])
     const [adminData, setAdminData] = useState<AdminData | null>(null)
     const [loading, setLoading] = useState(false)
     const [loginForm, setLoginForm] = useState({ username: '', password: '' })
@@ -159,6 +243,12 @@ const AdminPanel = () => {
         setCurrentUser(null)
         setAdminData(null)
         setActiveTab('dashboard')
+        if (typeof window !== 'undefined') {
+            try {
+                localStorage.removeItem('admin_active_tab')
+                window.history.replaceState({}, '', window.location.pathname)
+            } catch {}
+        }
         toast.info('Logged out successfully')
     }
 
@@ -708,7 +798,7 @@ const AdminPanel = () => {
                                                 <li key={tab.id}>
                                                     <button
                                                         onClick={() => {
-                                                            setActiveTab(tab.id)
+                                                            switchTab(tab.id)
                                                             setIsMobileSidebarOpen(false)
                                                         }}
                                                         className={`admin-nav-item ${isActive ? 'active' : ''}`}
@@ -740,7 +830,7 @@ const AdminPanel = () => {
                             {activeTab === 'dashboard' && (
                                 <DashboardTab
                                     stats={adminData.stats}
-                                    onNavigateTab={(tab) => setActiveTab(tab)}
+                                    onNavigateTab={(tab) => switchTab(tab)}
                                 />
                             )}
 
