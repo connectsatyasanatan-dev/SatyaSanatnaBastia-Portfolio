@@ -26,6 +26,7 @@ import AchievementsTab from '@/components/admin/AchievementsTab'
 import EducationTab from '@/components/admin/EducationTab'
 import CertificationsTab from '@/components/admin/CertificationsTab'
 import FestiveThemeTab from '@/components/admin/FestiveThemeTab'
+import SectionVisibilityTab from '@/components/admin/SectionVisibilityTab'
 import dynamic from 'next/dynamic'
 const AnalyticsTab = dynamic(() => import('@/components/admin/AnalyticsTab'), { ssr: false })
 
@@ -586,6 +587,7 @@ const AdminPanel = () => {
         {
             title: 'Appearance & System',
             tabs: [
+                { id: 'section-visibility', label: 'Section Visibility', icon: Eye },
                 { id: 'festive', label: 'Festive Themes', icon: Sparkles }
             ]
         }
@@ -830,6 +832,10 @@ const AdminPanel = () => {
                                     data={adminData.achievements}
                                     onUpdate={handleUpdateAchievements}
                                 />
+                            )}
+
+                            {activeTab === 'section-visibility' && (
+                                <SectionVisibilityTab />
                             )}
 
                             {activeTab === 'festive' && (

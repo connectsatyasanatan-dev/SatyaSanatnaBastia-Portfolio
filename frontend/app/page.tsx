@@ -12,6 +12,7 @@ import AppContainer from '@/components/AppContainer'
 import Footer from '@/components/Footer'
 import ChatBot from '@/components/ChatBot'
 import SEOHead from '@/components/SEOHead'
+import SectionVisibilityWrapper from '@/components/SectionVisibilityWrapper'
 
 export default async function Home() {
     return (
@@ -53,16 +54,36 @@ export default async function Home() {
                 </div>
 
                 <AppContainer>
-                    <HeroSection />
-                    <SkillsSection />
-                    <GitHistory />
-                    <EducationSection />
-                    <CertificationsSection />
-                    <ProjectsSection />
-                    <TestimonialsSection />
-                    <BlogSection />
-                    <TerminalSection />
-                    <ContactSection />
+                    <SectionVisibilityWrapper sectionId="hero">
+                        <HeroSection />
+                    </SectionVisibilityWrapper>
+                    <SectionVisibilityWrapper sectionId="skills">
+                        <SkillsSection />
+                    </SectionVisibilityWrapper>
+                    <SectionVisibilityWrapper sectionId="experience">
+                        <GitHistory />
+                    </SectionVisibilityWrapper>
+                    <SectionVisibilityWrapper sectionId="education">
+                        <EducationSection />
+                    </SectionVisibilityWrapper>
+                    <SectionVisibilityWrapper sectionId="certifications">
+                        <CertificationsSection />
+                    </SectionVisibilityWrapper>
+                    <SectionVisibilityWrapper sectionId="projects">
+                        <ProjectsSection />
+                    </SectionVisibilityWrapper>
+                    <SectionVisibilityWrapper sectionId="testimonials">
+                        <TestimonialsSection />
+                    </SectionVisibilityWrapper>
+                    <SectionVisibilityWrapper sectionId="blog">
+                        <BlogSection />
+                    </SectionVisibilityWrapper>
+                    <SectionVisibilityWrapper sectionId="terminal">
+                        <TerminalSection />
+                    </SectionVisibilityWrapper>
+                    <SectionVisibilityWrapper sectionId="contact">
+                        <ContactSection />
+                    </SectionVisibilityWrapper>
                     <Footer />
                     <ChatBot />
                 </AppContainer>

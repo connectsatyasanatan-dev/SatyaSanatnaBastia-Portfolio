@@ -747,3 +747,43 @@ def get_festive_theme():
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
     return response, 200
+
+
+@api.route("/section-visibility", methods=["GET"])
+def get_section_visibility():
+    """
+    Public endpoint to fetch portfolio section visibility flags.
+    Real-time: reads directly from DB with zero-cache headers, safe fallback.
+    """
+    default_config = {
+        "hero": True,
+        "skills": True,
+        "experience": True,
+        "education": True,
+        "certifications": True,
+        "projects": True,
+        "testimonials": True,
+        "blog": True,
+        "terminal": True,
+        "contact": True,
+    }
+    try:
+        config = db.get_setting("section_visibility", default_config)
+        if not isinstance(config, dict):
+            config = default_config
+        else:
+            merged = dict(default_config)
+            for k in default_config:
+                if k in config:
+                    merged[k] = bool(config[k])
+            config = merged
+    except Exception as e:
+        logger.warning(f"Error fetching section visibility from DB: {e}")
+        config = default_config
+
+    response = jsonify({"success": True, "visibility": config})
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0, private"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response, 200
+

@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { SidebarSkeleton } from './AppSkeletons'
+import { useSectionVisibility } from '@/hooks/useSectionVisibility'
 
 import { SECTION_FILES, SectionFile } from '@/lib/sections'
 export { SECTION_FILES }
@@ -63,6 +64,8 @@ interface SidebarProps {
 
 const Sidebar = ({ activeSection }: SidebarProps) => {
     const [isLoading, setIsLoading] = useState(true)
+    const { isSectionVisible } = useSectionVisibility()
+    const visibleFiles = (SECTION_FILES || []).filter((file) => isSectionVisible(file.id))
 
     useEffect(() => {
         const timer = setTimeout(() => setIsLoading(false), 1200)
@@ -141,7 +144,7 @@ const Sidebar = ({ activeSection }: SidebarProps) => {
 
                             {/* Each section as a file */}
                             <div className="nested-folder" role="tree" aria-label="Portfolio sections">
-                                {SECTION_FILES.map((file, idx) => (
+                                {visibleFiles.map((file, idx) => (
                                     <div
                                         key={file.id}
                                         role="treeitem"

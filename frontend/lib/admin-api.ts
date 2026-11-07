@@ -450,6 +450,18 @@ class AdminApiClient {
         })
     }
 
+    // Section Visibility Management
+    async getSectionVisibility(): Promise<{ success: boolean; visibility: Record<string, boolean> }> {
+        return this.request('/section-visibility')
+    }
+
+    async updateSectionVisibility(visibility: Record<string, boolean>): Promise<{ success: boolean; message: string; visibility: Record<string, boolean> }> {
+        return this.request('/section-visibility', {
+            method: 'PUT',
+            body: JSON.stringify({ visibility }),
+        })
+    }
+
     async uploadFile(file: File, isRetry: boolean = false): Promise<{ success: boolean; url: string; filename: string }> {
         const formData = new FormData()
         formData.append('file', file)

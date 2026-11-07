@@ -3,6 +3,7 @@
 import { X, ChevronRight } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import { SECTION_FILES, SectionFile } from '@/lib/sections'
+import { useSectionVisibility } from '@/hooks/useSectionVisibility'
 
 interface TabBarProps {
     activeSection: string
@@ -17,8 +18,10 @@ const DEFAULT_FILE: SectionFile = {
 }
 
 const TabBar = ({ activeSection }: TabBarProps) => {
-    const files = SECTION_FILES || []
-    const [openTabs, setOpenTabs] = useState<string[]>(() => files.map((f) => f.id))
+    const { isSectionVisible } = useSectionVisibility()
+    const allFiles = SECTION_FILES || []
+    const files = allFiles.filter((f) => isSectionVisible(f.id))
+    const [openTabs, setOpenTabs] = useState<string[]>(() => (SECTION_FILES || []).map((f) => f.id))
     const tabContainerRef = useRef<HTMLDivElement>(null)
 
     const activeFile = files.find((f) => f.id === activeSection) ?? files[0] ?? DEFAULT_FILE

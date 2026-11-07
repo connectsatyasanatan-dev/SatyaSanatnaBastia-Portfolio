@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { SECTION_FILES } from '@/lib/sections'
 import { applyTheme, getStoredTheme, THEME_OPTIONS, VSCodeTheme } from '@/lib/theme'
+import { useSectionVisibility } from '@/hooks/useSectionVisibility'
 
 interface PaletteItem {
     id: string
@@ -31,8 +32,11 @@ export default function CommandPalette() {
     const [query, setQuery] = useState('')
     const [selectedIndex, setSelectedIndex] = useState(0)
     const [currentTheme, setCurrentTheme] = useState<string>('cyberpunk')
+    const { isSectionVisible } = useSectionVisibility()
     const inputRef = useRef<HTMLInputElement>(null)
     const listRef = useRef<HTMLDivElement>(null)
+
+    const visibleFiles = (SECTION_FILES || []).filter((f) => isSectionVisible(f.id))
 
     // Listen for current active theme
     useEffect(() => {
@@ -128,7 +132,7 @@ export default function CommandPalette() {
         ? themeItems
         : [
             // Files
-            ...SECTION_FILES.map(file => ({
+            ...visibleFiles.map(file => ({
                 id: `file-${file.id}`,
                 title: file.filename,
                 subtitle: `Jump to ${file.id} section`,

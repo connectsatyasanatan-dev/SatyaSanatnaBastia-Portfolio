@@ -12,6 +12,7 @@ import CommandPalette from '@/components/CommandPalette'
 import DiwaliDecoration from '@/components/DiwaliDecoration'
 import { SECTION_FILES } from '@/lib/sections'
 import { getStoredTheme, applyTheme } from '@/lib/theme'
+import { useSectionVisibility } from '@/hooks/useSectionVisibility'
 
 interface AppContainerProps {
     children: React.ReactNode
@@ -20,12 +21,23 @@ interface AppContainerProps {
 export default function AppContainer({ children }: AppContainerProps) {
     const [isLoading, setIsLoading] = useState(true)
     const [activeSection, setActiveSection] = useState<string>('hero')
+    const { isSectionVisible } = useSectionVisibility()
 
     // Initialize stored theme on mount
     useEffect(() => {
         const theme = getStoredTheme()
         applyTheme(theme)
     }, [])
+
+    // Ensure active section stays on a visible section
+    useEffect(() => {
+        if (!isSectionVisible(activeSection)) {
+            const firstVisible = (SECTION_FILES || []).find((f) => isSectionVisible(f.id))
+            if (firstVisible) {
+                setActiveSection(firstVisible.id)
+            }
+        }
+    }, [activeSection, isSectionVisible])
 
     // Track which section is in viewport inside .main-content
     useEffect(() => {
@@ -37,7 +49,7 @@ export default function AppContainer({ children }: AppContainerProps) {
         const observers: IntersectionObserver[] = []
         const ratioMap: Record<string, number> = {}
 
-        const files = SECTION_FILES || []
+        const files = (SECTION_FILES || []).filter((f) => isSectionVisible(f.id))
         files.forEach((file) => {
             const el = document.getElementById(file.sectionId)
             if (!el) return
@@ -68,14 +80,14 @@ export default function AppContainer({ children }: AppContainerProps) {
         const handleScroll = () => {
             const containerRect = scrollContainer.getBoundingClientRect()
             if (scrollContainer.scrollTop < 80) {
-                setActiveSection('hero')
+                const first = files[0]?.id || 'hero'
+                setActiveSection(first)
                 return
             }
 
             let currentBest = ''
             let minDistance = Infinity
 
-            const files = SECTION_FILES || []
             files.forEach((file) => {
                 const el = document.getElementById(file.sectionId)
                 if (el) {
@@ -101,7 +113,7 @@ export default function AppContainer({ children }: AppContainerProps) {
             observers.forEach((o) => o.disconnect())
             scrollContainer.removeEventListener('scroll', handleScroll)
         }
-    }, [isLoading])
+    }, [isLoading, isSectionVisible])
 
     return (
         <>

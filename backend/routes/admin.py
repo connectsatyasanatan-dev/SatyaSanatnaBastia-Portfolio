@@ -1096,3 +1096,80 @@ def update_admin_festive_theme():
     except Exception as e:
         logger.error(f"Failed to update festive theme: {e}")
     return jsonify({"success": False, "message": "Failed to update festive theme"}), 500
+
+
+@admin.route("/section-visibility", methods=["GET"])
+@admin_required
+def get_admin_section_visibility():
+    default_config = {
+        "hero": True,
+        "skills": True,
+        "experience": True,
+        "education": True,
+        "certifications": True,
+        "projects": True,
+        "testimonials": True,
+        "blog": True,
+        "terminal": True,
+        "contact": True,
+    }
+    try:
+        config = db.get_setting("section_visibility", default_config)
+        if not isinstance(config, dict):
+            config = default_config
+        else:
+            merged = dict(default_config)
+            for k in default_config:
+                if k in config:
+                    merged[k] = bool(config[k])
+            config = merged
+    except Exception as e:
+        logger.warning(f"Error fetching section visibility: {e}")
+        config = default_config
+    return jsonify({"success": True, "visibility": config}), 200
+
+
+@admin.route("/section-visibility", methods=["PUT"])
+@admin_required
+def update_admin_section_visibility():
+    data = request.get_json() or {}
+    raw_visibility = data.get("visibility", data)
+    if not isinstance(raw_visibility, dict):
+        return jsonify({"success": False, "message": "Invalid visibility payload"}), 400
+
+    default_config = {
+        "hero": True,
+        "skills": True,
+        "experience": True,
+        "education": True,
+        "certifications": True,
+        "projects": True,
+        "testimonials": True,
+        "blog": True,
+        "terminal": True,
+        "contact": True,
+    }
+
+    sanitized = {}
+    for key in default_config:
+        if key in raw_visibility:
+            sanitized[key] = bool(raw_visibility[key])
+        else:
+            sanitized[key] = default_config[key]
+
+    try:
+        success = db.set_setting("section_visibility", sanitized)
+        if success:
+            _invalidate_cache("section_visibility")
+            response = jsonify({
+                "success": True,
+                "message": "Section visibility updated successfully",
+                "visibility": sanitized
+            })
+            response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0, private"
+            response.headers["Pragma"] = "no-cache"
+            return response, 200
+    except Exception as e:
+        logger.error(f"Failed to update section visibility: {e}")
+    return jsonify({"success": False, "message": "Failed to update section visibility"}), 500
+
