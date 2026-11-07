@@ -1,6 +1,6 @@
 'use client'
 
-import { GitCommit, GitMerge, Play, Pause, Diff, Activity } from 'lucide-react'
+import { GitCommit, GitBranch, MapPin, Calendar, Clock, CheckCircle2, Sparkles, Activity, Diff } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect, useCallback } from 'react'
 import portfolioAPI, { Experience } from '@/lib/api'
@@ -77,9 +77,14 @@ const GitHistory = () => {
 
                             {experiences.map((exp, index) => {
                                 const periodStr = exp.period || ''
-                                const isPresent = periodStr.toLowerCase().includes('present') || periodStr.toLowerCase().includes('current');
+                                const isPresent = Boolean(
+                                    periodStr.toLowerCase().includes('present') ||
+                                    periodStr.toLowerCase().includes('current') ||
+                                    exp.badge?.toLowerCase().includes('current') ||
+                                    exp.badge?.toLowerCase().includes('active') ||
+                                    (index === 0 && (periodStr.toLowerCase().includes('2026') || periodStr.toLowerCase().includes('2025')))
+                                )
                                 const expColor = exp.color || 'cyan';
-                                const IconComponent = isPresent ? Play : Pause;
                                 return (
                                     <motion.div
                                         key={index}
@@ -91,10 +96,15 @@ const GitHistory = () => {
                                         {/* Timeline dot */}
                                         <div className="timeline-dot">
                                             <motion.div
-                                                whileHover={{ scale: 1.1 }}
-                                                className={`timeline-dot-inner ${expColor}`}
+                                                whileHover={{ scale: 1.15 }}
+                                                className={`timeline-dot-inner ${expColor} ${isPresent ? 'active-dot' : ''}`}
+                                                title={isPresent ? 'Active Head Commit' : 'Commit Snapshot'}
                                             >
-                                                <IconComponent className={`${expColor}`} />
+                                                {isPresent ? (
+                                                    <GitBranch className={`${expColor}`} size={18} />
+                                                ) : (
+                                                    <GitCommit className={`${expColor}`} size={18} />
+                                                )}
                                             </motion.div>
                                         </div>
 
@@ -104,21 +114,54 @@ const GitHistory = () => {
                                             className={`timeline-content ${expColor} ${isPresent ? 'active' : ''}`}
                                             style={isPresent ? {
                                                 borderColor: 'var(--primary)',
-                                                boxShadow: '0 0 15px rgba(6, 249, 249, 0.15), inset 0 0 20px rgba(6, 249, 249, 0.05)'
+                                                boxShadow: '0 0 20px rgba(6, 249, 249, 0.2), inset 0 0 24px rgba(6, 249, 249, 0.05)'
                                             } : {}}
                                         >
                                             <div className="timeline-header">
                                                 <div className="timeline-title-group">
                                                     <div className="timeline-title-row">
                                                         <h4 className="timeline-title">{exp.title}</h4>
-                                                        {exp.badge && (
+                                                        {isPresent ? (
+                                                            <span className="timeline-status-badge active" title="Currently active role">
+                                                                <span className="live-indicator"></span>
+                                                                <span>Current Role</span>
+                                                            </span>
+                                                        ) : (
+                                                            <span className="timeline-status-badge completed" title="Completed past role">
+                                                                <CheckCircle2 size={12} />
+                                                                <span>Completed</span>
+                                                            </span>
+                                                        )}
+                                                        {exp.badge && !exp.badge.toLowerCase().includes('current') && !exp.badge.toLowerCase().includes('active') && (
                                                             <span className={`timeline-badge ${expColor}`}>
                                                                 {exp.badge}
                                                             </span>
                                                         )}
                                                     </div>
-                                                    <p className={`timeline-company ${expColor}`}>@ {exp.company}</p>
+
+                                                    {/* Company, Location, Type & Duration row */}
+                                                    <div className="timeline-company-row">
+                                                        <span className={`timeline-company ${expColor}`}>@ {exp.company}</span>
+                                                        {exp.location && (
+                                                            <span className="timeline-meta-chip location" title="Work Location">
+                                                                <MapPin size={12} style={{ color: '#06f9f9', flexShrink: 0 }} />
+                                                                <span>{exp.location}</span>
+                                                            </span>
+                                                        )}
+                                                        {exp.type && (
+                                                            <span className="timeline-meta-chip type" title="Employment Type">
+                                                                <span>{exp.type}</span>
+                                                            </span>
+                                                        )}
+                                                        {exp.duration && (
+                                                            <span className="timeline-meta-chip duration" title="Tenure Duration">
+                                                                <Clock size={12} style={{ color: '#94a3b8', flexShrink: 0 }} />
+                                                                <span>{exp.duration}</span>
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </div>
+
                                                 <div className="timeline-meta">
                                                     <div className={`timeline-period ${isPresent ? 'active' : ''}`}>
                                                         {isPresent && (

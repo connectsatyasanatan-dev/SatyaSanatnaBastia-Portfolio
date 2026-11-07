@@ -558,3 +558,79 @@
     padding: 2px 5px;
   }
 }
+
+/* ── Git History Company, Location, & Badges ── */
+#git-history-section .timeline-company-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 5px;
+  margin-bottom: 8px;
+}
+
+#git-history-section .timeline-meta-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+}
+
+#git-history-section .timeline-meta-chip.location {
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.25);
+  background: rgba(56, 189, 248, 0.08);
+}
+
+#git-history-section .timeline-meta-chip.type {
+  color: #a78bfa;
+  border-color: rgba(167, 139, 250, 0.25);
+  background: rgba(167, 139, 250, 0.08);
+}
+
+#git-history-section .timeline-meta-chip.duration {
+  color: #94a3b8;
+  border-color: rgba(148, 163, 184, 0.2);
+  background: rgba(148, 163, 184, 0.06);
+}
+
+#git-history-section .timeline-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+#git-history-section .timeline-status-badge.active {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.45);
+  color: #34d399;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.25);
+}
+
+#git-history-section .timeline-status-badge.completed {
+  background: rgba(100, 116, 139, 0.12);
+  border: 1px solid rgba(100, 116, 139, 0.3);
+  color: #94a3b8;
+}
+
+#git-history-section .timeline-dot-inner.active-dot {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 4px var(--editor-bg), 0 0 20px rgba(16, 185, 129, 0.5) !important;
+}
+
+#git-history-section .timeline-dot-inner.active-dot svg {
+  color: #10b981 !important;
+}

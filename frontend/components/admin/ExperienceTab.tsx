@@ -15,113 +15,327 @@ interface ExperienceTabProps {
     onDeleteExperience: (id: number) => Promise<void>
 }
 
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const CURRENT_YEAR = new Date().getFullYear()
+const YEARS = Array.from({ length: 16 }, (_, i) => String(CURRENT_YEAR - 6 + i))
+
+function parsePeriod(periodStr = '') {
+    const isPresent = Boolean(
+        periodStr.toLowerCase().includes('present') ||
+        periodStr.toLowerCase().includes('current')
+    )
+    const parts = periodStr.split(/[-–—]/)
+    const startPart = (parts[0] || '').trim()
+    const endPart = (parts[1] || '').trim()
+
+    let startMonth = 'Jan'
+    let startYear = String(CURRENT_YEAR - 1)
+    let endMonth = 'Dec'
+    let endYear = String(CURRENT_YEAR)
+
+    for (const m of MONTHS) {
+        if (new RegExp(m, 'i').test(startPart)) startMonth = m
+        if (new RegExp(m, 'i').test(endPart)) endMonth = m
+    }
+
+    const startYearMatch = startPart.match(/\b(20\d\d)\b/)
+    if (startYearMatch) startYear = startYearMatch[1]
+
+    const endYearMatch = endPart.match(/\b(20\d\d)\b/)
+    if (endYearMatch) endYear = endYearMatch[1]
+
+    return { startMonth, startYear, endMonth, endYear, isPresent }
+}
+
+function calculateDuration(startMonth: string, startYear: string, endMonth: string, endYear: string, isPresent: boolean) {
+    const sMonthIdx = MONTHS.indexOf(startMonth)
+    const sYearNum = parseInt(startYear, 10) || CURRENT_YEAR
+    let eMonthIdx: number
+    let eYearNum: number
+
+    if (isPresent) {
+        const now = new Date()
+        eMonthIdx = now.getMonth()
+        eYearNum = now.getFullYear()
+    } else {
+        eMonthIdx = MONTHS.indexOf(endMonth)
+        eYearNum = parseInt(endYear, 10) || CURRENT_YEAR
+    }
+
+    const totalMonths = (eYearNum - sYearNum) * 12 + (eMonthIdx - sMonthIdx) + 1
+    if (totalMonths <= 0) return '1 month'
+    const years = Math.floor(totalMonths / 12)
+    const months = totalMonths % 12
+    const parts = []
+    if (years > 0) parts.push(`${years} ${years === 1 ? 'year' : 'years'}`)
+    if (months > 0) parts.push(`${months} ${months === 1 ? 'month' : 'months'}`)
+    return parts.join(' ') || '1 month'
+}
+
 const ExperienceFormFields = ({
     data,
     onChange,
 }: {
     data: Partial<Experience>
     onChange: (updated: Partial<Experience>) => void
-}) => (
-    <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-        gap: '16px'
-    }}>
-        <div className="admin-form-group">
-            <label className="admin-form-label">Job Title *</label>
-            <input
-                type="text"
-                value={data.title ?? ''}
-                onChange={(e) => onChange({ ...data, title: e.target.value })}
-                className="admin-form-input"
-                placeholder="Senior Developer"
-            />
+}) => {
+    const [useCustomPeriod, setUseCustomPeriod] = useState(false)
+    const parsed = parsePeriod(data.period ?? '')
+    const [startMonth, setStartMonth] = useState(parsed.startMonth)
+    const [startYear, setStartYear] = useState(parsed.startYear)
+    const [endMonth, setEndMonth] = useState(parsed.endMonth)
+    const [endYear, setEndYear] = useState(parsed.endYear)
+    const [isCurrentRole, setIsCurrentRole] = useState(parsed.isPresent)
+
+    const updatePeriodFromPicker = (sM: string, sY: string, eM: string, eY: string, isCurr: boolean) => {
+        const newPeriod = isCurr ? `${sM} ${sY} – Present` : `${sM} ${sY} – ${eM} ${eY}`
+        const newDur = calculateDuration(sM, sY, eM, eY, isCurr)
+        onChange({
+            ...data,
+            period: newPeriod,
+            duration: newDur,
+            badge: isCurr ? 'Current Role' : (data.badge === 'Current Role' ? undefined : data.badge)
+        })
+    }
+
+    const handleStartMonthChange = (val: string) => {
+        setStartMonth(val)
+        updatePeriodFromPicker(val, startYear, endMonth, endYear, isCurrentRole)
+    }
+
+    const handleStartYearChange = (val: string) => {
+        setStartYear(val)
+        updatePeriodFromPicker(startMonth, val, endMonth, endYear, isCurrentRole)
+    }
+
+    const handleEndMonthChange = (val: string) => {
+        setEndMonth(val)
+        updatePeriodFromPicker(startMonth, startYear, val, endYear, isCurrentRole)
+    }
+
+    const handleEndYearChange = (val: string) => {
+        setEndYear(val)
+        updatePeriodFromPicker(startMonth, startYear, endMonth, val, isCurrentRole)
+    }
+
+    const handleCurrentRoleToggle = (checked: boolean) => {
+        setIsCurrentRole(checked)
+        updatePeriodFromPicker(startMonth, startYear, endMonth, endYear, checked)
+    }
+
+    return (
+        <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+            gap: '16px'
+        }}>
+            <div className="admin-form-group">
+                <label className="admin-form-label">Job Title *</label>
+                <input
+                    type="text"
+                    value={data.title ?? ''}
+                    onChange={(e) => onChange({ ...data, title: e.target.value })}
+                    className="admin-form-input"
+                    placeholder="e.g. Associate Software Engineer"
+                />
+            </div>
+
+            <div className="admin-form-group">
+                <label className="admin-form-label">Company Name *</label>
+                <input
+                    type="text"
+                    value={data.company ?? ''}
+                    onChange={(e) => onChange({ ...data, company: e.target.value })}
+                    className="admin-form-input"
+                    placeholder="e.g. Bourntec Solutions"
+                />
+            </div>
+
+            <div className="admin-form-group">
+                <label className="admin-form-label" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <MapPin size={14} style={{ color: '#06f9f9' }} />
+                    <span>Location (City / State / Remote)</span>
+                </label>
+                <input
+                    type="text"
+                    value={data.location ?? ''}
+                    onChange={(e) => onChange({ ...data, location: e.target.value })}
+                    className="admin-form-input"
+                    placeholder="e.g. Bhubaneswar, Odisha, India or Remote"
+                />
+            </div>
+
+            <div className="admin-form-group">
+                <label className="admin-form-label">Employment Type</label>
+                <select
+                    value={data.type ?? 'Full-time'}
+                    onChange={(e) => onChange({ ...data, type: e.target.value })}
+                    className="admin-select"
+                >
+                    <option value="Full-time">Full-time</option>
+                    <option value="Part-time">Part-time</option>
+                    <option value="Contract">Contract</option>
+                    <option value="Freelance">Freelance</option>
+                    <option value="Internship">Internship</option>
+                </select>
+            </div>
+
+            {/* ── Period Selector (Month/Year Picker + Current Checkbox) ── */}
+            <div className="admin-form-group" style={{ gridColumn: '1 / -1', background: 'rgba(15, 23, 42, 0.5)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '12px', padding: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                    <label className="admin-form-label" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Calendar size={15} style={{ color: '#06f9f9' }} />
+                        <span>Work Period &amp; Tenure</span>
+                    </label>
+
+                    <button
+                        type="button"
+                        onClick={() => setUseCustomPeriod(!useCustomPeriod)}
+                        style={{
+                            background: 'transparent',
+                            border: 'none',
+                            color: '#38bdf8',
+                            fontSize: '12px',
+                            cursor: 'pointer',
+                            textDecoration: 'underline'
+                        }}
+                    >
+                        {useCustomPeriod ? 'Switch to Month/Year Picker' : '✏️ Edit as custom text'}
+                    </button>
+                </div>
+
+                {useCustomPeriod ? (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+                        <div>
+                            <span style={{ fontSize: '11px', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Custom Period Text</span>
+                            <input
+                                type="text"
+                                value={data.period ?? ''}
+                                onChange={(e) => onChange({ ...data, period: e.target.value })}
+                                className="admin-form-input"
+                                placeholder="e.g. May 2024 – Present"
+                            />
+                        </div>
+                        <div>
+                            <span style={{ fontSize: '11px', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Calculated Duration</span>
+                            <input
+                                type="text"
+                                value={data.duration ?? ''}
+                                onChange={(e) => onChange({ ...data, duration: e.target.value })}
+                                className="admin-form-input"
+                                placeholder="e.g. 1 year 2 months"
+                            />
+                        </div>
+                    </div>
+                ) : (
+                    <div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px', alignItems: 'center' }}>
+                            <div>
+                                <span style={{ fontSize: '11px', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Start Month</span>
+                                <select
+                                    value={startMonth}
+                                    onChange={(e) => handleStartMonthChange(e.target.value)}
+                                    className="admin-select"
+                                >
+                                    {MONTHS.map((m) => <option key={m} value={m}>{m}</option>)}
+                                </select>
+                            </div>
+
+                            <div>
+                                <span style={{ fontSize: '11px', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Start Year</span>
+                                <select
+                                    value={startYear}
+                                    onChange={(e) => handleStartYearChange(e.target.value)}
+                                    className="admin-select"
+                                >
+                                    {YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
+                                </select>
+                            </div>
+
+                            {!isCurrentRole && (
+                                <>
+                                    <div>
+                                        <span style={{ fontSize: '11px', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>End Month</span>
+                                        <select
+                                            value={endMonth}
+                                            onChange={(e) => handleEndMonthChange(e.target.value)}
+                                            className="admin-select"
+                                        >
+                                            {MONTHS.map((m) => <option key={m} value={m}>{m}</option>)}
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <span style={{ fontSize: '11px', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>End Year</span>
+                                        <select
+                                            value={endYear}
+                                            onChange={(e) => handleEndYearChange(e.target.value)}
+                                            className="admin-select"
+                                        >
+                                            {YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
+                                        </select>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+
+                        {/* Current role checkbox */}
+                        <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: isCurrentRole ? '#34d399' : '#cbd5e1', fontWeight: 600 }}>
+                                <input
+                                    type="checkbox"
+                                    checked={isCurrentRole}
+                                    onChange={(e) => handleCurrentRoleToggle(e.target.checked)}
+                                    style={{ width: '16px', height: '16px', accentColor: '#10b981', cursor: 'pointer' }}
+                                />
+                                <span>🟢 I currently work here (Active / Present)</span>
+                            </label>
+                        </div>
+
+                        {/* Live preview badge */}
+                        <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '12px', color: '#94a3b8' }}>
+                            <span>Period: <strong style={{ color: '#06f9f9' }}>{data.period || `${startMonth} ${startYear} – ${isCurrentRole ? 'Present' : `${endMonth} ${endYear}`}`}</strong></span>
+                            <span>·</span>
+                            <span>Duration: <strong style={{ color: '#f8fafc' }}>{data.duration || calculateDuration(startMonth, startYear, endMonth, endYear, isCurrentRole)}</strong></span>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            <div className="admin-form-group" style={{ gridColumn: '1 / -1' }}>
+                <label className="admin-form-label">Description *</label>
+                <textarea
+                    value={data.description ?? ''}
+                    onChange={(e) => onChange({ ...data, description: e.target.value })}
+                    className="admin-textarea"
+                    rows={3}
+                    placeholder="Describe your role and responsibilities..."
+                />
+            </div>
+
+            <div className="admin-form-group">
+                <TagListField
+                    label="Achievements"
+                    hint=" Add one by one or paste multiple lines"
+                    value={data.achievements ?? []}
+                    onChange={(items) => onChange({ ...data, achievements: items })}
+                    placeholder="e.g. Led team of 5 developers"
+                    variant="long"
+                />
+            </div>
+
+            <div className="admin-form-group">
+                <TagListField
+                    label="Technologies"
+                    hint=" Add one by one or paste multiple lines"
+                    value={data.technologies ?? []}
+                    onChange={(items) => onChange({ ...data, technologies: items })}
+                    placeholder="e.g. React, Node.js"
+                />
+            </div>
         </div>
-        <div className="admin-form-group">
-            <label className="admin-form-label">Company *</label>
-            <input
-                type="text"
-                value={data.company ?? ''}
-                onChange={(e) => onChange({ ...data, company: e.target.value })}
-                className="admin-form-input"
-                placeholder="Tech Corp Inc."
-            />
-        </div>
-        <div className="admin-form-group">
-            <label className="admin-form-label">Location</label>
-            <input
-                type="text"
-                value={data.location ?? ''}
-                onChange={(e) => onChange({ ...data, location: e.target.value })}
-                className="admin-form-input"
-                placeholder="San Francisco, CA"
-            />
-        </div>
-        <div className="admin-form-group">
-            <label className="admin-form-label">Period</label>
-            <input
-                type="text"
-                value={data.period ?? ''}
-                onChange={(e) => onChange({ ...data, period: e.target.value })}
-                className="admin-form-input"
-                placeholder="Jan 2020 - Present"
-            />
-        </div>
-        <div className="admin-form-group">
-            <label className="admin-form-label">Duration</label>
-            <input
-                type="text"
-                value={data.duration ?? ''}
-                onChange={(e) => onChange({ ...data, duration: e.target.value })}
-                className="admin-form-input"
-                placeholder="2 years 6 months"
-            />
-        </div>
-        <div className="admin-form-group">
-            <label className="admin-form-label">Type</label>
-            <select
-                value={data.type ?? 'Full-time'}
-                onChange={(e) => onChange({ ...data, type: e.target.value })}
-                className="admin-select"
-            >
-                <option value="Full-time">Full-time</option>
-                <option value="Part-time">Part-time</option>
-                <option value="Contract">Contract</option>
-                <option value="Freelance">Freelance</option>
-                <option value="Internship">Internship</option>
-            </select>
-        </div>
-        <div className="admin-form-group" style={{ gridColumn: '1 / -1' }}>
-            <label className="admin-form-label">Description *</label>
-            <textarea
-                value={data.description ?? ''}
-                onChange={(e) => onChange({ ...data, description: e.target.value })}
-                className="admin-textarea"
-                rows={3}
-                placeholder="Describe your role and responsibilities..."
-            />
-        </div>
-        <div className="admin-form-group">
-            <TagListField
-                label="Achievements"
-                hint=" Add one by one or paste multiple lines"
-                value={data.achievements ?? []}
-                onChange={(items) => onChange({ ...data, achievements: items })}
-                placeholder="e.g. Led team of 5 developers"
-                variant="long"
-            />
-        </div>
-        <div className="admin-form-group">
-            <TagListField
-                label="Technologies"
-                hint=" Add one by one or paste multiple lines"
-                value={data.technologies ?? []}
-                onChange={(items) => onChange({ ...data, technologies: items })}
-                placeholder="e.g. React, Node.js"
-            />
-        </div>
-    </div>
-)
+    )
+}
 
 const ExperienceTab = ({ experience, onAddExperience, onUpdateExperience, onDeleteExperience }: ExperienceTabProps) => {
     const [editingId, setEditingId] = useState<number | null>(null)
@@ -528,15 +742,49 @@ const ExperienceTab = ({ experience, onAddExperience, onUpdateExperience, onDele
                                     <div style={{ display: 'flex', gap: '16px', justifyContent: 'space-between', flexWrap: 'wrap' }}>
                                         {/* Left: info */}
                                         <div style={{ flex: 1, minWidth: 0 }}>
-                                            <h3 style={{
-                                                fontSize: '17px',
-                                                fontWeight: '700',
-                                                color: '#f8fafc',
-                                                margin: '0 0 6px',
-                                                lineHeight: 1.3,
-                                            }}>
-                                                {exp.title}
-                                            </h3>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '6px' }}>
+                                                <h3 style={{
+                                                    fontSize: '17px',
+                                                    fontWeight: '700',
+                                                    color: '#f8fafc',
+                                                    margin: 0,
+                                                    lineHeight: 1.3,
+                                                }}>
+                                                    {exp.title}
+                                                </h3>
+                                                {(Boolean((exp.period || '').toLowerCase().includes('present') || (exp.period || '').toLowerCase().includes('current') || exp.badge?.toLowerCase().includes('current') || exp.badge?.toLowerCase().includes('active') || (index === 0 && ((exp.period || '').includes('2026') || (exp.period || '').includes('2025'))))) ? (
+                                                    <span style={{
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        gap: '5px',
+                                                        padding: '2px 9px',
+                                                        borderRadius: '999px',
+                                                        fontSize: '11px',
+                                                        fontWeight: 700,
+                                                        background: 'rgba(16, 185, 129, 0.15)',
+                                                        color: '#34d399',
+                                                        border: '1px solid rgba(16, 185, 129, 0.4)'
+                                                    }}>
+                                                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981' }} />
+                                                        CURRENT ROLE
+                                                    </span>
+                                                ) : (
+                                                    <span style={{
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        gap: '4px',
+                                                        padding: '2px 9px',
+                                                        borderRadius: '999px',
+                                                        fontSize: '11px',
+                                                        fontWeight: 600,
+                                                        background: 'rgba(100, 116, 139, 0.12)',
+                                                        color: '#94a3b8',
+                                                        border: '1px solid rgba(100, 116, 139, 0.25)'
+                                                    }}>
+                                                        ✓ COMPLETED
+                                                    </span>
+                                                )}
+                                            </div>
 
                                             {/* Company row */}
                                             <div style={{
